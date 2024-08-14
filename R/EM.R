@@ -39,6 +39,11 @@ EM <- function(A,
   
   cl <- match.call()
   
+  # Check n_cores
+  if(n_cores <= 0 | n_cores > parallel::detectCores()-1){
+    stop("n_cores needs to be >=1 and <= parallel::detectCores()-1")
+  }
+  
   # Check for class of A
   if(!"dgCMatrix" %in% class(A)){
     A <- methods::as(A, "dgCMatrix")
@@ -176,13 +181,21 @@ EM <- function(A,
   cl$combinations_2run <- combinations_2run
   
   if(nrow(combinations_2run) > 1){
+  
+    clusters <- parallel::makeCluster(spec = n_cores, type = "PSOCK")
+    parallel::clusterEvalQ(cl = clusters, library("JANE"))
+    parallel::clusterExport(cl = clusters, varlist = c("A", "cl", "combinations_2run"),  envir = environment())
+    
     opb <- pbapply::pboptions(style = 1, char = "=", type= "timer")
     parallel_res <- pbapply::pblapply(X = 1:nrow(combinations_2run), 
                                       FUN = inner_parallel,
                                       call_def = cl,
                                       A = A,
-                                      cl = n_cores)
+                                      cl = clusters)
     pboptions(opb) 
+    
+    parallel::stopCluster(cl = clusters)
+    
   } else {
     parallel_res <- list(inner_parallel(x = 1, call_def = cl, A = A))
   }
