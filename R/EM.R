@@ -245,7 +245,7 @@ EM_inner <- function(A,
                             K = K,
                             D = D)
   
-  current$control$termination_rule <- control$termination_rule
+  current$termination_rule <- control$termination_rule
   
   current$termination_metric <- array(NA, dim = c(control$max_its, 
                                                   ncol = 6 + (!(control$termination_rule %in% c("ARI", "NMI", "CER", "Q"))) - (control$termination_rule == "Q"),
