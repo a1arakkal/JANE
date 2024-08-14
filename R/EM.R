@@ -305,7 +305,7 @@ EM_inner <- function(A,
                                           temp_beta = as.double(control$beta_temp_schedule[beta_temp]))
       
       # update p
-      current$fun_list$update_p(prob_matrix = current$prob_matrix, p = current$p, nu = current$control$priors$nu)
+      current$fun_list$update_p(prob_matrix = current$prob_matrix, p = current$p, nu = current$priors$nu)
       
       # update U
       current$fun_list$update_U(U = current$U, 
@@ -320,8 +320,8 @@ EM_inner <- function(A,
       
       # update mus and omegas
       current$fun_list$update_mus_omegas(prob_matrix = current$prob_matrix,
-                                         U = current$U, b = current$control$priors$b, a = current$control$priors$a,
-                                         c = current$control$priors$c, G = current$control$priors$G,
+                                         U = current$U, b = current$priors$b, a = current$priors$a,
+                                         c = current$priors$c, G = current$priors$G,
                                          mus = current$mus, omegas = current$omegas)
       
       # update beta
@@ -329,8 +329,8 @@ EM_inner <- function(A,
                                    n_control = control$n_control,
                                    U = current$U,
                                    beta = current$beta, 
-                                   f = current$control$priors$f, 
-                                   e = current$control$priors$e,
+                                   f = current$priors$f, 
+                                   e = current$priors$e,
                                    X =  current$X,
                                    model = current$model)
       
