@@ -2,12 +2,11 @@
 #' @export
 EM <- function(A,
                D = 2,
-               K,
+               K = 2,
                model,
                initialization = "GNN", # random, GNN, or user supplied
                case_control = F,
                DA_type = "none", # none, cooling, heating, hybrid 
-               n_cores = 1,
                seed = 2024, 
                control = list()){
   
@@ -38,12 +37,11 @@ EM <- function(A,
   )
   
   cl <- match.call()
-  
-  # Check n_cores
-  if(n_cores <= 0 | n_cores > parallel::detectCores()-1){
-    stop("n_cores needs to be >=1 and <= parallel::detectCores()-1")
-  }
-  
+  cl$A <- quote(A)
+  cl$case_control <- NULL
+  cl$seed <- NULL
+  cl$DA_type <- NULL
+
   # Check for class of A
   if(!"dgCMatrix" %in% class(A)){
     A <- methods::as(A, "dgCMatrix")
@@ -74,6 +72,8 @@ EM <- function(A,
   # Check model 
   if(!model %in% c("NDH", "RS", "RSR")){
     stop("Model needs to be one of the following: NDH, RS, or RSR")
+  } else{
+    cl$model <- eval(model)
   }
   
   # If unsymmetric A provided for model = "NDH" or "RS" convert to symmetric A and warn
@@ -85,6 +85,8 @@ EM <- function(A,
   # Check initialization
   if(!is.list(initialization) && (!initialization %in% c("random", "GNN"))){
     stop("Please provide one for the following for initialization: 'random', 'GNN', or a named list with the necessary starting paramters")
+  } else {
+    cl$initialization <- eval(initialization)
   }
   
   # Check DA_type
@@ -150,10 +152,16 @@ EM <- function(A,
     stop("Please supply a n_its_start_CA value >= 1")
   }
   
-  cl$control <- con
+  cl$control <- eval(con)
   
   # Check initialization list if supplied
   if(is.list(initialization)){
+    
+    K <- length(initialization$p)
+    D <- ncol(initialization$U)
+    cl$K <- K
+    cl$D <- D
+    
     check_initial_values(list_name = initialization,
                          A = A,
                          K = K,
@@ -182,19 +190,26 @@ EM <- function(A,
   
   if(nrow(combinations_2run) > 1){
   
-    clusters <- parallel::makeCluster(spec = n_cores, type = "PSOCK")
-    parallel::clusterEvalQ(cl = clusters, library("JANE"))
-    parallel::clusterExport(cl = clusters, varlist = c("A", "cl", "combinations_2run"),  envir = environment())
-    
-    opb <- pbapply::pboptions(style = 1, char = "=", type= "timer")
-    parallel_res <- pbapply::pblapply(X = 1:nrow(combinations_2run), 
-                                      FUN = inner_parallel,
-                                      call_def = cl,
-                                      A = A,
-                                      cl = clusters)
-    pboptions(opb) 
-    
-    parallel::stopCluster(cl = clusters)
+    progressr::handlers(progressr::handler_progress(format = "(:spin) [:bar] :percent [Elapsed time: :elapsedfull || Estimated time remaining: :eta]",
+                                                    complete = "=",   # Completion bar character
+                                                    incomplete = "-", # Incomplete bar character
+                                                    current = ">",    # Current bar character
+                                                    clear = FALSE,    # If TRUE, clears the bar when finish
+                                                    width = 100))
+    progressr::with_progress({
+      p <- progressr::progressor(steps = nrow(combinations_2run))
+      parallel_res <- future.apply::future_lapply(X = 1:nrow(combinations_2run), 
+                                                  FUN = function(x){
+                                                    out <- inner_parallel(x = x,
+                                                                          call_def = cl,
+                                                                          A = A)
+                                                    p()
+                                                    return(out)
+                                                  },
+                                                  future.globals = FALSE,
+                                                  future.packages = "JANE",
+                                                  future.seed = seed)
+    })
     
   } else {
     parallel_res <- list(inner_parallel(x = 1, call_def = cl, A = A))
@@ -220,12 +235,14 @@ EM <- function(A,
   }
   
   optimal_starting <- parallel_res[[optimal_pos]]$starting_params
-  if(!is.null(optimal_starting)){
+  if(!is.null(optimal_starting) & is.list(optimal_starting)){
     optimal_starting[["model"]] <- model
     optimal_starting[["cluster_labels"]] <- apply(optimal_starting$prob_mat, 1, which.max)
     names(optimal_starting[["cluster_labels"]]) <- ids
     rownames(optimal_starting$prob_matrix) <- ids
     rownames(optimal_starting$U) <- ids
+  } else {
+    optimal_starting <- NULL
   }
   
   if(is.list(initialization)){
@@ -294,8 +311,13 @@ EM_inner <- function(A,
   current$convergence_ind[, "n_iterations"] <- rep(control$max_its, time = length(control$beta_temp_schedule))
   
   if(nrow(extra_args$combinations_2run) == 1){
-    pb <- pbapply::timerProgressBar(style = 5, width = 50, min = 0, max = control$max_its*length(control$beta_temp_schedule))
-    pb_val <- 0
+    pb <- progress_bar$new(format = "(:spin) [:bar] :percent [Elapsed time: :elapsedfull || Estimated time remaining: :eta]",
+                           total = control$max_its*length(control$beta_temp_schedule),
+                           complete = "=",   # Completion bar character
+                           incomplete = "-", # Incomplete bar character
+                           current = ">",    # Current bar character
+                           clear = FALSE,    # If TRUE, clears the bar when finish
+                           width = 100)      # Width of the progress bar
   }
   
   # Start loop
@@ -304,21 +326,8 @@ EM_inner <- function(A,
     for(n_its in 1:control$max_its){
       
       if(nrow(extra_args$combinations_2run) == 1){
-        pb_val <- pb_val + 1
-        if(pb_val %% 10 == 0){
-          pbapply::setTimerProgressBar(pb, pb_val)
-        }
+        pb$tick()
       }
-      
-      
-      # update prob_matrix
-      current$fun_list$update_prob_matrix(prob_matrix = current$prob_matrix, 
-                                          mus = current$mus, omegas = current$omegas, 
-                                          p = current$p, U = current$U,
-                                          temp_beta = as.double(control$beta_temp_schedule[beta_temp]))
-      
-      # update p
-      current$fun_list$update_p(prob_matrix = current$prob_matrix, p = current$p, nu = current$priors$nu)
       
       # update U
       current$fun_list$update_U(U = current$U, 
@@ -330,6 +339,16 @@ EM_inner <- function(A,
                                 beta = current$beta,
                                 X =  current$X,
                                 model = current$model)
+      
+      # update prob_matrix
+      current$fun_list$update_prob_matrix(prob_matrix = current$prob_matrix, 
+                                          mus = current$mus, omegas = current$omegas, 
+                                          p = current$p, U = current$U,
+                                          temp_beta = as.double(control$beta_temp_schedule[beta_temp]))
+      
+      # update p
+      current$fun_list$update_p(prob_matrix = current$prob_matrix, p = current$p, nu = current$priors$nu)
+      
       
       # update mus and omegas
       current$fun_list$update_mus_omegas(prob_matrix = current$prob_matrix,
@@ -448,14 +467,14 @@ inner_parallel <- function(x, call_def, A){
   
   while(retry & retry_counter <= call_def$control$max_retry){
     
-    if (!is.list(eval(call_def$initialization))){
+    if (!is.list(call_def$initialization)){
       
       call_def[[1]] <- as.symbol("initialize_starting_values")
-      call_def$random_start <- ifelse(eval(call_def$initialization) == "GNN", F, T)
+      call_def$random_start <- ifelse(call_def$initialization == "GNN", F, T)
       call_def$starting_params <- eval(call_def)
       
     } else{
-      call_def$starting_params <- eval(call_def$initialization)
+      call_def$starting_params <- call_def$initialization
     }
     
     run_fun <- tryCatch(

@@ -9,7 +9,8 @@
 #' @importFrom graphics arrows points segments par layout lines legend
 #' @import aricode
 #' @import rlang
-#' @import parallel
-#' @import pbapply
+#' @import future.apply
+#' @import progressr
+#' @import progress
 NULL
 
