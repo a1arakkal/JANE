@@ -182,6 +182,6 @@ trace_plot <- function(model_object){
     
   }
   
-  graphics::par(opar)
+  on.exit(graphics::par(opar), add = TRUE)
   
 }

@@ -7,7 +7,7 @@ EM <- function(A,
                initialization = "GNN", # random, GNN, or user supplied
                case_control = F,
                DA_type = "none", # none, cooling, heating, hybrid 
-               seed = 2024, 
+               seed = 24, 
                control = list()){
   
   
@@ -188,14 +188,17 @@ EM <- function(A,
   colnames(combinations_2run)[ncol(combinations_2run)] <- "seed"
   cl$combinations_2run <- combinations_2run
   
+  old_handlers <- progressr::handlers() # returns current set of progression handlers
+  
+  progressr::handlers(progressr::handler_progress(format = "(:spin) [:bar] :percent [Elapsed time: :elapsedfull || Estimated time remaining: :eta]",
+                                                  complete = "=",   # Completion bar character
+                                                  incomplete = "-", # Incomplete bar character
+                                                  current = ">",    # Current bar character
+                                                  clear = FALSE,    # If TRUE, clears the bar when finish
+                                                  width = 100))
+  
   if(nrow(combinations_2run) > 1){
   
-    progressr::handlers(progressr::handler_progress(format = "(:spin) [:bar] :percent [Elapsed time: :elapsedfull || Estimated time remaining: :eta]",
-                                                    complete = "=",   # Completion bar character
-                                                    incomplete = "-", # Incomplete bar character
-                                                    current = ">",    # Current bar character
-                                                    clear = FALSE,    # If TRUE, clears the bar when finish
-                                                    width = 100))
     progressr::with_progress({
       p <- progressr::progressor(steps = nrow(combinations_2run))
       parallel_res <- future.apply::future_lapply(X = 1:nrow(combinations_2run), 
@@ -212,8 +215,23 @@ EM <- function(A,
     })
     
   } else {
-    parallel_res <- list(inner_parallel(x = 1, call_def = cl, A = A))
+    
+    progressr::with_progress({
+      parallel_res <- future.apply::future_lapply(X = 1:nrow(combinations_2run), 
+                                                  FUN = function(x){
+                                                    out <- inner_parallel(x = x,
+                                                                          call_def = cl,
+                                                                          A = A)
+                                                    return(out)
+                                                  },
+                                                  future.globals = FALSE,
+                                                  future.packages = "JANE",
+                                                  future.seed = seed)
+    })
+    
   }
+  
+  on.exit(progressr::handlers(old_handlers), add = TRUE)
   
   IC_out <- do.call("rbind", lapply(parallel_res, function(x){x$EM_results$IC}))
   IC_out <- cbind(combinations_2run, IC_out)
@@ -246,7 +264,9 @@ EM <- function(A,
   }
   
   if(is.list(initialization)){
-    IC_out <- IC_out[, !colnames(IC_out) %in% c("n_start", "seed", "selected")]
+    IC_out[, "n_start"] <- NA
+    IC_out[, "seed"] <- NA
+    IC_out[, "selected"] <- NA
   }
   return(list(optimal_res = optimal_res[sort(names(optimal_res))],
               optimal_starting = optimal_starting[sort(names(optimal_starting))],
@@ -263,7 +283,7 @@ EM_inner <- function(A,
                      control,
                      ...){
   
-  extra_args <-  list(...)
+  extra_args <- list(...)
   
   # Run initialize function
   current <- initialize_fun(A = A,
@@ -311,23 +331,14 @@ EM_inner <- function(A,
   current$convergence_ind[, "n_iterations"] <- rep(control$max_its, time = length(control$beta_temp_schedule))
   
   if(nrow(extra_args$combinations_2run) == 1){
-    pb <- progress_bar$new(format = "(:spin) [:bar] :percent [Elapsed time: :elapsedfull || Estimated time remaining: :eta]",
-                           total = control$max_its*length(control$beta_temp_schedule),
-                           complete = "=",   # Completion bar character
-                           incomplete = "-", # Incomplete bar character
-                           current = ">",    # Current bar character
-                           clear = FALSE,    # If TRUE, clears the bar when finish
-                           width = 100)      # Width of the progress bar
+    p <-  progressr::progressor(steps = (control$max_its*length(control$beta_temp_schedule)) / 50) # updated every 50
+    tick <- 0
   }
   
   # Start loop
   for (beta_temp in 1:length(control$beta_temp_schedule)){
     
     for(n_its in 1:control$max_its){
-      
-      if(nrow(extra_args$combinations_2run) == 1){
-        pb$tick()
-      }
       
       # update U
       current$fun_list$update_U(U = current$U, 
@@ -433,6 +444,13 @@ EM_inner <- function(A,
           break
         }
         
+      }
+      
+      if(nrow(extra_args$combinations_2run) == 1){
+        tick <- tick + 1
+        if(tick %% 50 == 0){
+          p() # updated every 50
+        }
       }
       
     }
