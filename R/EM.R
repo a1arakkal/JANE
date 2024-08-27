@@ -390,6 +390,12 @@ EM_inner <- function(A,
     
     for(n_its in 1:control$max_its){
       
+      # update prob_matrix
+      current$fun_list$update_prob_matrix(prob_matrix = current$prob_matrix, 
+                                          mus = current$mus, omegas = current$omegas, 
+                                          p = current$p, U = current$U,
+                                          temp_beta = as.double(control$beta_temp_schedule[beta_temp]))
+      
       # update U
       current$fun_list$update_U(U = current$U, 
                                 A = A, 
@@ -400,12 +406,6 @@ EM_inner <- function(A,
                                 beta = current$beta,
                                 X =  current$X,
                                 model = current$model)
-      
-      # update prob_matrix
-      current$fun_list$update_prob_matrix(prob_matrix = current$prob_matrix, 
-                                          mus = current$mus, omegas = current$omegas, 
-                                          p = current$p, U = current$U,
-                                          temp_beta = as.double(control$beta_temp_schedule[beta_temp]))
       
       # update p
       current$fun_list$update_p(prob_matrix = current$prob_matrix, p = current$p, nu = current$priors$nu)
