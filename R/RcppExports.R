@@ -33,16 +33,8 @@ log_Q <- function(A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f,
     .Call('_JANE_log_Q', PACKAGE = 'JANE', A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f, X, n_control, model)
 }
 
-log_Q_CC <- function(A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f, n_control, X, model) {
-    .Call('_JANE_log_Q_CC', PACKAGE = 'JANE', A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f, n_control, X, model)
-}
-
 log_Q_RE <- function(A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f, X, model, n_control) {
     .Call('_JANE_log_Q_RE', PACKAGE = 'JANE', A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f, X, model, n_control)
-}
-
-log_Q_RE_CC <- function(A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f, X, model, n_control) {
-    .Call('_JANE_log_Q_RE_CC', PACKAGE = 'JANE', A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f, X, model, n_control)
 }
 
 draw_A_NDH_c <- function(U, beta0) {

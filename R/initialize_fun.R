@@ -24,7 +24,6 @@ initialize_fun <- function(A, priors, list_name, model, n_interior_knots, n_cont
     if(!is.null(n_control)){
       current$fun_list$update_U <- update_U_CC
       current$fun_list$update_beta <- update_beta_CC
-      current$fun_list$log_Q <- log_Q_CC
     }
     
     # priors
@@ -62,7 +61,6 @@ initialize_fun <- function(A, priors, list_name, model, n_interior_knots, n_cont
     if(!is.null(n_control)){
       current$fun_list$update_U <- update_U_RE_CC
       current$fun_list$update_beta <- update_beta_RE_CC
-      current$fun_list$log_Q <- log_Q_RE_CC
     }
     
     # priors
@@ -101,7 +99,6 @@ initialize_fun <- function(A, priors, list_name, model, n_interior_knots, n_cont
     if(!is.null(n_control)){
       current$fun_list$update_U <- update_U_RE_CC
       current$fun_list$update_beta <- update_beta_RE_CC
-      current$fun_list$log_Q <- log_Q_RE_CC
     }
     
     # priors

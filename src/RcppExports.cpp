@@ -126,33 +126,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// log_Q_CC
-double log_Q_CC(arma::sp_mat A, arma::mat U, arma::mat mus, arma::cube omegas, arma::mat prob_matrix, arma::colvec beta, arma::colvec p, arma::rowvec a, double b, double c, arma::mat G, arma::colvec nu, double e, double f, double n_control, void * X, void * model);
-RcppExport SEXP _JANE_log_Q_CC(SEXP ASEXP, SEXP USEXP, SEXP musSEXP, SEXP omegasSEXP, SEXP prob_matrixSEXP, SEXP betaSEXP, SEXP pSEXP, SEXP aSEXP, SEXP bSEXP, SEXP cSEXP, SEXP GSEXP, SEXP nuSEXP, SEXP eSEXP, SEXP fSEXP, SEXP n_controlSEXP, SEXP XSEXP, SEXP modelSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::sp_mat >::type A(ASEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type U(USEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type mus(musSEXP);
-    Rcpp::traits::input_parameter< arma::cube >::type omegas(omegasSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type prob_matrix(prob_matrixSEXP);
-    Rcpp::traits::input_parameter< arma::colvec >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< arma::colvec >::type p(pSEXP);
-    Rcpp::traits::input_parameter< arma::rowvec >::type a(aSEXP);
-    Rcpp::traits::input_parameter< double >::type b(bSEXP);
-    Rcpp::traits::input_parameter< double >::type c(cSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type G(GSEXP);
-    Rcpp::traits::input_parameter< arma::colvec >::type nu(nuSEXP);
-    Rcpp::traits::input_parameter< double >::type e(eSEXP);
-    Rcpp::traits::input_parameter< double >::type f(fSEXP);
-    Rcpp::traits::input_parameter< double >::type n_control(n_controlSEXP);
-    Rcpp::traits::input_parameter< void * >::type X(XSEXP);
-    Rcpp::traits::input_parameter< void * >::type model(modelSEXP);
-    rcpp_result_gen = Rcpp::wrap(log_Q_CC(A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f, n_control, X, model));
-    return rcpp_result_gen;
-END_RCPP
-}
 // log_Q_RE
 double log_Q_RE(arma::sp_mat A, arma::mat U, arma::mat mus, arma::cube omegas, arma::mat prob_matrix, arma::colvec beta, arma::colvec p, arma::rowvec a, double b, double c, arma::mat G, arma::colvec nu, arma::colvec e, arma::mat f, arma::mat X, Rcpp::String model, void * n_control);
 RcppExport SEXP _JANE_log_Q_RE(SEXP ASEXP, SEXP USEXP, SEXP musSEXP, SEXP omegasSEXP, SEXP prob_matrixSEXP, SEXP betaSEXP, SEXP pSEXP, SEXP aSEXP, SEXP bSEXP, SEXP cSEXP, SEXP GSEXP, SEXP nuSEXP, SEXP eSEXP, SEXP fSEXP, SEXP XSEXP, SEXP modelSEXP, SEXP n_controlSEXP) {
@@ -177,33 +150,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::String >::type model(modelSEXP);
     Rcpp::traits::input_parameter< void * >::type n_control(n_controlSEXP);
     rcpp_result_gen = Rcpp::wrap(log_Q_RE(A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f, X, model, n_control));
-    return rcpp_result_gen;
-END_RCPP
-}
-// log_Q_RE_CC
-double log_Q_RE_CC(arma::sp_mat A, arma::mat U, arma::mat mus, arma::cube omegas, arma::mat prob_matrix, arma::colvec beta, arma::colvec p, arma::rowvec a, double b, double c, arma::mat G, arma::colvec nu, arma::colvec e, arma::mat f, arma::mat X, Rcpp::String model, double n_control);
-RcppExport SEXP _JANE_log_Q_RE_CC(SEXP ASEXP, SEXP USEXP, SEXP musSEXP, SEXP omegasSEXP, SEXP prob_matrixSEXP, SEXP betaSEXP, SEXP pSEXP, SEXP aSEXP, SEXP bSEXP, SEXP cSEXP, SEXP GSEXP, SEXP nuSEXP, SEXP eSEXP, SEXP fSEXP, SEXP XSEXP, SEXP modelSEXP, SEXP n_controlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::sp_mat >::type A(ASEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type U(USEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type mus(musSEXP);
-    Rcpp::traits::input_parameter< arma::cube >::type omegas(omegasSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type prob_matrix(prob_matrixSEXP);
-    Rcpp::traits::input_parameter< arma::colvec >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< arma::colvec >::type p(pSEXP);
-    Rcpp::traits::input_parameter< arma::rowvec >::type a(aSEXP);
-    Rcpp::traits::input_parameter< double >::type b(bSEXP);
-    Rcpp::traits::input_parameter< double >::type c(cSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type G(GSEXP);
-    Rcpp::traits::input_parameter< arma::colvec >::type nu(nuSEXP);
-    Rcpp::traits::input_parameter< arma::colvec >::type e(eSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type f(fSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Rcpp::String >::type model(modelSEXP);
-    Rcpp::traits::input_parameter< double >::type n_control(n_controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(log_Q_RE_CC(A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f, X, model, n_control));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -440,9 +386,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_JANE_gradient_C", (DL_FUNC) &_JANE_gradient_C, 3},
     {"_JANE_compute_dist", (DL_FUNC) &_JANE_compute_dist, 6},
     {"_JANE_log_Q", (DL_FUNC) &_JANE_log_Q, 17},
-    {"_JANE_log_Q_CC", (DL_FUNC) &_JANE_log_Q_CC, 17},
     {"_JANE_log_Q_RE", (DL_FUNC) &_JANE_log_Q_RE, 17},
-    {"_JANE_log_Q_RE_CC", (DL_FUNC) &_JANE_log_Q_RE_CC, 17},
     {"_JANE_draw_A_NDH_c", (DL_FUNC) &_JANE_draw_A_NDH_c, 2},
     {"_JANE_draw_A_RS_c", (DL_FUNC) &_JANE_draw_A_RS_c, 3},
     {"_JANE_draw_A_RSR_c", (DL_FUNC) &_JANE_draw_A_RSR_c, 4},
