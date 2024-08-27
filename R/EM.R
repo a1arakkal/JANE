@@ -235,7 +235,19 @@ EM <- function(A,
   
   IC_out <- do.call("rbind", lapply(parallel_res, function(x){x$EM_results$IC}))
   IC_out <- cbind(combinations_2run, IC_out)
+  IC_out <- cbind(IC_out, Q = do.call("c", lapply(parallel_res, function(x){x$EM_results$Q})))
+  IC_out <- cbind(IC_out, row_id = 1:nrow(IC_out))
   
+  # Max Q of all n_start given K and D -----------------------------------------
+  best_start <- stats::aggregate(Q ~ K + D, data = IC_out,
+                                 FUN = function(x) which.max(x))
+  colnames(best_start)[colnames(best_start) == "Q"] <- "n_start"
+  IC_out_best_start <- merge(x = IC_out, y = best_start,
+                             by = c("K", "D", "n_start"))
+  IC_out_best_start <- as.matrix(IC_out_best_start)
+  rownames(IC_out_best_start) <- NULL
+  
+  # optimal based on min BIC --------------------------------------------------- 
   selected <- rep(0, nrow(IC_out))
   optimal_pos <- which(IC_out[, con$IC_selection] == min(IC_out[, con$IC_selection]))
   selected[optimal_pos] <- 1
@@ -262,15 +274,53 @@ EM <- function(A,
   } else {
     optimal_starting <- NULL
   }
+
+  # optimal based on min BIC of best start ------------------------------------- 
+  selected <- rep(0, nrow(IC_out_best_start))
+  optimal_pos <- which(IC_out_best_start[, con$IC_selection] == min(IC_out_best_start[, con$IC_selection]))
+  selected[optimal_pos] <- 1
+  IC_out_best_start <- cbind(IC_out_best_start, selected)
+  optimal_pos <- ifelse(length(optimal_pos) > 1, IC_out_best_start[optimal_pos[1], "row_id"], IC_out_best_start[optimal_pos, "row_id"])
+  IC_out_best_start <- IC_out_best_start[order(IC_out_best_start[, "K"],
+                                               IC_out_best_start[, "D"], 
+                                               IC_out_best_start[, "n_start"]), , drop = F]
+  
+  optimal_res_v2 <- parallel_res[[optimal_pos]]$EM_results
+  if (length(optimal_res_v2) > 1){
+    optimal_res_v2[["cluster_labels"]] <- apply(optimal_res_v2$prob_mat, 1, which.max)
+    names(optimal_res_v2[["cluster_labels"]]) <- ids
+    rownames(optimal_res_v2$prob_matrix) <- ids
+    rownames(optimal_res_v2$U) <- ids
+  } else {
+    optimal_res_v2 <- NULL
+  }
+  
+  optimal_starting_v2 <- parallel_res[[optimal_pos]]$starting_params
+  if(!is.null(optimal_starting_v2) & is.list(optimal_starting_v2)){
+    optimal_starting_v2[["model"]] <- model
+    optimal_starting_v2[["cluster_labels"]] <- apply(optimal_starting_v2$prob_mat, 1, which.max)
+    names(optimal_starting_v2[["cluster_labels"]]) <- ids
+    rownames(optimal_starting_v2$prob_matrix) <- ids
+    rownames(optimal_starting_v2$U) <- ids
+  } else {
+    optimal_starting_v2 <- NULL
+  }
   
   if(is.list(initialization)){
     IC_out[, "n_start"] <- NA
     IC_out[, "seed"] <- NA
     IC_out[, "selected"] <- NA
+    IC_out_best_start[, "n_start"] <- NA
+    IC_out_best_start[, "seed"] <- NA
+    IC_out_best_start[, "selected"] <- NA
   }
+  
   return(list(optimal_res = optimal_res[sort(names(optimal_res))],
               optimal_starting = optimal_starting[sort(names(optimal_starting))],
-              IC_out = IC_out))
+              IC_out = IC_out,
+              optimal_res_v2 = optimal_res_v2[sort(names(optimal_res_v2))],
+              optimal_starting_v2 = optimal_starting_v2[sort(names(optimal_starting_v2))],
+              IC_out_best_start = IC_out_best_start))
   
 }
 
@@ -466,6 +516,25 @@ EM_inner <- function(A,
   
   # Get IC info
   out$IC <- unlist(BICL(A = A, object = out))
+  
+  # compute Q
+  out$Q <- current$fun_list$log_Q(A = A,
+                                  U = current$U,
+                                  mus = current$mus,
+                                  omegas = current$omegas,
+                                  prob_matrix = current$prob_matrix,
+                                  beta = current$beta,
+                                  X = current$X, 
+                                  n_control = control$n_control,
+                                  p = current$p,
+                                  a = current$priors$a,
+                                  b = current$priors$b,
+                                  c = current$priors$c,
+                                  G = current$priors$G,
+                                  nu = current$priors$nu,
+                                  e = current$priors$e,
+                                  f = current$priors$f,
+                                  model = current$model)
   
   return(out[!(names(out) %in% "X")])
   
