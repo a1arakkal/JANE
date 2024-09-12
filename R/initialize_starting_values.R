@@ -67,6 +67,7 @@ initialize_starting_values <- function(A,
             # only retain index that is not edge index (i.e., setdiff(index, edges_indices$index) different than setdiff(edges_indices$index,index)
             # where the edge indices that are not in index is retained)
             temp <- cbind(temp[index %in% setdiff(index, edges_indices[,3]), , drop = F], index[index %in% setdiff(index, edges_indices[,3])])
+            temp <- temp[!duplicated(temp[,3]), , drop = F] # remove duplicates
             # only retain index that is not down_sample_nonLink_indices so that we dont have duplicate values
             new_vals <- setdiff(temp[,3], down_sample_nonLink_indices[,3][!is.na(down_sample_nonLink_indices[,3])])
             
@@ -77,7 +78,7 @@ initialize_starting_values <- function(A,
               if(sum(rows_NA) >= nrow(temp)){
                 down_sample_nonLink_indices[which(rows_NA)[1:nrow(temp)], ] <- temp # if rows to update is more than nrow temp then only nrow temp of down_sample_nonLink_indices
               } else {
-                down_sample_nonLink_indices[rows_NA] <- temp[1:length(rows_NA), ] # else update all na rows
+                down_sample_nonLink_indices[rows_NA, ] <- temp[1:sum(rows_NA), ] # else update all na rows
               }
               
             }
@@ -146,6 +147,7 @@ initialize_starting_values <- function(A,
             # only retain index that is not edge index (i.e., setdiff(index, edges_indices$index) different than setdiff(edges_indices$index,index)
             # where the edge indices that are not in index is retained)
             temp <- cbind(temp[index %in% setdiff(index, edges_indices[,3]), , drop = F], index[index %in% setdiff(index, edges_indices[,3])])
+            temp <- temp[!duplicated(temp[,3]), , drop = F] # remove duplicates
             # only retain index that is not down_sample_nonLink_indices so that we dont have duplicate values
             new_vals <- setdiff(temp[,3], down_sample_nonLink_indices[,3][!is.na(down_sample_nonLink_indices[,3])])
             
@@ -156,7 +158,7 @@ initialize_starting_values <- function(A,
               if(sum(rows_NA) >= nrow(temp)){
                 down_sample_nonLink_indices[which(rows_NA)[1:nrow(temp)], ] <- temp # if rows to update is more than nrow temp then only nrow temp of down_sample_nonLink_indices
               } else {
-                down_sample_nonLink_indices[rows_NA] <- temp[1:length(rows_NA), ] # else update all na rows
+                down_sample_nonLink_indices[rows_NA, ] <- temp[1:sum(rows_NA), ] # else update all na rows
               }
               
             }
@@ -228,6 +230,7 @@ initialize_starting_values <- function(A,
             # only retain index that is not edge index (i.e., setdiff(index, edges_indices$index) different than setdiff(edges_indices$index,index)
             # where the edge indices that are not in index is retained)
             temp <- cbind(temp[index %in% setdiff(index, edges_indices[,3]), , drop = F], index[index %in% setdiff(index, edges_indices[,3])])
+            temp <- temp[!duplicated(temp[,3]), , drop = F] # remove duplicates
             # only retain index that is not down_sample_nonLink_indices so that we dont have duplicate values
             new_vals <- setdiff(temp[,3], down_sample_nonLink_indices[,3][!is.na(down_sample_nonLink_indices[,3])])
             
@@ -238,7 +241,7 @@ initialize_starting_values <- function(A,
               if(sum(rows_NA) >= nrow(temp)){
                 down_sample_nonLink_indices[which(rows_NA)[1:nrow(temp)], ] <- temp # if rows to update is more than nrow temp then only nrow temp of down_sample_nonLink_indices
               } else {
-                down_sample_nonLink_indices[rows_NA] <- temp[1:length(rows_NA), ] # else update all na rows
+                down_sample_nonLink_indices[rows_NA, ] <- temp[1:sum(rows_NA), ] # else update all na rows
               }
               
             }
