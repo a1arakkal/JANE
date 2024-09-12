@@ -18,7 +18,6 @@ initialize_starting_values <- function(A,
     
     # Construct a row normalized matrix s.t. for the ith row their neighbors 
     # have a value 1/(deg_out_i).
-    
     out_degree <- rowSums(A)
     A_matrix_row_norm <- Matrix::Diagonal(x = 1.0 / ifelse(out_degree>0, out_degree, 1.0)) %*% A
     
@@ -31,16 +30,89 @@ initialize_starting_values <- function(A,
       
       # Construct a matrix of random values for starting U
       starting_U <- matrix(stats::rnorm(N*D, sd = control$sd_random_U_GNN), nrow = N, ncol = D)
+    
+      # Perform down-sampling to get balanced number of links and non-links (use this for prediction of GNN approach to select n iterations of GNN loop)
+      indices <- summary(A)
+      edges_indices <- indices[indices$j != indices$i, colnames(indices) != "x"] # will have sum(A) rows 
+      edges_indices[, "index"] <- ( (edges_indices$j -1) * (nrow(A)) ) + edges_indices$i # compute to column based-element-wise indices ( (col-1)*(N_total_row) ) + row
+      edges_indices <- as.matrix(edges_indices)
+      rownames(edges_indices) <- NULL
+      colnames(edges_indices) <- NULL
       
-      for (i in 1:control$n_its_GNN){
+      down_sample_nonLink_indices <- matrix(NA, nrow = nrow(edges_indices), ncol = ncol(edges_indices)) # create matrix for results
+      
+      while(any(is.na(down_sample_nonLink_indices))){
+        
+        rows_NA <- rowSums(is.na(down_sample_nonLink_indices)) > 0.0 # logical for whether or not rows need to be filled
+        rsample_i <- round(stats::runif(n = sum(rows_NA)*10.0, min = 1.0, max = nrow(A))) # random draw of i
+        rsample_j <- round(stats::runif(n = sum(rows_NA)*10.0, min = 1.0, max = nrow(A))) # random draw of j
+        temp <- cbind(rsample_i[rsample_j != rsample_i], rsample_j[rsample_j != rsample_i]) # select where j != i
+        index <- ( (temp[,2] -1) * (nrow(A)) ) + temp[,1] # compute the column based-element-wise indices
+        # only retain index that is not edge index (i.e., setdiff(index, edges_indices$index) different than setdiff(edges_indices$index,index)
+        # where the edge indices that are not in index is retained)
+        temp <- cbind(temp[index %in% setdiff(index, edges_indices[,3]), , drop = F], index[index %in% setdiff(index, edges_indices[,3])])
+        temp <- temp[!duplicated(temp[,3]), , drop = F] # remove duplicates
+        # only retain index that is not down_sample_nonLink_indices so that we dont have duplicate values
+        new_vals <- setdiff(temp[,3], down_sample_nonLink_indices[,3][!is.na(down_sample_nonLink_indices[,3])])
+        
+        if(length(new_vals)>0){ # only update if there are new_values to do so
+          
+          temp <- temp[temp[,3] %in% new_vals, , drop = F] # select the rows that will be added to down_sample_nonLink_indices
+          
+          if(sum(rows_NA) >= nrow(temp)){
+            down_sample_nonLink_indices[which(rows_NA)[1:nrow(temp)], ] <- temp # if rows to update is more than nrow temp then only nrow temp of down_sample_nonLink_indices
+          } else {
+            down_sample_nonLink_indices[rows_NA, ] <- temp[1:sum(rows_NA), ] # else update all na rows
+          }
+          
+        }
+          
+      }
+      
+      distances <- matrix(data = 0.0, nrow = nrow(edges_indices)*2, ncol = 1 + 2*(control$n_interior_knots + 1)) # balanced design so edges_indices*2
+      compute_dist(U = starting_U, 
+                          distances = distances,
+                          model = "RSR", 
+                          X = matrix(0, nrow = nrow(distances), ncol = ncol(distances)-1), # dummy X so function will work
+                          indices = rbind(edges_indices[,-3]-1, down_sample_nonLink_indices[,-3]-1),
+                          downsampling = T)
+      
+      temp_y <-  A[c(edges_indices[,3], down_sample_nonLink_indices[,3])]
+      logisti_reg_fit <- suppressWarnings(stats::glm(temp_y~distances[,ncol(distances)],
+                                     family = "binomial"))
+      pred_prob <- stats::predict(logisti_reg_fit, type='response')
+      brier <- mean((pred_prob-temp_y)^2)
+      starting_U_best <- starting_U
+      best_global_brier <- brier
+      
+      for(i in 1:control$n_its_GNN){
         
         # For each iteration the ith row of starting_U will be the average of the neighbors
         # values of the current starting_U 
-        starting_U <- ((A_matrix_row_norm %*% starting_U) + (A_matrix_col_norm %*% starting_U))/2.0
+        starting_U <- as.matrix(((A_matrix_row_norm %*% starting_U) + (A_matrix_col_norm %*% starting_U))/2.0)
         
+        distances <- matrix(data = 0.0, nrow = nrow(edges_indices)*2, ncol = 1 + 2*(control$n_interior_knots + 1)) # balanced design so edges_indices*2
+        compute_dist(U = starting_U, 
+                            distances = distances,
+                            model = "RSR", 
+                            X = matrix(0, nrow = nrow(distances), ncol = ncol(distances)-1), 
+                            indices = rbind(edges_indices[,-3]-1, down_sample_nonLink_indices[,-3]-1),
+                            downsampling = T)
+        
+        logisti_reg_fit <- suppressWarnings(stats::glm(temp_y~distances[,ncol(distances)],
+                                      family = "binomial"))
+        pred_prob <- stats::predict(logisti_reg_fit, type='response')
+        brier <- mean((pred_prob-temp_y)^2)
+        
+        if(brier < best_global_brier){
+          starting_U_best <- starting_U
+        } 
+        
+        best_global_brier <- min(best_global_brier, brier)
+
       }
       
-      starting_U <- as.matrix(starting_U)
+      starting_U <- starting_U_best
       
       # Rescale U
       if(model == "NDH"){
@@ -292,7 +364,7 @@ initialize_starting_values <- function(A,
       }
       
       
-      # Step4: Run K-means algo for GMM based on starting U
+      # Run K-means algo for GMM based on starting U
       starting_params <- stats::kmeans(x = starting_U,
                                        centers = K,
                                        iter.max = 10,

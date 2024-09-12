@@ -32,7 +32,7 @@ EM <- function(A,
     IC_selection = "Total_ICL", # Information criteria to use for selection between different starting values, K, and D
     sd_random_U_GNN = 1, # standard deviation used for draws from random normal used in graphical neural network (GNN) starting values approach
     max_retry_GNN = 5, # number of max attempts for GNN approach before switching to random starting values 
-    n_its_GNN = 2, # number of iterations for GNN approach
+    n_its_GNN = 50, # number of iterations for GNN approach
     downsampling_GNN = T # logical for whether or not to use downsampling s.t. number of links and non-links are balanced for GNN logistic regression approach
   )
   
