@@ -272,10 +272,21 @@ EM <- function(A,
   
   # Keep info on convergence across all combinations_2run ----------------------
   all_convergence_ind <- do.call("rbind", lapply(1:length(parallel_res), function(x){
-    tmp <- rep(1, nrow(parallel_res[[x]]$EM_results$convergence_ind)) %x% combinations_2run[x, c("K", "D", "n_start"), drop = F]
-    colnames(tmp) <-  c("K", "D", "n_start")
-    cbind(tmp,
-          parallel_res[[x]]$EM_results$convergence_ind)
+    
+    if(!is.null(parallel_res[[x]]$EM_results$convergence_ind)){
+      tmp <- rep(1, nrow(parallel_res[[x]]$EM_results$convergence_ind)) %x% combinations_2run[x, c("K", "D", "n_start"), drop = F]
+      colnames(tmp) <-  c("K", "D", "n_start")
+      cbind(tmp,
+            parallel_res[[x]]$EM_results$convergence_ind)
+    } else {
+      convergence_ind <- matrix(0, nrow = length(con$beta_temp_schedule), ncol = 3)
+      colnames(convergence_ind) <- c("beta_temperature", "convergence_ind", "n_iterations")
+      convergence_ind[, "beta_temperature"] <- con$beta_temp_schedule
+      tmp <- rep(1, nrow(convergence_ind)) %x% combinations_2run[x, c("K", "D", "n_start"), drop = F]
+      colnames(tmp) <-  c("K", "D", "n_start")
+      cbind(tmp, convergence_ind)
+    }
+    
   }))
 
   
