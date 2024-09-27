@@ -7,10 +7,9 @@ EM <- function(A,
                initialization = "GNN", # random, GNN, or user supplied
                case_control = F,
                DA_type = "none", # none, cooling, heating, hybrid 
-               seed = 24, 
+               seed = 2024, 
                control = list()){
-  
-  
+
   con <- list(
     max_its = 1e3, # max iteration of EM algorithm, 
     min_its = 10,  # min iteration of EM algorithm,
@@ -183,9 +182,7 @@ EM <- function(A,
   combinations_2run <- combinations_2run[order(combinations_2run[, "K"],
                                                combinations_2run[, "D"], 
                                                combinations_2run[, "n_start"]), , drop = F]
-  combinations_2run <- cbind(combinations_2run, seed * combinations_2run[, "K"] * combinations_2run[, "D"] * combinations_2run[, "n_start"])
   rownames(combinations_2run) <- NULL
-  colnames(combinations_2run)[ncol(combinations_2run)] <- "seed"
   cl$combinations_2run <- combinations_2run
   
   old_handlers <- progressr::handlers() # returns current set of progression handlers
@@ -211,7 +208,7 @@ EM <- function(A,
                                                   },
                                                   future.globals = FALSE,
                                                   future.packages = "JANE",
-                                                  future.seed = seed)
+                                                  future.seed = ifelse(is.null(seed), TRUE, seed))
     })
     
   } else {
@@ -226,7 +223,7 @@ EM <- function(A,
                                                   },
                                                   future.globals = FALSE,
                                                   future.packages = "JANE",
-                                                  future.seed = seed)
+                                                  future.seed = ifelse(is.null(seed), TRUE, seed))
     })
     
   }
@@ -266,7 +263,6 @@ EM <- function(A,
 
   if(is.list(initialization)){
     IC_out[, "n_start"] <- NA
-    IC_out[, "seed"] <- NA
     IC_out[, "selected"] <- NA
   }
   
@@ -500,9 +496,7 @@ inner_parallel <- function(x, call_def, A){
   combinations_2run_x <- call_def$combinations_2run[x, ]
   call_def$K <- combinations_2run_x["K"]
   call_def$D <- combinations_2run_x["D"]
-  
-  set.seed(combinations_2run_x["seed"]) #set.seed
-  
+
   retry <- T
   retry_counter <- 0
   
