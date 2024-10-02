@@ -112,6 +112,12 @@ plot.JANE <- function(x, trace_plot = FALSE, true_labels = NULL,
     stop("zoom not in [0,100]")
   }
   
+  if(type == "persp"){
+    alpha_edge <- 0
+    alpha_node <- 0
+    zoom <- 100
+  }
+  
   if(trace_plot){
     
     trace_plot(x$optimal_res)
