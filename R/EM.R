@@ -286,10 +286,12 @@ EM <- function(A,
   }))
 
   
-  return(list(optimal_res = optimal_res[sort(names(optimal_res))],
-              optimal_starting = optimal_starting[sort(names(optimal_starting))],
-              IC_out = IC_out,
-              all_convergence_ind = all_convergence_ind))
+  return(structure(list(optimal_res = optimal_res[sort(names(optimal_res))],
+                        optimal_starting = optimal_starting[sort(names(optimal_starting))],
+                        IC_selection =  con$IC_selection,
+                        IC_out = IC_out,
+                        all_convergence_ind = all_convergence_ind,
+                        A = A), class = "JANE"))
   
 }
 

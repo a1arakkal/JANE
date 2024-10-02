@@ -1,4 +1,4 @@
-#' @import Matrix
+#' @rawNamespace import(Matrix, except = image)
 #' @import extraDistr
 #' @import splines 
 #' @import mclust 
@@ -7,10 +7,10 @@
 #' @import future.apply
 #' @import progressr
 #' @import progress
+#' @import graphics
+#' @import grDevices
 #' @importFrom methods as
 #' @importFrom igraph graph_from_adjacency_matrix as_edgelist
 #' @importFrom scales alpha
-#' @importFrom grDevices gray
-#' @importFrom graphics arrows points segments par layout lines legend
 NULL
 

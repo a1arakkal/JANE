@@ -1,7 +1,6 @@
 
-#' @export
-plot_data <- function(A, data, zoom = 1, misclassified = NULL, type = "contour",
-                          alpha_edge = 0.1, alpha_node = 1, title){
+plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour",
+                          alpha_edge = 0.1, alpha_node = 1, swap_axes = FALSE, title){
   
   U <- data$U
   Z <- data$cluster_labels
@@ -18,13 +17,21 @@ plot_data <- function(A, data, zoom = 1, misclassified = NULL, type = "contour",
   par$variance$sigma <- array(apply(omegas, 3, function(x){chol2inv(chol(x))}),
                               dim  = dim(omegas))
   
-  mclust::surfacePlot(U, 
+  if (swap_axes){
+    par$mean <- par$mean[2:1, ]
+    par$variance$sigma <- par$variance$sigma[2:1, 2:1, ]
+    U <- U[, 2:1]
+  } 
+  
+  mclust::surfacePlot(data = U, 
                       what = "density",
                       transformation = "none",
                       type = type,
                       parameters = par,
-                      ylim = c(min(U[,2] ), max(U[,2])) + (1.0/zoom)*c(-1,1),
-                      xlim = c(min(U[,1] ), max(U[,1])) + (1.0/zoom)*c(-1,1))
+                      swapAxes = FALSE,
+                      ylim = c(min(U[,2]), max(U[,2])) + (100/zoom)*c(-1,1),
+                      xlim = c(min(U[,1]), max(U[,1])) + (100/zoom)*c(-1,1))
+  
   
   if(undirected){
     
@@ -58,20 +65,20 @@ plot_data <- function(A, data, zoom = 1, misclassified = NULL, type = "contour",
     } 
     
     graphics::arrows(x0 = U[k_elist[,1],1],
-           x1 = U[k_elist[,2],1],
-           y0 = U[k_elist[,1],2],
-           y1 = U[k_elist[,2],2],
-           col= grDevices::gray(0.5, alpha_edge),
-           length = 0.1,
-           angle = 10) 
+                     x1 = U[k_elist[,2],1],
+                     y0 = U[k_elist[,1],2],
+                     y1 = U[k_elist[,2],2],
+                     col= grDevices::gray(0.5, alpha_edge),
+                     length = 0.1,
+                     angle = 10) 
     
     
   }
   
   if(is.null(misclassified)){
-    graphics::points(U,pch=16, cex = 0.8, col = alpha(Z, alpha_node))
+    graphics::points(U,pch = 16, cex = 0.8, col = scales::alpha(Z, alpha_node))
   } else {
-    graphics::points(U,pch=16, cex = 0.8, 
+    graphics::points(U, pch = 16, cex = 0.8, 
            col = scales::alpha(ifelse(1:nrow(A) %in% misclassified == T, "black", "white"),
                        alpha_node))
   }

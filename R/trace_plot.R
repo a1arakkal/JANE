@@ -1,5 +1,4 @@
 
-#' @export
 trace_plot <- function(model_object){
   
   plot_data <- model_object$termination_metric
