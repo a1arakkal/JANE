@@ -12,6 +12,11 @@ specify_priors <- function(D,
                            e, # prior mean on beta (vector of length 1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1))
                            f){ # prior precision on beta (square matrix of dim 1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1))
   
+  # add check that nu >= 1
+  if (any(nu < 1)){
+    stop("For the current implementation we require that all elements of the nu vector be >= 1 to prevent against negative mixture probabilities for empty clusters")
+  }
+  
   priors <- list(
     a = t(a),
     b = b,

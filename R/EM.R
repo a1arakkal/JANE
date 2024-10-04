@@ -35,6 +35,21 @@ EM <- function(A,
     downsampling_GNN = T # logical for whether or not to use downsampling s.t. number of links and non-links are balanced for GNN logistic regression approach
   )
   
+  # Stop if A not supplied
+  if(missing(A) || !(inherits(A, "matrix") | inherits(A, "dgCMatrix"))){
+    stop("Argument 'A' missing or is not a matrix, please supply an adjacency matrix")
+  }
+  
+  # Stop if A is not square
+  if(nrow(A) != ncol(A)){
+    stop("Please supply a square adjacency matrix")
+  }
+  
+  # Stop if model not supplied
+  if(missing(model) || !(length(model) == 1 & is.character(model))){
+    stop("Argument 'model' missing or not a character of length 1, please supply a model (i.e., NDH, RS, or RSR)")
+  }
+  
   cl <- match.call()
   cl$A <- quote(A)
   cl$case_control <- NULL
@@ -46,13 +61,18 @@ EM <- function(A,
     A <- methods::as(A, "dgCMatrix")
   }
   
+  # Stop if not unweighted network
+  if(!all(A@x == 1.0)){
+    stop("Please supply an unweighted network")
+  }
+
   # Check for self loops 
-  if(!all(diag(A) == 0)){
+  if(!all(diag(A) == 0.0)){
     stop("Self-loop(s) detected (i.e., diagonal element(s) of A are not 0)")
   }
   
   # if A is named either col or row use that as id, else give id as row number
-  if ( ( length(unique(rownames(A))) == nrow(A) ) | ( length(unique(colnames(A))) == nrow(A) )){
+  if (( length(unique(rownames(A))) == nrow(A) ) | ( length(unique(colnames(A))) == nrow(A) )){
     ids <- if(length(unique(rownames(A))) != nrow(A)){ colnames(A) } else { rownames(A) }
   } else {
     message(paste0("Rownames/colnames for A missing or not unique, generating node IDs 1:", nrow(A)))
@@ -68,6 +88,11 @@ EM <- function(A,
     ids <- ids[-isolates]
   }
   
+  # Check if max K supplied >= N
+  if(max(K) >= nrow(A)){
+    stop("Number of clusters is greater than or equal to number of actors, please supply smaller K(s)")
+  }
+  
   # Check model 
   if(!model %in% c("NDH", "RS", "RSR")){
     stop("Model needs to be one of the following: NDH, RS, or RSR")
@@ -77,8 +102,15 @@ EM <- function(A,
   
   # If unsymmetric A provided for model = "NDH" or "RS" convert to symmetric A and warn
   if(!isSymmetric(A) & (model %in% c("NDH", "RS"))){
-    A <- 1.0 * ( (A + t(A)) > 0.0)
-    message(paste0("Unsymmetric A matrix supplied for model = ", model, ", converting to symmetric matrix"))
+    input <- utils::menu(c("Yes", "No"), 
+                         title = paste0("Unsymmetric A matrix supplied for model = ",
+                                        model, ", do you want to convert A to a symmetric matrix?"))
+    if(input == 1){
+      A <- 1.0 * ( (A + t(A)) > 0.0 )
+      message("Converting A to symmetric matrix")
+    } else {
+      stop("A needs to be symmetric for model = ", model)
+    }
   }
   
   # Check initialization
@@ -93,14 +125,14 @@ EM <- function(A,
     stop("Please provide one of the following for IC_slection: 'none', 'cooling', 'heating', or 'hybrid'")
   }
   
-  # update con n_control if case_control is T
+  # Update con n_control if case_control is T
   if(case_control == T){
     con$n_control <- 100
   } else {
     control$n_control <- NULL
   }
   
-  # update con beta_temp_schedule by DA_type argument
+  # Update con beta_temp_schedule by DA_type argument
   if(DA_type == "cooling"){
     con$beta_temp_schedule <- seq(0.5, 1, length.out = 10)
   } else if (DA_type == "heating"){
@@ -111,29 +143,37 @@ EM <- function(A,
     control$beta_temp_schedule <- 1
   }
   
-  # updated con n_start if user supplied starting values
+  # Updated con n_start if user supplied starting values
   if (is.list(initialization)){
     control$n_start <- 1
   }
   
-  # check if names of elements in list match control_default
+  # Check if names of elements in list match control_default
   nmsC <- names(con)
   namc <- names(control)
   
+  # Check for duplicated params in control
+  if(sum(duplicated(namc)) > 0){
+    stop("Duplicated parameter(s) in control: ", namc[duplicated(namc)])
+  }
+  
   noNms <- namc[!namc %in% nmsC]
   if (length(noNms) != 0) {
-    stop("unknown names in control: ", paste(noNms, collapse = ", "))
+    potential_matches <- nmsC[stringdist::amatch(x = noNms, table = nmsC, method = "jaccard", maxDist = Inf)]
+    stop("Unknown parameter(s) in control: ", paste(noNms, collapse = ", "),
+         ". Closest match: ", paste(unique(potential_matches), collapse = ", "))
   }
+  
   con[namc] <- control
   
   # Check value of IC_selection
   if(!con[["IC_selection"]] %in% c("BIC_logit", "BIC_mbc", "ICL_mbc", "Total_BIC", "Total_ICL")) {
-    stop("Please provide one of the following for IC_slection: 'BIC_logit', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL'")
+    stop("Please provide one of the following for IC_selection: 'BIC_logit', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL'")
   } 
   
   # Check value of n_control supplied and compute n_control
-  if(!is.null(con[["n_control"]]) && !(con[["n_control"]]< max(nrow(A)-rowSums(A)) & con[["n_control"]]>0)){
-    stop("Please supply a n_control value in (0, max(nrow(A)-rowSums(A)))")
+  if(!is.null(con[["n_control"]]) && !(con[["n_control"]]<= min(nrow(A)-rowSums(A), nrow(A)-colSums(A)) & con[["n_control"]]>0)){
+    stop("Please supply a n_control value in (0, min(nrow(A)-rowSums(A), nrow(A)-colSums(A))]")
   } 
   
   # check value of quantile_diff
@@ -288,7 +328,9 @@ EM <- function(A,
   
   return(structure(list(optimal_res = optimal_res[sort(names(optimal_res))],
                         optimal_starting = optimal_starting[sort(names(optimal_starting))],
-                        IC_selection =  con$IC_selection,
+                        input_params =  list(IC_selection = con$IC_selection,
+                                             case_control = case_control,
+                                             DA_type = DA_type),
                         IC_out = IC_out,
                         all_convergence_ind = all_convergence_ind,
                         A = A), class = "JANE"))

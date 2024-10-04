@@ -1,6 +1,7 @@
 
 plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour",
-                          alpha_edge = 0.1, alpha_node = 1, swap_axes = FALSE, title){
+                      alpha_edge = 0.1, alpha_node = 1, swap_axes = FALSE, uncertainty = FALSE, 
+                      main = NULL, xlab = NULL, ylab = NULL){
   
   U <- data$U
   Z <- data$cluster_labels
@@ -23,6 +24,16 @@ plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour
     U <- U[, 2:1]
   } 
   
+  if(uncertainty & is.null(misclassified)){
+    uncer <- round(1-apply(data$prob_matrix, 1, max), 2)
+    opar <- graphics::par(no.readonly=TRUE)
+    nf <- graphics::layout(
+      matrix(c(1,2), ncol=2, byrow=TRUE), 
+      widths = c(3,0.5)
+    )
+    graphics::par(mar=c(4, 4, 2, 0.5), oma=c(1,1,1,1), las=1)
+  }
+  
   mclust::surfacePlot(data = U, 
                       what = "density",
                       transformation = "none",
@@ -30,7 +41,11 @@ plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour
                       parameters = par,
                       swapAxes = FALSE,
                       ylim = c(min(U[,2]), max(U[,2])) + (100/zoom)*c(-1,1),
-                      xlim = c(min(U[,1]), max(U[,1])) + (100/zoom)*c(-1,1))
+                      xlim = c(min(U[,1]), max(U[,1])) + (100/zoom)*c(-1,1), 
+                      xlab = xlab,
+                      ylab = ylab)
+  graphics::title(main = main, 
+                  cex.main = ifelse(!is.null(misclassified), 1.0, ifelse(!uncertainty, 1.0, 0.8)))
   
   
   if(undirected){
@@ -76,12 +91,43 @@ plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour
   }
   
   if(is.null(misclassified)){
-    graphics::points(U,pch = 16, cex = 0.8, col = scales::alpha(Z, alpha_node))
+    if(!uncertainty){
+      
+      graphics::points(U,pch = 16, cex = 0.8, col = scales::alpha(Z, alpha_node))
+      
+    } else {
+      
+      if (length(unique(uncer)) > 1){
+        break_points <- cut(uncer, breaks = seq(min(uncer) - 1e-6, max(uncer), length.out = 11))
+      } else {
+        break_points <- as.factor(uncer)
+      }
+      
+      cols <- grDevices::heat.colors(length(levels(break_points)), alpha_node, rev = TRUE)
+      graphics::points(U, pch = 16, cex = 0.8, col = cols[break_points])
+      graphics::par(mar = c(5, 0, 5, 5))
+      graphics::image(1, 1:length(levels(break_points)), t(seq_along(levels(break_points))), 
+                      col = cols, axes = FALSE, xlab = "")
+      labels <- strsplit(levels(break_points), ",")
+      labels <-  unlist(lapply(labels, function(x){
+        p1 <- as.numeric(sub(pattern = "(\\()", x = x[1] , replacement = ""))
+        p2 <- as.numeric(sub(pattern = "(\\])", x = x[2] , replacement = ""))
+        p1 <- ifelse(p1<0, 0, p1)
+        if(is.na(p2)){
+          paste0(format(round(p1, 2), nsmall = 2))
+        } else {
+          paste0("(",format(round(p1, 2), nsmall = 2),", ", format(round(p2, 2), nsmall = 2), "]")
+        }
+      }))
+      graphics::axis(4, at = 1:length(labels), labels = labels)
+      on.exit(graphics::par(opar), add = TRUE)
+      
+    }
   } else {
     graphics::points(U, pch = 16, cex = 0.8, 
-           col = scales::alpha(ifelse(1:nrow(A) %in% misclassified == T, "black", "white"),
-                       alpha_node))
+                     col = scales::alpha(ifelse(1:nrow(A) %in% misclassified == T, "black", "white"),
+                                         alpha_node))
   }
-  title(title)
+  
 }
 
