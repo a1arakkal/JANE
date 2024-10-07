@@ -47,7 +47,7 @@ JANE <- function(A,
   
   # Stop if model not supplied
   if(missing(model) || !(length(model) == 1 & is.character(model))){
-    stop("Argument 'model' missing or not a character of length 1, please supply a model (i.e., 'NDH', 'RS', or 'RSR')")
+    stop("Argument 'model' missing or not a character vector of length 1, please supply a model (i.e., 'NDH', 'RS', or 'RSR')")
   }
   
   cl <- match.call()
