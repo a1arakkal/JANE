@@ -1,6 +1,6 @@
 
 #' @export
-EM <- function(A,
+JANE <- function(A,
                D = 2,
                K = 2,
                model,
@@ -47,7 +47,7 @@ EM <- function(A,
   
   # Stop if model not supplied
   if(missing(model) || !(length(model) == 1 & is.character(model))){
-    stop("Argument 'model' missing or not a character of length 1, please supply a model (i.e., NDH, RS, or RSR)")
+    stop("Argument 'model' missing or not a character of length 1, please supply a model (i.e., 'NDH', 'RS', or 'RSR')")
   }
   
   cl <- match.call()
@@ -95,7 +95,7 @@ EM <- function(A,
   
   # Check model 
   if(!model %in% c("NDH", "RS", "RSR")){
-    stop("Model needs to be one of the following: NDH, RS, or RSR")
+    stop("Model needs to be one of the following: 'NDH', 'RS', or 'RSR'")
   } else{
     cl$model <- eval(model)
   }
@@ -115,7 +115,7 @@ EM <- function(A,
   
   # Check initialization
   if(!is.list(initialization) && (!initialization %in% c("random", "GNN"))){
-    stop("Please provide one for the following for initialization: 'random', 'GNN', or a named list with the necessary starting paramters")
+    stop("Please provide one of the following for initialization: 'random', 'GNN', or a named list with the necessary starting paramters")
   } else {
     cl$initialization <- eval(initialization)
   }
