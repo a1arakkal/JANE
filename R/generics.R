@@ -15,7 +15,7 @@
 #'    \tab \cr
 #'    \code{omegas} \tab A numeric \eqn{D \times D \times K} array representing the estimated precision matrices of the multivariate normal distribution for the latent positions of the \eqn{K} clusters. \cr
 #'    \tab \cr
-#'    \code{Z} \tab A numeric \eqn{N \times K} matrix with rows representing the estimated probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}. \cr
+#'    \code{Z} \tab A numeric \eqn{N \times K} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}. \cr
 #'    \tab \cr
 #'    \code{cluster_labels} \tab A numeric vector of length \eqn{N} representing the cluster labels of each actor based on a hard clustering rule of \eqn{\{h | Z_ih = max_k Z_ik\}}. \cr
 #'    \tab \cr
@@ -37,7 +37,7 @@
 #'                   dim = c(2,2,3))
 #' p_k <- rep(1/3, 3)
 #' beta0 <- 1.0
-#' sim_data <- JANE::sim_A(N = 100, 
+#' sim_data <- JANE::sim_A(N = 100L, 
 #'                         model = "NDH",
 #'                         mus = mus, 
 #'                         omegas = omegas, 
@@ -47,8 +47,8 @@
 #'                         
 #' # Run JANE on simulated data
 #' res <- JANE::JANE(A = sim_data$A,
-#'                   D = 2,
-#'                   K = 3,
+#'                   D = 2L,
+#'                   K = 3L,
 #'                   initialization = "GNN", 
 #'                   model = "NDH",
 #'                   case_control = FALSE,
@@ -247,7 +247,7 @@ print.JANE <- function(x, ...){
 #'                   dim = c(2,2,3))
 #' p_k <- rep(1/3, 3)
 #' beta0 <- 1.0
-#' sim_data <- JANE::sim_A(N = 100, 
+#' sim_data <- JANE::sim_A(N = 100L, 
 #'                         model = "NDH",
 #'                         mus = mus, 
 #'                         omegas = omegas, 
@@ -257,8 +257,8 @@ print.JANE <- function(x, ...){
 #'                         
 #' # Run JANE on simulated data
 #' res <- JANE::JANE(A = sim_data$A,
-#'                   D = 2,
-#'                   K = 3,
+#'                   D = 2L,
+#'                   K = 3L,
 #'                   initialization = "GNN", 
 #'                   model = "NDH",
 #'                   case_control = FALSE,

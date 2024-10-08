@@ -44,7 +44,7 @@
 #'                   dim = c(2,2,3))
 #' p_k <- rep(1/3, 3)
 #' beta0 <- 1.0
-#' JANE::sim_A(N = 100, 
+#' JANE::sim_A(N = 100L, 
 #'             model = "NDH",
 #'             mus = mus, 
 #'             omegas = omegas, 

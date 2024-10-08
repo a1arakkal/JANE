@@ -74,7 +74,7 @@ omegas <- array(c(diag(rep(7,2)),
                   dim = c(2,2,3))
 p_k <- rep(1/3, 3)
 beta0 <- 1.0
-sim_data <- JANE::sim_A(N = 100, 
+sim_data <- JANE::sim_A(N = 100L, 
                         model = "NDH",
                         mus = mus, 
                         omegas = omegas, 
@@ -84,8 +84,8 @@ sim_data <- JANE::sim_A(N = 100,
                         
 # Run JANE on simulated data
 res <- JANE::JANE(A = sim_data$A,
-                  D = 2,
-                  K = 3,
+                  D = 2L,
+                  K = 3L,
                   initialization = "GNN", 
                   model = "NDH",
                   case_control = FALSE,
