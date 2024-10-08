@@ -1,5 +1,4 @@
 
-#' @importFrom utils packageVersion
 JANE_startup_message <- function(){
 
   msg <- c(paste0(path <- r"(

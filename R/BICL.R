@@ -1,5 +1,4 @@
 
-#' @export
 BICL <- function(A, object){
   
   if(object$model == "NDH"){

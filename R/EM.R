@@ -337,7 +337,7 @@ JANE <- function(A,
   
 }
 
-#' @export
+
 EM_inner <- function(A,
                      D,
                      K,
@@ -534,7 +534,7 @@ EM_inner <- function(A,
   
 }
 
-#' @export
+
 inner_parallel <- function(x, call_def, A){
   
   combinations_2run_x <- call_def$combinations_2run[x, ]

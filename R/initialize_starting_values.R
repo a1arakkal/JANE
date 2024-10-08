@@ -1,5 +1,4 @@
 
-#' @export
 initialize_starting_values <- function(A, 
                                        K,
                                        D, 

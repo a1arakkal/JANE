@@ -1,5 +1,4 @@
 
-#' @export
 check_initial_values <- function(list_name,
                                  A,
                                  K,

@@ -1,5 +1,4 @@
 
-#' @export
 terminate_EM <- function(A, current, termination_rule = "ARI", 
                          tolerance = sqrt(.Machine$double.eps),
                          tolerance_ARI = 0.999,

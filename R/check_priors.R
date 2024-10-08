@@ -1,5 +1,4 @@
 
-#' @export
 check_priors <- function(priors,
                          D,
                          K,

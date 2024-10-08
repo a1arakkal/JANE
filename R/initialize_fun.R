@@ -1,5 +1,4 @@
 
-#' @export
 initialize_fun <- function(A, priors, list_name, model, n_interior_knots, n_control, K, D){
   
   # Create new environment -----------------------------------------------------

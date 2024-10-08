@@ -42,7 +42,7 @@ trace_plot <- function(model_object){
            x = finite_vals,
            type = "l",
            xlab = "Iteration",
-           ylab = "Abs diff. moving average",
+           ylab = "Abs diff. cumulative average",
            col = "red", 
            ylim = c(min(plot_data[finite_vals,6], plot_data[finite_vals,7]), 
                     max(plot_data[finite_vals,6], plot_data[finite_vals,7])))
@@ -55,7 +55,7 @@ trace_plot <- function(model_object){
            xlim = c(0, nrow(plot_data)),
            yaxt = 'n', pch = '',
            xlab = "Iteration",
-           ylab = "Abs diff. moving average")
+           ylab = "Abs diff. cumulative average")
       graphics::legend("topright", 
                        legend=c("U", "Cluster assignment prob. matrix"),
                        col=c("red", "blue"), lty = 1, cex=0.8)
@@ -101,13 +101,13 @@ trace_plot <- function(model_object){
            x = finite_vals,
            type = "l",
            xlab = "Iteration",
-           ylab = "Abs diff. Q moving average")
+           ylab = "Abs diff. Q cumulative average")
     } else {
       plot(0,
            xlim = c(0, nrow(plot_data)),
            yaxt = 'n', pch = '',
            xlab = "Iteration",
-           ylab = "Abs diff. Q moving average")
+           ylab = "Abs diff. Q cumulative average")
     }
     
     graphics::par(mar = c(5.1, 4.1, 1.1, 2.1))
@@ -144,7 +144,7 @@ trace_plot <- function(model_object){
            x = finite_vals,
            type = "l",
            xlab = "Iteration",
-           ylab = "Abs diff. moving average",
+           ylab = "Abs diff. cumulative average",
            col = "red", 
            ylim = c(min(plot_data[finite_vals,5], plot_data[finite_vals,6]), 
                     max(plot_data[finite_vals,5], plot_data[finite_vals,6])))
@@ -156,7 +156,7 @@ trace_plot <- function(model_object){
            xlim = c(0, nrow(plot_data)),
            yaxt = 'n', pch = '',
            xlab = "Iteration",
-           ylab = "Abs diff. moving average")
+           ylab = "Abs diff. cumulative average")
       graphics::legend("topright", legend=c("U", model_object$termination_rule),
                        col=c("red", "blue"), lty = 1, cex=0.8)
     }

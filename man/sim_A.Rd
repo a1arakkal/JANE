@@ -2,7 +2,7 @@
 % Please edit documentation in R/sim_A.R
 \name{sim_A}
 \alias{sim_A}
-\title{sim_A - Simulate unweighted network}
+\title{Simulate Unweighted Networks from Latent Space Cluster Models}
 \usage{
 sim_A(
   N,
@@ -10,34 +10,75 @@ sim_A(
   omegas,
   p_k,
   beta0,
-  model = "NDH",
+  model,
   precision_R_effects,
-  remove_isolates = F
+  remove_isolates = TRUE
 )
 }
 \arguments{
-\item{N}{Number of nodes/actors}
+\item{N}{An integer specifying the number of actors in the network.}
 
-\item{mus}{Cluster centers (KxD matrix)}
+\item{mus}{A numeric \eqn{K \times D} matrix specifying the mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.}
 
-\item{omegas}{Precision matrices for cluster (DxDxK array)}
+\item{omegas}{A numeric \eqn{D \times D \times K} array specifying the precision matrices of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.}
 
-\item{p_k}{Mixture probabilities (Kx1 vector)}
+\item{p_k}{A numeric vector of length \eqn{K} specifying the mixture probabilities of the multivariate normal mixture distribution for the latent positions.}
 
-\item{beta0}{Intercept parameter}
+\item{beta0}{A numeric value specifying the intercept parameter for the logistic regression model.}
 
-\item{model}{Model to simulate data from ("NDH", "RS", or "RSR)}
+\item{model}{A character string to specify the model to simulate the network from:
+\itemize{
+\item{'NDH': generates an \strong{undirected} network with no degree heterogeneity}
+\item{'RS': generates an \strong{undirected} network with degree heterogeneity, specifically by including actor specific random sociality effects}
+\item{'RSR': generates a \strong{directed} network with degree heterogeneity, specifically by including actor specific random sender and receiver effects}
+}}
 
-\item{precision_R_effects}{Precision for random effects (a scalar for "RS" or 2x2 matrix for "RSR")}
+\item{precision_R_effects}{Precision parameters for random degree heterogeneity effects:
+\itemize{
+\item{'NDH': does not apply, can leave as missing}
+\item{'RS': a numeric value specifying the precision parameter of the normal distribution of the random sociality effect, if missing will generate from a gamma(shape = 1, rate = 1)}
+\item{'RSR': a numeric matrix specifying the precision matrix of the multivariate normal distribution of the random sender and receiver effects, if missing will generate from a Wishart(df = 3, Sigma = \eqn{I_2})}
+}}
 
-\item{remove_isolates}{A logical indicating whether or not to exclude isolates from network}
+\item{remove_isolates}{A logical; if \code{TRUE} then isolates from the network are removed (default is \code{TRUE}).}
 }
 \value{
-Add details
+A list containing the following components:\tabular{ll}{
+\code{A} \tab A sparse adjacency matrix of class 'dgCMatrix' representing the simulated network. \cr
+\tab \cr
+\code{Z} \tab A numeric \eqn{N \times K} cluster assignment matrix with rows representing the cluster an actor belongs to (i.e. indicated by a value of 1.0). \cr
+\tab \cr
+\code{U} \tab A numeric \eqn{N \times D} matrix with rows representing an actor's position in a \eqn{D}-dimensional social space. \cr
+\tab \cr
+\code{RE} \tab A numeric \eqn{N \times 1} matrix representing the actor specific random sociality effect (i.e., s) OR a \eqn{N \times 2} matrix representing the actor specific random sender and receiver effects (i.e., s and r, respectively). \cr
+\tab \cr
+\code{precision_R_effects} \tab The specific precision_R_effects used to simulate \code{RE}. \cr
+\tab \cr
+\code{model} \tab A character string representing the specific \code{model} used to simulate the network. \cr
+\tab \cr
+}
 }
 \description{
-sim_A - Simulate unweighted network
+Simulate an unweighted network from a \eqn{D}-dimensional latent space cluster model with \eqn{K} clusters and \eqn{N} actors. The \emph{squared} euclidean distance is used (i.e., \eqn{dist(U_i,U_j)^2}), where \eqn{U_i} and \eqn{U_j} are the respective actor's positions in an unobserved social space.
 }
-\details{
-More summary needed here.
+\examples{
+\dontrun{
+mus <- matrix(c(-1,-1,1,-1,1,1), 
+              nrow = 3,
+              ncol = 2, 
+              byrow = TRUE)
+omegas <- array(c(diag(rep(7,2)),
+                  diag(rep(7,2)), 
+                  diag(rep(7,2))), 
+                  dim = c(2,2,3))
+p_k <- rep(1/3, 3)
+beta0 <- 1.0
+JANE::sim_A(N = 100, 
+            model = "NDH",
+            mus = mus, 
+            omegas = omegas, 
+            p_k = p_k, 
+            beta0 = beta0, 
+            remove_isolates = TRUE)
+}
 }
