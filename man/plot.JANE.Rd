@@ -48,7 +48,7 @@
 A plot of the network or trace plot of the EM run.
 }
 \description{
-S3 plot method for object of class "\code{JANE}"
+S3 plot method for object of class "\code{JANE}."
 }
 \details{
 The classification of actors into specific clusters is based on a hard clustering rule of \eqn{\{h | Z_ih = max_k Z_ik\}}. Additionally, the actor-specific classification uncertainty is derived as 1 - \eqn{max_k Z_ik}.

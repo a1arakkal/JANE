@@ -43,20 +43,13 @@ sim_A(
 \item{remove_isolates}{A logical; if \code{TRUE} then isolates from the network are removed (default is \code{TRUE}).}
 }
 \value{
-A list containing the following components:\tabular{ll}{
-\code{A} \tab A sparse adjacency matrix of class 'dgCMatrix' representing the simulated network. \cr
-\tab \cr
-\code{Z} \tab A numeric \eqn{N \times K} cluster assignment matrix with rows representing the cluster an actor belongs to (i.e. indicated by a value of 1.0). \cr
-\tab \cr
-\code{U} \tab A numeric \eqn{N \times D} matrix with rows representing an actor's position in a \eqn{D}-dimensional social space. \cr
-\tab \cr
-\code{RE} \tab A numeric \eqn{N \times 1} matrix representing the actor specific random sociality effect (i.e., s) OR a \eqn{N \times 2} matrix representing the actor specific random sender and receiver effects (i.e., s and r, respectively). \cr
-\tab \cr
-\code{precision_R_effects} \tab The specific precision_R_effects used to simulate \code{RE}. \cr
-\tab \cr
-\code{model} \tab A character string representing the specific \code{model} used to simulate the network. \cr
-\tab \cr
-}
+A list containing the following components:
+\item{\code{A}}{ A sparse adjacency matrix of class 'dgCMatrix' representing the simulated network.}
+\item{\code{Z}}{ A numeric \eqn{N \times K} cluster assignment matrix with rows representing the cluster an actor belongs to (i.e. indicated by a value of 1.0).}
+\item{\code{U}}{ A numeric \eqn{N \times D} matrix with rows representing an actor's position in a \eqn{D}-dimensional social space. }
+\item{\code{RE}}{ A numeric \eqn{N \times 1} matrix representing the actor specific random sociality effect (i.e., s) OR a \eqn{N \times 2} matrix representing the actor specific random sender and receiver effects (i.e., s and r, respectively).}
+\item{\code{precision_R_effects}}{ The specific precision_R_effects used to simulate \code{RE}.}
+\item{\code{model}}{ A character string representing the specific \code{model} used to simulate the network.}
 }
 \description{
 Simulate an unweighted network from a \eqn{D}-dimensional latent space cluster model with \eqn{K} clusters and \eqn{N} actors. The \emph{squared} euclidean distance is used (i.e., \eqn{dist(U_i,U_j)^2}), where \eqn{U_i} and \eqn{U_j} are the respective actor's positions in an unobserved social space.

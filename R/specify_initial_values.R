@@ -1,5 +1,5 @@
 #' Specify starting values for EM algorithm
-#' @description A function that allows the user to specify starting values for the EM algorithm in a structure accepted by \code{JANE} 
+#' @description A function that allows the user to specify starting values for the EM algorithm in a structure accepted by \code{JANE}. 
 #' @param A A square matrix or sparse matrix of class 'dgCMatrix' representing the adjacency matrix of the unweighted network of interest.
 #' @param D An integer specifying the dimension of the latent positions.
 #' @param K An integer specifying the total number of clusters.
@@ -20,6 +20,7 @@
 #' To match \code{\link[JANE]{JANE}}, this function will remove isolates from the adjacency matrix A and determine the total number of actors after excluding isolates. If this is not done, errors with respect to incorrect dimensions in the starting values will be generated when executing \code{\link[JANE]{JANE}}.
 #' 
 #' Similarly to match \code{\link[JANE]{JANE}}, if an unsymmetric adjacency matrix A is supplied for \code{model %in% c('NDH', 'RS')} the user will be asked if they would like to proceed with converting A to a symmetric matrix (i.e., \code{A <- 1.0 * ( (A + t(A)) > 0.0 )}).
+#' @return A list of starting values for the EM algorithm generated from the input values in a structure accepted by \code{JANE}.
 #' @examples
 #' # Simulate network
 #' mus <- matrix(c(-1,-1,1,-1,1,1), 

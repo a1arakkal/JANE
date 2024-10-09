@@ -16,29 +16,29 @@
 \item{...}{Unused.}
 }
 \value{
-A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following components (Note: \eqn{N} is the number of actors in the network, \eqn{K} is the number of clusters, and \eqn{D} is the dimension of the latent space):\tabular{ll}{
-\code{coefficients} \tab A numeric vector representing the estimated coefficients from the logistic regression model.  \cr
-\tab \cr
-\code{p_k} \tab A numeric vector of length \eqn{K} representing the estimated mixture probabilities of the multivariate normal mixture distribution for the latent positions. \cr
-\tab \cr
-\code{U} \tab A numeric \eqn{N \times D} matrix with rows representing an actor's estimated latent position in a \eqn{D}-dimensional social space. \cr
-\tab \cr
-\code{mus} \tab A numeric \eqn{K \times D} matrix representing the estimated mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters. \cr
-\tab \cr
-\code{omegas} \tab A numeric \eqn{D \times D \times K} array representing the estimated precision matrices of the multivariate normal distribution for the latent positions of the \eqn{K} clusters. \cr
-\tab \cr
-\code{Z} \tab A numeric \eqn{N \times K} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}. \cr
-\tab \cr
-\code{cluster_labels} \tab A numeric vector of length \eqn{N} representing the cluster labels of each actor based on a hard clustering rule of \eqn{\{h | Z_ih = max_k Z_ik\}}. \cr
-\tab \cr
-\code{input_params} \tab A list with the following components: (1) \code{model}: A character string representing the specific \code{model} used (i.e., 'NDH', 'RS', or 'RSR'); (2) \code{IC_selection}: A character string representing the specific information criteria used to select the optimal fit (i.e., 'BIC_logit', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL'); (3) \code{case_control}" A logical; if \code{TRUE} then the case/control approach was utilized; (4) \code{DA_type}" A character string representing the specific deterministic annealing approach utilized (i.e., 'none', 'cooling', 'heating', or 'hybrid'). \cr
-\tab \cr
-\code{clustering_performance} \tab (only if \code{true_labels} is \code{!NULL}) A list with the following components: (1) \code{CER}: A list with two components: (i) \code{misclassified}: The indexes of the misclassified data points in a minimum error mapping between the cluster labels and the known true cluster labels (i.e., \code{true_labels}) and (ii) \code{errorRate}: The error rate corresponding to a minimum error mapping between the cluster labels and the known true cluster labels (see \code{\link[mclust]{classError}} for details); (2) \code{ARI}: A numeric value representing the adjusted Rand index comparing the cluster labels and the known true cluster labels (see \code{\link[mclust]{adjustedRandIndex}} for details); (3) \code{aricode}: A numeric value representing the normalized mutual information comparing the cluster labels and the known true cluster labels (see \code{\link[aricode]{NMI}} for details); (4) \code{confusion_matrix}: A numeric table representing the confusion matrix comparing the cluster labels and the known true cluster labels. \cr
-\tab \cr
-}
+A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following components (Note: \eqn{N} is the number of actors in the network, \eqn{K} is the number of clusters, and \eqn{D} is the dimension of the latent space):
+\item{\code{coefficients}}{ A numeric vector representing the estimated coefficients from the logistic regression model.}
+\item{\code{p_k}}{ A numeric vector of length \eqn{K} representing the estimated mixture probabilities of the multivariate normal mixture distribution for the latent positions.}
+\item{\code{U}}{ A numeric \eqn{N \times D} matrix with rows representing an actor's estimated latent position in a \eqn{D}-dimensional social space.}
+\item{\code{mus}}{ A numeric \eqn{K \times D} matrix representing the estimated mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.}
+\item{\code{omegas}}{ A numeric \eqn{D \times D \times K} array representing the estimated precision matrices of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.}
+\item{\code{Z}}{ A numeric \eqn{N \times K} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
+\item{\code{cluster_labels}}{ A numeric vector of length \eqn{N} representing the cluster labels of each actor based on a hard clustering rule of \eqn{\{h | Z_ih = max_k Z_ik\}}.}
+\item{\code{input_params}}{ A list with the following components: \itemize{
+\item{\code{model}: A character string representing the specific \code{model} used (i.e., 'NDH', 'RS', or 'RSR')}
+\item{\code{IC_selection}: A character string representing the specific information criteria used to select the optimal fit (i.e., 'BIC_logit', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL')}
+\item{\code{case_control}: A logical; if \code{TRUE} then the case/control approach was utilized}
+\item{\code{DA_type}: A character string representing the specific deterministic annealing approach utilized (i.e., 'none', 'cooling', 'heating', or 'hybrid')}
+}}
+\item{\code{clustering_performance}}{ (only if \code{true_labels} is \code{!NULL}) A list with the following components: \itemize{
+\item{\code{CER}: A list with two components: (i) \code{misclassified}: The indexes of the misclassified data points in a minimum error mapping between the cluster labels and the known true cluster labels (i.e., \code{true_labels}) and (ii) \code{errorRate}: The error rate corresponding to a minimum error mapping between the cluster labels and the known true cluster labels (see \code{\link[mclust]{classError}} for details)}
+\item{\code{ARI}: A numeric value representing the adjusted Rand index comparing the cluster labels and the known true cluster labels (see \code{\link[mclust]{adjustedRandIndex}} for details)}
+\item{\code{aricode}: A numeric value representing the normalized mutual information comparing the cluster labels and the known true cluster labels (see \code{\link[aricode]{NMI}} for details)}
+\item{\code{confusion_matrix}: A numeric table representing the confusion matrix comparing the cluster labels and the known true cluster labels.}
+}}
 }
 \description{
-S3 summary method for object of class "\code{JANE}"
+S3 summary method for object of class "\code{JANE}."
 }
 \examples{
 \dontrun{
