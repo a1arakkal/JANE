@@ -9,7 +9,7 @@ specify_initial_values(
   D,
   K,
   model,
-  n_interior_knots,
+  n_interior_knots = NULL,
   U,
   omegas,
   mus,
@@ -32,7 +32,7 @@ specify_initial_values(
 \item{'RSR': \strong{directed} network with degree heterogeneity}
 }}
 
-\item{n_interior_knots}{An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only).}
+\item{n_interior_knots}{An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only; default is \code{NULL}).}
 
 \item{U}{A numeric \eqn{N \times D} matrix with rows specifying an actor's position in a \eqn{D}-dimensional social space.}
 

@@ -4,7 +4,7 @@
 \alias{specify_priors}
 \title{Specify prior hyperparameters for EM algorithm}
 \usage{
-specify_priors(D, K, model, n_interior_knots, a, b, c, G, nu, e, f)
+specify_priors(D, K, model, n_interior_knots = NULL, a, b, c, G, nu, e, f)
 }
 \arguments{
 \item{D}{An integer specifying the dimension of the latent positions.}
@@ -18,7 +18,7 @@ specify_priors(D, K, model, n_interior_knots, a, b, c, G, nu, e, f)
 \item{'RSR': \strong{directed} network with degree heterogeneity}
 }}
 
-\item{n_interior_knots}{An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only).}
+\item{n_interior_knots}{An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only; default is \code{NULL}).}
 
 \item{a}{A numeric vector of length D...}
 
