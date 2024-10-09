@@ -9,7 +9,7 @@
 #'   \item{'RS': \strong{undirected} network with degree heterogeneity}
 #'   \item{'RSR': \strong{directed} network with degree heterogeneity}
 #'   }
-#' @param n_interior_knots An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only).   
+#' @param n_interior_knots An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only; default is \code{NULL}).   
 #' @param mus A numeric \eqn{K \times D} matrix specifying the mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.
 #' @param omegas A numeric \eqn{D \times D \times K} array specifying the precision matrices of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.
 #' @param p_k A numeric vector of length \eqn{K} specifying the mixture probabilities of the multivariate normal mixture distribution for the latent positions.
@@ -77,7 +77,7 @@ specify_initial_values <- function(A,
                                    D,
                                    K,
                                    model,
-                                   n_interior_knots,
+                                   n_interior_knots = NULL,
                                    U,
                                    omegas, 
                                    mus, 
@@ -87,7 +87,7 @@ specify_initial_values <- function(A,
   
   # Stop if any argument is missing
   defined <- ls()
-  passed <- names(as.list(match.call())[-1])
+  passed <- c(names(as.list(match.call())[-1]), "n_interior_knots")
   
   if (any(!defined %in% passed)) {
     stop(paste("Please supply values for argument(s): ", paste(setdiff(defined, passed), collapse=", ")))
@@ -101,6 +101,11 @@ specify_initial_values <- function(A,
   # Check model 
   if(!model %in% c("NDH", "RS", "RSR")){
     stop("Model needs to be one of the following: 'NDH', 'RS', or 'RSR'")
+  }
+  
+  # Stop if n_interior_knots is NULL for RS and RSR
+  if((model %in% c("RS", "RSR")) & is.null(n_interior_knots)){
+    stop("Model 'RS' or 'RSR' requires an integer value for n_interior_knots")
   }
   
   # Stop if D or K not numeric
