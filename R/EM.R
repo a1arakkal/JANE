@@ -1,14 +1,14 @@
 
 #' @export
 JANE <- function(A,
-               D = 2,
-               K = 2,
-               model,
-               initialization = "GNN", # random, GNN, or user supplied
-               case_control = F,
-               DA_type = "none", # none, cooling, heating, hybrid 
-               seed = 2024, 
-               control = list()){
+                 D = 2,
+                 K = 2,
+                 model,
+                 initialization = "GNN", # random, GNN, or user supplied
+                 case_control = F,
+                 DA_type = "none", # none, cooling, heating, hybrid 
+                 seed = NULL, 
+                 control = list()){
 
   con <- list(
     max_its = 1e3, # max iteration of EM algorithm, 
@@ -30,8 +30,8 @@ JANE <- function(A,
     max_retry = 5, # number of max attempts to try if starting values causes issues with EM algo 
     IC_selection = "Total_ICL", # Information criteria to use for selection between different starting values, K, and D
     sd_random_U_GNN = 1, # standard deviation used for draws from random normal used in graphical neural network (GNN) starting values approach
-    max_retry_GNN = 5, # number of max attempts for GNN approach before switching to random starting values 
-    n_its_GNN = 50, # number of iterations for GNN approach
+    max_retry_GNN = 10, # number of max attempts for GNN approach before switching to random starting values 
+    n_its_GNN = 20, # number of iterations for GNN approach
     downsampling_GNN = T # logical for whether or not to use downsampling s.t. number of links and non-links are balanced for GNN logistic regression approach
   )
   

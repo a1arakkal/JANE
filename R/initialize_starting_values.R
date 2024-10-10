@@ -190,7 +190,14 @@ initialize_starting_values <- function(A,
                                   y = A[lower.tri(A, diag = F)])
             }
             
-            scale_U <- ifelse(res$par[length(res$par)] == 0.0, 1.0, sqrt(-1.0*res$par[length(res$par)]))
+            beta_U <- res$par[length(res$par)]
+            
+            if( (!beta_U < -1.0) & ( floor(control$n_its_GNN * 0.5) > 1) ) {
+              control$n_its_GNN <- floor(control$n_its_GNN * 0.5)
+              stop()
+            }
+            
+            scale_U <- sqrt(-1.0*beta_U)
             starting_U <- starting_U*scale_U
             starting_beta <- res$par[-length(res$par)]
             
@@ -272,7 +279,14 @@ initialize_starting_values <- function(A,
               
             }
             
-            scale_U <- ifelse(res$par[length(res$par)] == 0.0, 1.0, sqrt(-1.0*res$par[length(res$par)]))
+            beta_U <- res$par[length(res$par)]
+            
+            if( (!beta_U < -1.0) & ( floor(control$n_its_GNN * 0.5) > 1) ) {
+              control$n_its_GNN <- floor(control$n_its_GNN * 0.5)
+              stop()
+            }
+            
+            scale_U <- sqrt(-1.0*beta_U)
             starting_U <- starting_U*scale_U
             starting_beta <- res$par[-length(res$par)]
             
@@ -359,7 +373,14 @@ initialize_starting_values <- function(A,
                                   y = temp_y)
             }
             
-            scale_U <- ifelse(res$par[length(res$par)] == 0.0, 1.0, sqrt(-1.0*res$par[length(res$par)]))
+            beta_U <- res$par[length(res$par)]
+            
+            if( (!beta_U < -1.0) & ( floor(control$n_its_GNN * 0.5) > 1) ) {
+              control$n_its_GNN <- floor(control$n_its_GNN * 0.5)
+              stop()
+            }
+            
+            scale_U <- sqrt(-1.0*beta_U)
             starting_U <- starting_U*scale_U
             starting_beta <- res$par[-length(res$par)]
             
