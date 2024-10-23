@@ -503,14 +503,14 @@ EM_inner <- function(A,
   extra_args <- list(...)
   
   # Run initialize function
-  current <- initialize_fun(A = A,
-                            list_name = starting_params, 
-                            model = model, 
-                            n_interior_knots = control$n_interior_knots,
-                            n_control = control$n_control, 
-                            priors = control$priors, 
-                            K = K,
-                            D = D)
+  current <- suppressWarnings(initialize_fun(A = A,
+                                             list_name = starting_params, 
+                                             model = model, 
+                                             n_interior_knots = control$n_interior_knots,
+                                             n_control = control$n_control, 
+                                             priors = control$priors, 
+                                             K = K,
+                                             D = D))
   
   current$termination_rule <- control$termination_rule
   
