@@ -9,28 +9,101 @@
 #'   \item{'RSR': \strong{directed} network with degree heterogeneity}
 #'   }
 #' @param n_interior_knots An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only; default is \code{NULL}).   
-#' @param a A numeric vector of length D...
-#' @param b A numeric value...
-#' @param c A numeric value...
-#' @param G A numeric \eqn{N \times D} matrix...
-#' @param nu A numeric vector of length K...
-#' @param e A numeric vector. Specifically a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}...
-#' @param f A numeric square matrix. Specifically dimension \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}...
+#' @param a A numeric vector of length \eqn{D} specifying the mean of the multivariate normal prior on \eqn{\mu_k} for \eqn{k = 1,\ldots,K}, where \eqn{\mu_k} represents the mean of the multivariate normal distribution for the latent positions of the \eqn{k^{th}} cluster.
+#' @param b A numeric value specifying the scaling factor on the precision of the multivariate normal prior on \eqn{\mu_k} for \eqn{k = 1,\ldots,K}, where \eqn{\mu_k} represents the mean of the multivariate normal distribution for the latent positions of the \eqn{k^{th}} cluster.
+#' @param c A numeric value specifying the degrees of freedom of the Wishart prior on \eqn{\Omega_k} for \eqn{k = 1,\ldots,K}, where \eqn{\Omega_k} represents the precision of the multivariate normal distribution for the latent positions of the \eqn{k^{th}} cluster.
+#' @param G A numeric \eqn{D \times D} matrix specifying the inverse of the scale matrix of the Wishart prior on \eqn{\Omega_k} for \eqn{k = 1,\ldots,K}, where \eqn{\Omega_k} represents the precision of the multivariate normal distribution for the latent positions of the \eqn{k^{th}} cluster.
+#' @param nu A numeric vector of length \eqn{K} specifying the concentration parameters of the Dirichlet prior on \eqn{p}, where \eqn{p} represents the mixture weights of the finite multivariate normal mixture distribution.
+#' @param e A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.
+#' @param f A numeric square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.
 #' @details
-#' For the current implementation we require that all elements of the nu vector be >= 1 to prevent against negative mixture probabilities for empty clusters.
+#' 
+#' \strong{Prior on \eqn{\mu_k} and \eqn{\Omega_k}} (note: the same prior is used for \eqn{k = 1,\ldots,K}) :
+#' 
+#' \eqn{\pi(\mu_k, \Omega_k) = \pi(\mu_k | \Omega_k) \pi(\Omega_k)}, thus
+#' \deqn{\mu_k | \Omega_k \sim MVN(a, b*\Omega_k)}
+#' \deqn{\Omega_k \sim Wishart(c, G^{-1})}
+#' 
+#' \strong{Prior on \eqn{p}}:
+#' 
+#' For the current implementation we require that all elements of the nu vector be >= 1 to prevent against negative mixture weights for empty clusters.
+#' \deqn{p \sim Dirichlet(\nu_1 ,\ldots,\nu_K)}
+#' 
+#' \strong{Prior on \eqn{\beta}}:
+#' \deqn{\beta \sim MVN(e, f)}
+#' 
 #' @return A list of prior hyperparameters for the EM algorithm generated from the input values in a structure accepted by \code{JANE}.
+#' 
+#' @examples
+#' \dontrun{
+#' # Simulate network
+#' mus <- matrix(c(-1,-1,1,-1,1,1), 
+#'               nrow = 3,
+#'               ncol = 2, 
+#'               byrow = TRUE)
+#' omegas <- array(c(diag(rep(7,2)),
+#'                   diag(rep(7,2)), 
+#'                   diag(rep(7,2))), 
+#'                   dim = c(2,2,3))
+#' p_k <- rep(1/3, 3)
+#' beta0 <- 1.0
+#' sim_data <- JANE::sim_A(N = 100L, 
+#'                         model = "RS",
+#'                         mus = mus, 
+#'                         omegas = omegas, 
+#'                         p_k = p_k, 
+#'                         beta0 = beta0, 
+#'                         remove_isolates = TRUE)
+#'                         
+#'                         
+#' # Specify prior hyperparameters
+#' D <- 3L
+#' K <- 5L
+#' n_interior_knots <- 5L
+#' 
+#' a <- rep(1, D)
+#' b <- 3
+#' c <- 4
+#' G <- 10*diag(D)
+#' nu <- rep(2, K)
+#' e <- rep(0.5, 1 + (n_interior_knots + 1))
+#' f <- diag(c(0.1, rep(0.5, n_interior_knots + 1)))
+#' 
+#' my_prior_hyperparameters <- specify_priors(D = D,
+#'                                            K = K,
+#'                                            model = "RS",
+#'                                            n_interior_knots = n_interior_knots,
+#'                                            a = a,
+#'                                            b = b,
+#'                                            c = c,
+#'                                            G = G,
+#'                                            nu = nu,
+#'                                            e = e,
+#'                                            f = f)
+#'                                            
+#' # Run JANE on simulated data using supplied prior hyperparameters
+#' res <- JANE::JANE(A = sim_data$A,
+#'                   D = D,
+#'                   K = K,
+#'                   initialization = "GNN",
+#'                   model = "RS",
+#'                   case_control = FALSE,
+#'                   DA_type = "none",
+#'                   control = list(priors = my_prior_hyperparameters))
+#'                                                          
+#' }
 #' @export
 specify_priors <- function(D, 
                            K,
                            model,
                            n_interior_knots = NULL,
-                           a, # prior on mean of mus (vector of length D)
-                           b, # prior on precision of mus (scalar)
-                           c, # prior on df for omegas (scalar)
-                           G, # prior on sigma for omegas (DxD matrix)
-                           nu, # prior for dirichlet vector of length k
-                           e, # prior mean on beta (vector of length 1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1))
-                           f){ # prior precision on beta (square matrix of dim 1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1))
+                           a, 
+                           b, 
+                           c,
+                           G, 
+                           nu,
+                           e, 
+                           f){
   
   # Stop if any argument is missing
   defined <- ls()

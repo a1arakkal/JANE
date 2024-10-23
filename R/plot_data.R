@@ -1,9 +1,15 @@
 
-plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour",
+plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour",  rotation_angle = 0,
                       alpha_edge = 0.1, alpha_node = 1, swap_axes = FALSE, uncertainty = FALSE, 
                       main = NULL, xlab = NULL, ylab = NULL){
   
-  U <- data$U
+  rotation_radians <- (pi/180)*rotation_angle
+  rot_mat <- matrix(c(cos(rotation_radians),
+                      sin(rotation_radians), 
+                      -sin(rotation_radians),
+                      cos(rotation_radians)), nrow = 2)
+  
+  U <- data$U %*% rot_mat
   Z <- data$cluster_labels
   mus <- data$mus
   omegas <- data$omegas
@@ -12,11 +18,14 @@ plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour
   A_ig <- igraph::graph_from_adjacency_matrix(A,  mode = ifelse(undirected, "undirected", "directed"))
   k_elist <- igraph::as_edgelist(A_ig,  names= F)
   
+
   par <- list()
   par$pro <- rep(1, nrow(mus))
-  par$mean <- t(mus)
-  par$variance$sigma <- array(apply(omegas, 3, function(x){chol2inv(chol(x))}),
+  par$mean <- t(mus %*% rot_mat)
+  par$variance$sigma <- array(apply(omegas, 3, function(x){t(rot_mat) %*% chol2inv(chol(x)) %*% rot_mat}),
                               dim  = dim(omegas))
+  
+
   
   if (swap_axes){
     par$mean <- par$mean[2:1, ]

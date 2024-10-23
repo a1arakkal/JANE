@@ -38,7 +38,7 @@ A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following 
 }}
 }
 \description{
-S3 summary method for object of class "\code{JANE}."
+S3 summary method for object of class "\code{JANE}".
 }
 \examples{
 \dontrun{

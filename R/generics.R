@@ -1,5 +1,5 @@
 #' Summarizing JANE Fits
-#' @description S3 summary method for object of class "\code{JANE}."
+#' @description S3 summary method for object of class "\code{JANE}".
 #' @param object An object of S3 \code{\link{class}} "\code{JANE}", a result of a call to \code{JANE}.
 #' @param true_labels (optional) A numeric, character, or factor vector of known true cluster labels. Must have the same length as number of actors in the fitted network (default is \code{NULL}). 
 #' @param initial_values A logical; if \code{TRUE} then summarize fit using the starting parameters used in the EM algorithm (default is \code{FALSE}, i.e., the results after the EM algorithm is run are summarized).
@@ -202,7 +202,7 @@ print.JANE <- function(x, ...){
 
 
 #' Plot JANE Fits
-#' @description S3 plot method for object of class "\code{JANE}."
+#' @description S3 plot method for object of class "\code{JANE}".
 #' @param x An object of S3 \code{\link{class}} "\code{JANE}", a result of a call to \code{JANE}.
 #' @param type A character string to select the type of plot:
 #'  \itemize{
@@ -215,6 +215,7 @@ print.JANE <- function(x, ...){
 #' @param initial_values A logical; if \code{TRUE} then summarize fit using the starting parameters used in the EM algorithm (default is \code{FALSE}, i.e., the results after the EM algorithm is run are summarized).
 #' @param density_type 	Choose from one of the following three options: 'contour' (default), 'hdr', 'image', and 'persp' indicating the density plot type.
 #' @param swap_axes A logical; if \code{TRUE} will swap the x and y axes (default is \code{FALSE}).
+#' @param rotation_angle A numeric value that rotates the estimated latent positions and contours of the multivariate normal distributions clockwise (or counterclockwise if \code{swap_axes = TRUE}) through the specified angle about the origin (default is 0 degrees). Only relevant when \code{D} (i.e., dimension of the latent space) \code{>= 2} and \code{type != 'trace_plot'}.
 #' @param zoom A numeric value that controls the magnification of the plot.
 #' @param alpha_edge A numeric value that controls the transparency of the network edges.
 #' @param alpha_node A numeric value that controls the transparency of the actors in the network.
@@ -222,14 +223,13 @@ print.JANE <- function(x, ...){
 #' @details
 #'The classification of actors into specific clusters is based on a hard clustering rule of \eqn{\{h | Z_ih = max_k Z_ik\}}. Additionally, the actor-specific classification uncertainty is derived as 1 - \eqn{max_k Z_ik}.
 #'
-#'The trace plot contains up to five unique plots tracking various metrics across the EM algorithm run, depending on the \code{\link[JANE]{JANE}} control parameter \code{termination_rule}.
-#'
-#'When \code{termination_rule = 'prob_mat'} five plots will be presented. Specifically, in the top panel, the plot on the left presents the change in the absolute difference in \eqn{Z} (i.e., the \eqn{N \times K} cluster assignment probability matrix) between subsequent iterations. The exact quantile of the absolute difference plotted are presented in parentheses and determined by the \code{\link[JANE]{JANE}} control parameter \code{quantile_diff}. For example, the default control parameter \code{quantile_diff} = 1, so the values being plotted are the max absolute difference in \eqn{Z} between subsequent iterations. The plot on the right of the top panel presents the absolute difference in the cumulative average of the absolute change in \eqn{Z}  and \eqn{U} (i.e., the \eqn{N \times D} matrix of latent positions) across subsequent iterations (absolute change in \eqn{Z}  and \eqn{U}  computed in an identical manner as described above). This metric is only tracked beginning at an iteration determined by the \code{n_its_start_CA} control parameter in \code{\link[JANE]{JANE}}. Note, this plot may be empty if the EM algorithm converges before the \code{n_its_start_CA}-th iteration. Finally, the bottom panel presents ARI, NMI, and CER values comparing the classifications between subsequent iterations, respectively. Specifically, at a given iteration we determine the  classification of actors in clusters based on a hard clustering rule of \eqn{\{h | Z_ih = max_k Z_ik\}} and given these labels from two subsequent iterations, we compute and plot the ARI, NMI and CER. 
-#'
-#'When \code{termination_rule = 'Q'} is utilized  the plots generated are similar to those described in the previous paragraph. However, instead of tracking the change in \eqn{Z} over iterations, here the absolute difference in the objective function of the E-step evaluated using parameters from subsequent iterations is tracked. Furthermore, the cumulative average of the absolute change in \eqn{U} is no longer tracked.
-#'
-#'When \code{termination_rule %in% c('ARI', 'NMI', 'CER')} then only four plots will be presented. Specifically, the top left panel presents a plot of the absolute difference in the cumulative average of the absolute change in the specific \code{termination_rule}  employed and \eqn{U} across iterations. As previously mentioned, if the EM algorithm converges before the \code{n_its_start_CA}-th iteration then this will be an empty plot. Furthermore, the other three plots present ARI, NMI, and CER values comparing the classifications between subsequent iterations, respectively.
-#'
+#'The trace plot contains up to five unique plots tracking various metrics across the EM algorithm run, depending on the \code{\link[JANE]{JANE}} control parameter \code{termination_rule}:
+#'  \itemize{
+#'   \item{\code{termination_rule = 'prob_mat'}: Five plots will be presented. Specifically, in the top panel, the plot on the left presents the change in the absolute difference in \eqn{Z} (i.e., the \eqn{N \times K} cluster assignment probability matrix) between subsequent iterations. The exact quantile of the absolute difference plotted are presented in parentheses and determined by the \code{\link[JANE]{JANE}} control parameter \code{quantile_diff}. For example, the default control parameter \code{quantile_diff} = 1, so the values being plotted are the max absolute difference in \eqn{Z} between subsequent iterations. The plot on the right of the top panel presents the absolute difference in the cumulative average of the absolute change in \eqn{Z}  and \eqn{U} (i.e., the \eqn{N \times D} matrix of latent positions) across subsequent iterations (absolute change in \eqn{Z}  and \eqn{U}  computed in an identical manner as described above). This metric is only tracked beginning at an iteration determined by the \code{n_its_start_CA} control parameter in \code{\link[JANE]{JANE}}. Note, this plot may be empty if the EM algorithm converges before the \code{n_its_start_CA}-th iteration. Finally, the bottom panel presents ARI, NMI, and CER values comparing the classifications between subsequent iterations, respectively. Specifically, at a given iteration we determine the  classification of actors in clusters based on a hard clustering rule of \eqn{\{h | Z_ih = max_k Z_ik\}} and given these labels from two subsequent iterations, we compute and plot the ARI, NMI and CER.}
+#'   \item{\code{termination_rule = 'Q'}: Plots generated are similar to those described in the previous bullet point. However, instead of tracking the change in \eqn{Z} over iterations, here the absolute difference in the objective function of the E-step evaluated using parameters from subsequent iterations is tracked. Furthermore, the cumulative average of the absolute change in \eqn{U} is no longer tracked.}
+#'  \item{\code{termination_rule \%in\% c('ARI', 'NMI', 'CER')}: Four plots will be presented. Specifically, the top left panel presents a plot of the absolute difference in the cumulative average of the absolute change in the specific \code{termination_rule}  employed and \eqn{U} across iterations. As previously mentioned, if the EM algorithm converges before the \code{n_its_start_CA}-th iteration then this will be an empty plot. Furthermore, the other three plots present ARI, NMI, and CER values comparing the classifications between subsequent iterations, respectively.}
+#'   }
+#'   
 #' @seealso \code{\link[mclust]{surfacePlot}}, \code{\link[mclust]{adjustedRandIndex}}, \code{\link[mclust]{classError}},  \code{\link[aricode]{NMI}}  
 #' 
 #' @return A plot of the network or trace plot of the EM run.
@@ -285,7 +285,7 @@ print.JANE <- function(x, ...){
 #' @method plot JANE
 #' @exportS3Method plot JANE
 plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
-                      zoom = 100, density_type = "contour", 
+                      zoom = 100, density_type = "contour", rotation_angle = 0,
                       alpha_edge = 0.1, alpha_node = 1, swap_axes = FALSE, ...){
   
   if(!inherits(x, "JANE")){
@@ -453,6 +453,7 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
                 zoom = zoom, 
                 type = density_type,
                 swap_axes = swap_axes,
+                rotation_angle = rotation_angle,
                 alpha_edge = alpha_edge, 
                 alpha_node = alpha_node,
                 uncertainty = uncertainty,
@@ -490,6 +491,7 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
                   zoom = zoom, 
                   type = density_type,
                   swap_axes = swap_axes,
+                  rotation_angle = rotation_angle,
                   alpha_edge = alpha_edge, 
                   alpha_node = alpha_node,
                   uncertainty = uncertainty,

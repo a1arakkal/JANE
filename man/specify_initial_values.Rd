@@ -58,6 +58,7 @@ To match \code{\link[JANE]{JANE}}, this function will remove isolates from the a
 Similarly to match \code{\link[JANE]{JANE}}, if an unsymmetric adjacency matrix A is supplied for \code{model \%in\% c('NDH', 'RS')} the user will be asked if they would like to proceed with converting A to a symmetric matrix (i.e., \code{A <- 1.0 * ( (A + t(A)) > 0.0 )}).
 }
 \examples{
+\dontrun{
 # Simulate network
 mus <- matrix(c(-1,-1,1,-1,1,1), 
               nrow = 3,
@@ -107,5 +108,5 @@ my_starting_values <- JANE::specify_initial_values(A = sim_data$A,
 res <- JANE::JANE(A = sim_data$A,
                   initialization = my_starting_values,
                   model = "RSR")
-
+}
 }

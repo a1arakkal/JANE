@@ -22,6 +22,7 @@
 #' Similarly to match \code{\link[JANE]{JANE}}, if an unsymmetric adjacency matrix A is supplied for \code{model %in% c('NDH', 'RS')} the user will be asked if they would like to proceed with converting A to a symmetric matrix (i.e., \code{A <- 1.0 * ( (A + t(A)) > 0.0 )}).
 #' @return A list of starting values for the EM algorithm generated from the input values in a structure accepted by \code{JANE}.
 #' @examples
+#' \dontrun{
 #' # Simulate network
 #' mus <- matrix(c(-1,-1,1,-1,1,1), 
 #'               nrow = 3,
@@ -71,7 +72,7 @@
 #' res <- JANE::JANE(A = sim_data$A,
 #'                   initialization = my_starting_values,
 #'                   model = "RSR")
-#' 
+#' }
 #' @export
 specify_initial_values <- function(A,
                                    D,
