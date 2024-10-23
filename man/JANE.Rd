@@ -81,8 +81,8 @@ The \code{control} argument is a named list that the user can supply containing 
 \item{\code{tolerance_ARI}}{A numeric specifying the tolerance used for \code{termination_rule = 'ARI'} (default is \code{0.999}).}
 \item{\code{tolerance_NMI}}{A numeric specifying the tolerance used for \code{termination_rule = 'NMI'} (default is \code{0.999}).}
 \item{\code{tolerance_CER}}{A numeric specifying the tolerance used for \code{termination_rule = 'ARI'} (default is \code{0.01}).}
-\item{\code{n_its_start_CA}}{An integer specifying what iteration to start computing cumulative averages (note: cumulative average of \eqn{U}, the latent position matrix, is not tracked when code{termination_rule = 'Q'}) (default is \code{20}).}
-\item{\code{tolerance_diff_CA}}{A numeric specifying the tolerance used for the change in cumulative average of \code{termination_rule} metric and \eqn{U} (note: cumulative average of \eqn{U} is not tracked when code{termination_rule = 'Q'}) (default is \code{1e-3}).}
+\item{\code{n_its_start_CA}}{An integer specifying what iteration to start computing cumulative averages (note: cumulative average of \eqn{U}, the latent position matrix, is not tracked when \code{termination_rule = 'Q'}) (default is \code{20}).}
+\item{\code{tolerance_diff_CA}}{A numeric specifying the tolerance used for the change in cumulative average of \code{termination_rule} metric and \eqn{U} (note: cumulative average of \eqn{U} is not tracked when \code{termination_rule = 'Q'}) (default is \code{1e-3}).}
 \item{\code{consecutive_diff_CA}}{An integer specifying the tolerance for the number of consecutive instances where change in cumulative average is less than \code{tolerance_diff_CA} (default is \code{5}).}
 \item{\code{quantile_diff}}{An numeric in \code{[0,1]} specifying the quantile used in computing the change in the absolute difference of \eqn{Z} and \eqn{U} between subsequent iterations (default is \code{1}, i.e., max).}
 \item{\code{beta_temp_schedule}}{A numeric vector specifying the temperature schedule for deterministic annealing (default is \code{1}, i.e., deterministic annealing no utilized).}
