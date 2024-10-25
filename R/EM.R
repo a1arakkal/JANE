@@ -35,6 +35,7 @@
 #' @details
 #' The \code{control} argument is a named list that the user can supply containing the following components:
 #' \describe{
+#' \item{\code{verbose}}{A logical; if \code{TRUE} causes information to be printed out about the progress of the EM algorithm (default is \code{FALSE}).}
 #' \item{\code{max_its}}{An integer specifying the maximum number of iterations for the EM algorithm (default is \code{1e3}).}
 #' \item{\code{min_its}}{An integer specifying the minimum number of iterations for the EM algorithm (default is \code{10}).}
 #' \item{\code{priors}}{A list of prior hyperparameters (default is \code{NULL}). See \code{\link[JANE]{specify_priors}} on how to specify the hyperparameters.}
@@ -165,6 +166,7 @@ JANE <- function(A,
                  control = list()){
 
   con <- list(
+    verbose = FALSE,
     max_its = 1e3, 
     min_its = 10,  
     priors = NULL,  
@@ -186,7 +188,7 @@ JANE <- function(A,
     sd_random_U_GNN = 1, 
     max_retry_GNN = 10, 
     n_its_GNN = 10,
-    downsampling_GNN = T 
+    downsampling_GNN = TRUE 
   )
   
   # Stop if A not supplied
@@ -717,11 +719,15 @@ inner_parallel <- function(x, call_def, A){
       },
       
       error = function(e) {
-        message("Issues with starting values. Retrying with new starting values.\n")
+        if(call_def$control$verbose){
+          message("Issues with starting values. Retrying with new starting values.\n")
+        }
         NA
       },
       warning = function(w) {
-        message("Issues with starting values. Retrying with new starting values.\n")
+        if(call_def$control$verbose){
+          message("Issues with starting values. Retrying with new starting values.\n")
+        }
         NA
       }
     ) 

@@ -66,6 +66,7 @@ Fit the latent space cluster model using an EM algorithm.
 \details{
 The \code{control} argument is a named list that the user can supply containing the following components:
 \describe{
+\item{\code{verbose}}{A logical; if \code{TRUE} causes information to be printed out about the progress of the EM algorithm (default is \code{FALSE}).}
 \item{\code{max_its}}{An integer specifying the maximum number of iterations for the EM algorithm (default is \code{1e3}).}
 \item{\code{min_its}}{An integer specifying the minimum number of iterations for the EM algorithm (default is \code{10}).}
 \item{\code{priors}}{A list of prior hyperparameters (default is \code{NULL}). See \code{\link[JANE]{specify_priors}} on how to specify the hyperparameters.}

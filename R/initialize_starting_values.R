@@ -472,7 +472,9 @@ initialize_starting_values <- function(A,
       
       if(is.null(starting_params)){
         retry_count <- retry_count + 1
-        message("Issues generating starting values, trying again.\n")
+        if(control$verbose){
+          message("Issues generating starting values, trying again.\n")
+        }
       } else {
         retry <- F
       }
@@ -484,7 +486,9 @@ initialize_starting_values <- function(A,
   if(retry | random_start){
     
     if(retry & !random_start){
-      message("Reached max re-try iterrations, switching to random values.\n")
+      if(control$verbose){
+        message("Reached max GNN re-attempts, switching to random values.\n")
+      }
     } 
     
     starting_params <- list(
