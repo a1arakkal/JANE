@@ -17,6 +17,7 @@
 #'                           \item{\code{IC_selection}: A character string representing the specific information criteria used to select the optimal fit (i.e., 'BIC_logit', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL')}
 #'                           \item{\code{case_control}: A logical; if \code{TRUE} then the case/control approach was utilized}
 #'                           \item{\code{DA_type}: A character string representing the specific deterministic annealing approach utilized (i.e., 'none', 'cooling', 'heating', or 'hybrid')}
+#'                           \item{\code{priors}: A list of the prior hyperparameters used. See \code{\link[JANE]{specify_priors}} for definitions.}
 #'                           }}
 #' \item{\code{clustering_performance}}{ (only if \code{true_labels} is \code{!NULL}) A list with the following components: \itemize{
 #'                           \item{\code{CER}: A list with two components: (i) \code{misclassified}: The indexes of the misclassified data points in a minimum error mapping between the cluster labels and the known true cluster labels (i.e., \code{true_labels}) and (ii) \code{errorRate}: The error rate corresponding to a minimum error mapping between the cluster labels and the known true cluster labels (see \code{\link[mclust]{classError}} for details)}
@@ -71,10 +72,18 @@ summary.JANE <- function(object, true_labels = NULL, initial_values = FALSE, ...
     stop("Object is not of class JANE")
   }
   
+  if(all(object$IC_out[, "selected"] == 1)){
+    stop("Unable to select the best K, D, and n_start using infomation criteria. See output matrix IC_out for infomation criteria values. Try different initialization approaches or only specify one K, D, and n_start.")
+  }
+  
   IC_selection <- object$input_params$IC_selection
   case_control <- object$input_params$case_control
   DA_type <- object$input_params$DA_type
 
+  priors <- object$optimal_res$priors
+  priors$a <- priors$a[1,]
+  priors$c <- unname(priors$c)
+  
   if(!initial_values){
     summary_data <- object$optimal_res
   } else {
@@ -108,7 +117,8 @@ summary.JANE <- function(object, true_labels = NULL, initial_values = FALSE, ...
   out$input_params <- list(model = model,
                            IC_selection = IC_selection,
                            case_control = case_control,
-                           DA_type = DA_type)
+                           DA_type = DA_type,
+                           priors = priors)
     
   if (!is.null(true_labels)){
     out$clustering_performance = list(CER = CER,

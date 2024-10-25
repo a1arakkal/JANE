@@ -29,6 +29,7 @@ A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following 
 \item{\code{IC_selection}: A character string representing the specific information criteria used to select the optimal fit (i.e., 'BIC_logit', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL')}
 \item{\code{case_control}: A logical; if \code{TRUE} then the case/control approach was utilized}
 \item{\code{DA_type}: A character string representing the specific deterministic annealing approach utilized (i.e., 'none', 'cooling', 'heating', or 'hybrid')}
+\item{\code{priors}: A list of the prior hyperparameters used. See \code{\link[JANE]{specify_priors}} for definitions.}
 }}
 \item{\code{clustering_performance}}{ (only if \code{true_labels} is \code{!NULL}) A list with the following components: \itemize{
 \item{\code{CER}: A list with two components: (i) \code{misclassified}: The indexes of the misclassified data points in a minimum error mapping between the cluster labels and the known true cluster labels (i.e., \code{true_labels}) and (ii) \code{errorRate}: The error rate corresponding to a minimum error mapping between the cluster labels and the known true cluster labels (see \code{\link[mclust]{classError}} for details)}
