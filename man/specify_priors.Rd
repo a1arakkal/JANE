@@ -28,7 +28,7 @@ specify_priors(D, K, model, n_interior_knots = NULL, a, b, c, G, nu, e, f)
 
 \item{G}{A numeric \eqn{D \times D} matrix specifying the inverse of the scale matrix of the Wishart prior on \eqn{\Omega_k} for \eqn{k = 1,\ldots,K}, where \eqn{\Omega_k} represents the precision of the multivariate normal distribution for the latent positions of the \eqn{k^{th}} cluster.}
 
-\item{nu}{A numeric vector of length \eqn{K} specifying the concentration parameters of the Dirichlet prior on \eqn{p}, where \eqn{p} represents the mixture weights of the finite multivariate normal mixture distribution.}
+\item{nu}{A numeric vector of length \eqn{K} specifying the concentration parameters of the Dirichlet prior on \eqn{p}, where \eqn{p} represents the mixture weights of the finite multivariate normal mixture distribution for the latent positions.}
 
 \item{e}{A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.}
 
@@ -66,13 +66,13 @@ omegas <- array(c(diag(rep(7,2)),
                   diag(rep(7,2)), 
                   diag(rep(7,2))), 
                   dim = c(2,2,3))
-p_k <- rep(1/3, 3)
+p <- rep(1/3, 3)
 beta0 <- 1.0
 sim_data <- JANE::sim_A(N = 100L, 
                         model = "RS",
                         mus = mus, 
                         omegas = omegas, 
-                        p_k = p_k, 
+                        p = p, 
                         beta0 = beta0, 
                         remove_isolates = TRUE)
                         

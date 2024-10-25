@@ -18,7 +18,7 @@
 \value{
 A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following components (Note: \eqn{N} is the number of actors in the network, \eqn{K} is the number of clusters, and \eqn{D} is the dimension of the latent space):
 \item{\code{coefficients}}{ A numeric vector representing the estimated coefficients from the logistic regression model.}
-\item{\code{p_k}}{ A numeric vector of length \eqn{K} representing the estimated mixture probabilities of the multivariate normal mixture distribution for the latent positions.}
+\item{\code{p}}{ A numeric vector of length \eqn{K} representing the estimated mixture weights of the finite multivariate normal mixture distribution for the latent positions.}
 \item{\code{U}}{ A numeric \eqn{N \times D} matrix with rows representing an actor's estimated latent position in a \eqn{D}-dimensional social space.}
 \item{\code{mus}}{ A numeric \eqn{K \times D} matrix representing the estimated mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.}
 \item{\code{omegas}}{ A numeric \eqn{D \times D \times K} array representing the estimated precision matrices of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.}
@@ -52,13 +52,13 @@ omegas <- array(c(diag(rep(7,2)),
                   diag(rep(7,2)), 
                   diag(rep(7,2))), 
                   dim = c(2,2,3))
-p_k <- rep(1/3, 3)
+p <- rep(1/3, 3)
 beta0 <- 1.0
 sim_data <- JANE::sim_A(N = 100L, 
                         model = "NDH",
                         mus = mus, 
                         omegas = omegas, 
-                        p_k = p_k, 
+                        p = p, 
                         beta0 = beta0, 
                         remove_isolates = TRUE)
                         

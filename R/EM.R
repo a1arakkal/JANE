@@ -33,6 +33,8 @@
 #' \item{\code{optimal_res}}{ A list containing the estimated parameters of interest based on the optimal fit selected. It is recommended to use \code{summary()} to extract the parameters of interest. See \code{\link[JANE]{summary.JANE}} for more details.}
 #' \item{\code{optimal_starting}}{ A list containing the starting parameters used in the EM algorithm that resulted in the optimal fit selected. It is recommended to use \code{summary()} to extract the parameters of interest. See \code{\link[JANE]{summary.JANE}} for more details.}
 #' @details
+#' \strong{\code{control}:}
+#' 
 #' The \code{control} argument is a named list that the user can supply containing the following components:
 #' \describe{
 #' \item{\code{verbose}}{A logical; if \code{TRUE} causes information to be printed out about the progress of the EM algorithm (default is \code{FALSE}).}
@@ -71,7 +73,13 @@
 #' \item{\code{n_its_GNN}}{(only relevant when \code{initialization = 'GNN'}) An integer specifying the maximum number of iterations for the \code{GNN} approach (default is \code{10}).} 
 #' \item{\code{downsampling_GNN}}{(only relevant when \code{initialization = 'GNN'}) A logical; if \code{TRUE} employs downsampling s.t. the number of links and non-links are balanced for \code{GNN} approach (default is \code{TRUE}).}
 #'}
-#' Add more details about: 1) IC criterias and when it a appropriate to use, 2) parallel operations, 3) priors used
+#'
+#' \strong{Running \code{JANE} in parallel:}
+#' 
+#' \code{JANE} integrates the \pkg{future} and \pkg{future.apply} packages to fit the various combinations of \code{K}, \code{D}, and \code{n_start} in parallel. The 'Examples' section below provides an example of how to run \code{JANE} in parallel. See \code{\link[future]{plan}} and \code{\link[future.apply]{future.apply}} for more details.
+#' 
+#' 
+#' Add more details about: 1) IC criterias and when it a appropriate to use,
 #' @examples 
 #' \dontrun{
 #' # Simulate network
@@ -83,13 +91,13 @@
 #'                   diag(rep(7,2)), 
 #'                   diag(rep(7,2))), 
 #'                   dim = c(2,2,3))
-#' p_k <- rep(1/3, 3)
+#' p <- rep(1/3, 3)
 #' beta0 <- 1.0
 #' sim_data <- JANE::sim_A(N = 100L, 
 #'                         model = "NDH",
 #'                         mus = mus, 
 #'                         omegas = omegas, 
-#'                         p_k = p_k, 
+#'                         p = p, 
 #'                         beta0 = beta0, 
 #'                         remove_isolates = TRUE)
 #'                         
@@ -151,8 +159,31 @@
 #'                    case_control = FALSE,
 #'                    DA_type = "none")  
 #' 
-#' ## Check if results match
-#' all.equal(res1, res2)             
+#' # Check if results match
+#' all.equal(res1, res2)    
+#' 
+#' # Another reproducibility example where the seed was not set. 
+#' # It is possible to replicate the results using the starting values due to 
+#' # the nature of EM algorithms
+#' res3 <- JANE::JANE(A = sim_data$A,
+#'                    D = 2L,
+#'                    K = 3L,
+#'                    initialization = "GNN", 
+#'                    model = "NDH",
+#'                    case_control = FALSE,
+#'                    DA_type = "none")
+#' # Extract starting values                    
+#' start_vals <- res3$optimal_start  
+#' 
+#' # No need to specify D and K below as function will determine those values from start_vals
+#' res4 <- JANE::JANE(A = sim_data$A,
+#'                    initialization = start_vals, 
+#'                    model = "NDH",
+#'                    case_control = FALSE,
+#'                    DA_type = "none")
+#'                    
+#' # Check if optimal_res are identical
+#' all.equal(res3$optimal_res, res4$optimal_res)                   
 #' }                            
 #' @export
 JANE <- function(A,

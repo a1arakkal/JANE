@@ -13,7 +13,7 @@ specify_initial_values(
   U,
   omegas,
   mus,
-  p_k,
+  p,
   Z,
   beta
 )
@@ -40,7 +40,7 @@ specify_initial_values(
 
 \item{mus}{A numeric \eqn{K \times D} matrix specifying the mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.}
 
-\item{p_k}{A numeric vector of length \eqn{K} specifying the mixture probabilities of the multivariate normal mixture distribution for the latent positions.}
+\item{p}{A numeric vector of length \eqn{K} specifying the mixture weights of the finite multivariate normal mixture distribution for the latent positions.}
 
 \item{Z}{A numeric \eqn{N \times K} matrix with rows representing the conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
 
@@ -68,13 +68,13 @@ omegas <- array(c(diag(rep(7,2)),
                   diag(rep(7,2)), 
                   diag(rep(7,2))), 
                 dim = c(2,2,3))
-p_k <- rep(1/3, 3)
+p <- rep(1/3, 3)
 beta0 <- -1
 sim_data <- JANE::sim_A(N = 100L, 
                         model = "RSR",
                         mus = mus, 
                         omegas = omegas, 
-                        p_k = p_k, 
+                        p = p, 
                         beta0 = beta0, 
                         remove_isolates = TRUE)
 
@@ -87,7 +87,7 @@ n_interior_knots <- 5L
 U <- matrix(stats::rnorm(N*D), nrow = N, ncol = D)
 omegas <- stats::rWishart(n = K, df = D+1, Sigma = diag(D))
 mus <- matrix(stats::rnorm(K*D), nrow = K, ncol = D)
-p_k <- extraDistr::rdirichlet(n = 1, rep(3,K))[1,]
+p <- extraDistr::rdirichlet(n = 1, rep(3,K))[1,]
 Z <-  extraDistr::rdirichlet(n = N, alpha = rep(1, K))
 beta <- stats::rnorm(n = 1 + 2*(1 + n_interior_knots))
 
@@ -99,7 +99,7 @@ my_starting_values <- JANE::specify_initial_values(A = sim_data$A,
                                                    U = U,
                                                    omegas = omegas, 
                                                    mus = mus, 
-                                                   p_k = p_k, 
+                                                   p = p, 
                                                    Z = Z,
                                                    beta = beta)         
 

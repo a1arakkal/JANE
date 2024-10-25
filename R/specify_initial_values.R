@@ -12,7 +12,7 @@
 #' @param n_interior_knots An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only; default is \code{NULL}).   
 #' @param mus A numeric \eqn{K \times D} matrix specifying the mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.
 #' @param omegas A numeric \eqn{D \times D \times K} array specifying the precision matrices of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.
-#' @param p_k A numeric vector of length \eqn{K} specifying the mixture probabilities of the multivariate normal mixture distribution for the latent positions.
+#' @param p A numeric vector of length \eqn{K} specifying the mixture weights of the finite multivariate normal mixture distribution for the latent positions.
 #' @param beta A numeric vector specifying the regression coefficients for the logistic regression model. Specifically a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.
 #' @param U A numeric \eqn{N \times D} matrix with rows specifying an actor's position in a \eqn{D}-dimensional social space.
 #' @param Z A numeric \eqn{N \times K} matrix with rows representing the conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.
@@ -32,13 +32,13 @@
 #'                   diag(rep(7,2)), 
 #'                   diag(rep(7,2))), 
 #'                 dim = c(2,2,3))
-#' p_k <- rep(1/3, 3)
+#' p <- rep(1/3, 3)
 #' beta0 <- -1
 #' sim_data <- JANE::sim_A(N = 100L, 
 #'                         model = "RSR",
 #'                         mus = mus, 
 #'                         omegas = omegas, 
-#'                         p_k = p_k, 
+#'                         p = p, 
 #'                         beta0 = beta0, 
 #'                         remove_isolates = TRUE)
 #' 
@@ -51,7 +51,7 @@
 #' U <- matrix(stats::rnorm(N*D), nrow = N, ncol = D)
 #' omegas <- stats::rWishart(n = K, df = D+1, Sigma = diag(D))
 #' mus <- matrix(stats::rnorm(K*D), nrow = K, ncol = D)
-#' p_k <- extraDistr::rdirichlet(n = 1, rep(3,K))[1,]
+#' p <- extraDistr::rdirichlet(n = 1, rep(3,K))[1,]
 #' Z <-  extraDistr::rdirichlet(n = N, alpha = rep(1, K))
 #' beta <- stats::rnorm(n = 1 + 2*(1 + n_interior_knots))
 #' 
@@ -63,7 +63,7 @@
 #'                                                    U = U,
 #'                                                    omegas = omegas, 
 #'                                                    mus = mus, 
-#'                                                    p_k = p_k, 
+#'                                                    p = p, 
 #'                                                    Z = Z,
 #'                                                    beta = beta)         
 #' 
@@ -82,7 +82,7 @@ specify_initial_values <- function(A,
                                    U,
                                    omegas, 
                                    mus, 
-                                   p_k, 
+                                   p, 
                                    Z,
                                    beta){ 
   
@@ -177,7 +177,7 @@ specify_initial_values <- function(A,
   list_name <- list(U = U, 
                     omegas = omegas, 
                     mus = mus, 
-                    p = p_k, 
+                    p = p, 
                     prob_matrix = Z,
                     beta = beta)
   

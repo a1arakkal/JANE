@@ -3,7 +3,7 @@
 #' @param N An integer specifying the number of actors in the network.
 #' @param mus A numeric \eqn{K \times D} matrix specifying the mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.
 #' @param omegas A numeric \eqn{D \times D \times K} array specifying the precision matrices of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.
-#' @param p_k A numeric vector of length \eqn{K} specifying the mixture probabilities of the multivariate normal mixture distribution for the latent positions.
+#' @param p A numeric vector of length \eqn{K} specifying the mixture weights of the finite multivariate normal mixture distribution for the latent positions.
 #' @param beta0 A numeric value specifying the intercept parameter for the logistic regression model.
 #' @param model A character string to specify the model to simulate the network from:
 #'  \itemize{
@@ -35,19 +35,19 @@
 #'                   diag(rep(7,2)), 
 #'                   diag(rep(7,2))), 
 #'                   dim = c(2,2,3))
-#' p_k <- rep(1/3, 3)
+#' p <- rep(1/3, 3)
 #' beta0 <- 1.0
 #' JANE::sim_A(N = 100L, 
 #'             model = "NDH",
 #'             mus = mus, 
 #'             omegas = omegas, 
-#'             p_k = p_k, 
+#'             p = p, 
 #'             beta0 = beta0, 
 #'             remove_isolates = TRUE)
 #'}
 #' @export
 
-sim_A <- function(N, mus, omegas, p_k, beta0, 
+sim_A <- function(N, mus, omegas, p, beta0, 
                   model,
                   precision_R_effects,
                   remove_isolates = TRUE){
@@ -57,7 +57,7 @@ sim_A <- function(N, mus, omegas, p_k, beta0,
   }
   
   # draw Z
-  Z <-  t(stats::rmultinom(n = N, size = 1, prob = p_k))
+  Z <-  t(stats::rmultinom(n = N, size = 1, prob = p))
   
   # draw U
   U <- matrix(stats::rnorm(N*ncol(mus)), nrow = N, ncol = ncol(mus))
