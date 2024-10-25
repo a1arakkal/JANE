@@ -173,7 +173,8 @@ initialize_starting_values <- function(A,
                                   upper = c(Inf, 0),
                                   method = "L-BFGS-B",
                                   X = cbind(rep(1, nrow(distances)), distances), 
-                                  y = A[c(edges_indices[,3], down_sample_nonLink_indices[,3])])
+                                  y = A[c(edges_indices[,3], down_sample_nonLink_indices[,3])],
+                                  hessian = T)
               
             } else {
               
@@ -187,12 +188,18 @@ initialize_starting_values <- function(A,
                                   upper = c(Inf, 0),
                                   method = "L-BFGS-B",
                                   X = cbind(rep(1, nrow(distances)), distances), 
-                                  y = A[lower.tri(A, diag = F)])
+                                  y = A[lower.tri(A, diag = F)],
+                                  hessian = T)
             }
             
             beta_U <- res$par[length(res$par)]
+            info_mat <- 1.0*res$hessian # not multiplied by negative 1 as we are minimizing with optim
+            var_beta <- chol2inv(chol(info_mat)) # invert the whole info matrix 
+            var_beta_U <- diag(var_beta)[length(res$par)] # extract the Var associated with beta_U
+            test_stat <- (beta_U - 0)/sqrt(var_beta_U) # construct Wald test stat
+            p_value <- stats::pnorm(test_stat) # get one-sided p-value
             
-            if( (!beta_U < -1.0) & ( floor(control$n_its_GNN * 0.5) > 1) ) {
+            if( (!p_value < 0.05) & ( floor(control$n_its_GNN * 0.5) > 1) ) {
               control$n_its_GNN <- floor(control$n_its_GNN * 0.5)
               stop()
             }
@@ -261,7 +268,8 @@ initialize_starting_values <- function(A,
                                   upper = c(rep(Inf, 1 + (control$n_interior_knots + 1)), 0),
                                   method = "L-BFGS-B",
                                   X = cbind(rep(1, nrow(distances)), distances), 
-                                  y = A[c(edges_indices[,3], down_sample_nonLink_indices[,3])])
+                                  y = A[c(edges_indices[,3], down_sample_nonLink_indices[,3])],
+                                  hessian = T)
               
             } else {
               
@@ -275,13 +283,19 @@ initialize_starting_values <- function(A,
                                   upper = c(rep(Inf, 1 + (control$n_interior_knots + 1)), 0),
                                   method = "L-BFGS-B",
                                   X = cbind(rep(1, nrow(distances)), distances), 
-                                  y = A[lower.tri(A, diag = F)])
+                                  y = A[lower.tri(A, diag = F)],
+                                  hessian = T)
               
             }
             
             beta_U <- res$par[length(res$par)]
+            info_mat <- 1.0*res$hessian # not multiplied by negative 1 as we are minimizing with optim
+            var_beta <- chol2inv(chol(info_mat)) # invert the whole info matrix 
+            var_beta_U <- diag(var_beta)[length(res$par)] # extract the Var associated with beta_U
+            test_stat <- (beta_U - 0)/sqrt(var_beta_U) # construct Wald test stat
+            p_value <- stats::pnorm(test_stat) # get one-sided p-value
             
-            if( (!beta_U < -1.0) & ( floor(control$n_its_GNN * 0.5) > 1) ) {
+            if( (!p_value < 0.05) & ( floor(control$n_its_GNN * 0.5) > 1) ) {
               control$n_its_GNN <- floor(control$n_its_GNN * 0.5)
               stop()
             }
@@ -351,7 +365,8 @@ initialize_starting_values <- function(A,
                                   upper = c(rep(Inf, 1 + 2*(control$n_interior_knots + 1)), 0),
                                   method = "L-BFGS-B",
                                   X = cbind(rep(1, nrow(distances)), distances), 
-                                  y = A[c(edges_indices[,3], down_sample_nonLink_indices[,3])])
+                                  y = A[c(edges_indices[,3], down_sample_nonLink_indices[,3])],
+                                  hessian = T)
               
             } else {
               
@@ -370,12 +385,18 @@ initialize_starting_values <- function(A,
                                   upper = c(rep(Inf, 1 + 2*(control$n_interior_knots + 1)), 0),
                                   method = "L-BFGS-B",
                                   X = cbind(rep(1, nrow(distances)), distances), 
-                                  y = temp_y)
+                                  y = temp_y,
+                                  hessian = T)
             }
             
             beta_U <- res$par[length(res$par)]
+            info_mat <- 1.0*res$hessian # not multiplied by negative 1 as we are minimizing with optim
+            var_beta <- chol2inv(chol(info_mat)) # invert the whole info matrix 
+            var_beta_U <- diag(var_beta)[length(res$par)] # extract the Var associated with beta_U
+            test_stat <- (beta_U - 0)/sqrt(var_beta_U) # construct Wald test stat
+            p_value <- stats::pnorm(test_stat) # get one-sided p-value
             
-            if( (!beta_U < -1.0) & ( floor(control$n_its_GNN * 0.5) > 1) ) {
+            if( (!p_value < 0.05) & ( floor(control$n_its_GNN * 0.5) > 1) ) {
               control$n_its_GNN <- floor(control$n_its_GNN * 0.5)
               stop()
             }
