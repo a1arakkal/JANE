@@ -76,6 +76,10 @@ summary.JANE <- function(object, true_labels = NULL, initial_values = FALSE, ...
     stop("Unable to select the best K, D, and n_start using infomation criteria. See output matrix IC_out for infomation criteria values. Try different initialization approaches or only specify one K, D, and n_start.")
   }
   
+  if(is.null(object$optimal_res) | is.null(object$optimal_starting)){
+    stop("Unable to fit the model")
+  }
+  
   IC_selection <- object$input_params$IC_selection
   case_control <- object$input_params$case_control
   DA_type <- object$input_params$DA_type
