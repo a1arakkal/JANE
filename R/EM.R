@@ -639,10 +639,10 @@ EM_inner <- function(A,
                                         n_control = control$n_control)
       
       
-      # Additional check for convergence using moving average (MA)
-      # Here we check if the MA of the termination metric is changing by iterations. If there
-      # has been at least x (e.g. 10) number of consecutive iterations where 
-      # the abs diff in MA is less than control$tolerance_diff_CA.
+      # Additional check for convergence using cumulative average (CA)
+      # Here we check if the CA of the termination metric is changing by iterations. If there
+      # has been at least x control$n_its_start_CA number of consecutive iterations where 
+      # the abs diff in CA is less than control$tolerance_diff_CA.
       
       if(n_its <= control$n_its_start_CA){
         
