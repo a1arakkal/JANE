@@ -660,16 +660,17 @@ EM_inner <- function(A,
         
       } else {
         
+        n_its_temp <- n_its-control$n_its_start_CA+1
         diff_MA_prev <- diff_MA
-        diff_MA <- abs( ((MA - check_convergence$metric[col_term_metric]))/(n_its) )
+        diff_MA <- abs( ((MA - check_convergence$metric[col_term_metric]))/(n_its_temp) )
         counter <- (counter + 1) * (diff_MA<control$tolerance_diff_CA)*(diff_MA_prev<control$tolerance_diff_CA)
-        MA <- (check_convergence$metric[col_term_metric] + (n_its-1)*MA)/(n_its)
+        MA <- (check_convergence$metric[col_term_metric] + (n_its_temp-1)*MA)/(n_its_temp)
         
         if(control$termination_rule != "Q"){
           diff_MA_U_prev <- diff_MA_U
-          diff_MA_U <- abs( ((MA_U - check_convergence$metric[col_term_U]))/(n_its) )
+          diff_MA_U <- abs( ((MA_U - check_convergence$metric[col_term_U]))/(n_its_temp) )
           counter_U <- (counter_U + 1) * (diff_MA_U<control$tolerance_diff_CA)*(diff_MA_U_prev<control$tolerance_diff_CA)
-          MA_U <- (check_convergence$metric[col_term_U] + (n_its-1)*MA_U)/(n_its)
+          MA_U <- (check_convergence$metric[col_term_U] + (n_its_temp-1)*MA_U)/(n_its_temp)
         }
         
       }
