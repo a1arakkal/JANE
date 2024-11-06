@@ -10,10 +10,9 @@ JANE can be installed via the `install_github()` function from the devtools pack
 
 ```
 devtools::install_github("a1arakkal/JANE")
-
 ```
 
-# Usage
+# Basic Usage
 
 ## Simulate a network
 
@@ -35,7 +34,6 @@ sim_data <- JANE::sim_A(N = 100L,
                         p = p, 
                         beta0 = beta0, 
                         remove_isolates = TRUE)
-
 ```
 
 ## Fit JANE on network
@@ -48,7 +46,6 @@ res <- JANE::JANE(A = sim_data$A,
                   model = "NDH",
                   case_control = FALSE,
                   DA_type = "none")
-
 ```
 
 ## Summarise and plot fit
