@@ -8,7 +8,7 @@ JANE is a package for fitting latent space network clustering models using an EM
 
 JANE can be installed via the `install_github()` function from the devtools package.
 
-```
+``` r
 devtools::install_github("a1arakkal/JANE")
 ```
 
@@ -16,7 +16,7 @@ devtools::install_github("a1arakkal/JANE")
 
 ## Simulate a network
 
-```
+``` r
 mus <- matrix(c(-1,-1,1,-1,1,1), 
               nrow = 3,
               ncol = 2, 
@@ -38,7 +38,7 @@ sim_data <- JANE::sim_A(N = 100L,
 
 ## Fit JANE on network
 
-```
+``` r
 res <- JANE::JANE(A = sim_data$A,
                   D = 2L,
                   K = 3L,
@@ -50,7 +50,8 @@ res <- JANE::JANE(A = sim_data$A,
 
 ## Summarise and plot fit
 
-```
+``` r
+
 # Summarize fit 
 summary(res)
 
