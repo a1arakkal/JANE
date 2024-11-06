@@ -1,5 +1,5 @@
 Package: JANE
-Title: Just Another latent space NEtwork clustering algorithm (JANE)
+Title: Just Another Latent Space Network Clustering Algorithm (JANE)
 Version: 0.0.0.9000
 Authors@R: 
     c(person("Alan", "Arakkal", , "alan-arakkal@uiowa.edu", 
