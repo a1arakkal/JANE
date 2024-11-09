@@ -21,7 +21,7 @@
 #' \strong{Prior on \eqn{\mu_k} and \eqn{\Omega_k}} (note: the same prior is used for \eqn{k = 1,\ldots,K}) :
 #' 
 #' \eqn{\pi(\mu_k, \Omega_k) = \pi(\mu_k | \Omega_k) \pi(\Omega_k)}, thus
-#' \deqn{\mu_k | \Omega_k \sim MVN(a, b*\Omega_k)}
+#' \deqn{\mu_k | \Omega_k \sim MVN(a, (b\Omega_k)^{-1})}
 #' \deqn{\Omega_k \sim Wishart(c, G^{-1})}
 #' 
 #' \strong{Prior on \eqn{p}}:
@@ -30,7 +30,7 @@
 #' \deqn{p \sim Dirichlet(\nu_1 ,\ldots,\nu_K)}
 #' 
 #' \strong{Prior on \eqn{\beta}}:
-#' \deqn{\beta \sim MVN(e, f)}
+#' \deqn{\beta \sim MVN(e, f^{-1})}
 #' 
 #' @return A list of prior hyperparameters for the EM algorithm generated from the input values in a structure accepted by \code{JANE}.
 #' 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/sim_A.R
 \name{sim_A}
 \alias{sim_A}
-\title{Simulate Unweighted Networks from Latent Space Cluster Models}
+\title{Simulate unweighted networks from latent space cluster models}
 \usage{
 sim_A(
   N,

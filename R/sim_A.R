@@ -1,4 +1,4 @@
-#' Simulate Unweighted Networks from Latent Space Cluster Models
+#' Simulate unweighted networks from latent space cluster models
 #' @description Simulate an unweighted network from a \eqn{D}-dimensional latent space cluster model with \eqn{K} clusters and \eqn{N} actors. The \emph{squared} euclidean distance is used (i.e., \eqn{dist(U_i,U_j)^2}), where \eqn{U_i} and \eqn{U_j} are the respective actor's positions in an unobserved social space.
 #' @param N An integer specifying the number of actors in the network.
 #' @param mus A numeric \eqn{K \times D} matrix specifying the mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.

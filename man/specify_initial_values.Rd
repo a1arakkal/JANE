@@ -44,7 +44,7 @@ specify_initial_values(
 
 \item{Z}{A numeric \eqn{N \times K} matrix with rows representing the conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
 
-\item{beta}{A numeric vector specifying the regression coefficients for the logistic regression model. Specifically a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.}
+\item{beta}{A numeric vector specifying the regression coefficients for the logistic regression model. Specifically, a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.}
 }
 \value{
 A list of starting values for the EM algorithm generated from the input values in a structure accepted by \code{JANE}.
@@ -103,7 +103,7 @@ my_starting_values <- JANE::specify_initial_values(A = sim_data$A,
                                                    Z = Z,
                                                    beta = beta)         
 
-# Run JANE on simulated data (no need to specify D and K as function will 
+# Run JANE using my_starting_values (no need to specify D and K as function will 
 # determine those values from my_starting_values)
 res <- JANE::JANE(A = sim_data$A,
                   initialization = my_starting_values,

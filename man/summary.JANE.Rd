@@ -2,7 +2,7 @@
 % Please edit documentation in R/generics.R
 \name{summary.JANE}
 \alias{summary.JANE}
-\title{Summarizing JANE Fits}
+\title{Summarizing JANE fits}
 \usage{
 \method{summary}{JANE}(object, true_labels = NULL, initial_values = FALSE, ...)
 }
@@ -20,10 +20,10 @@ A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following 
 \item{\code{coefficients}}{ A numeric vector representing the estimated coefficients from the logistic regression model.}
 \item{\code{p}}{ A numeric vector of length \eqn{K} representing the estimated mixture weights of the finite multivariate normal mixture distribution for the latent positions.}
 \item{\code{U}}{ A numeric \eqn{N \times D} matrix with rows representing an actor's estimated latent position in a \eqn{D}-dimensional social space.}
-\item{\code{mus}}{ A numeric \eqn{K \times D} matrix representing the estimated mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.}
-\item{\code{omegas}}{ A numeric \eqn{D \times D \times K} array representing the estimated precision matrices of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.}
+\item{\code{mus}}{ A numeric \eqn{K \times D} matrix representing the estimated mean vectors of the multivariate normal distributions for the latent positions of the \eqn{K} clusters.}
+\item{\code{omegas}}{ A numeric \eqn{D \times D \times K} array representing the estimated precision matrices of the multivariate normal distributions for the latent positions of the \eqn{K} clusters.}
 \item{\code{Z}}{ A numeric \eqn{N \times K} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
-\item{\code{cluster_labels}}{ A numeric vector of length \eqn{N} representing the cluster labels of each actor based on a hard clustering rule of \eqn{\{h | Z_ih = max_k Z_ik\}}.}
+\item{\code{cluster_labels}}{ A numeric vector of length \eqn{N} representing the cluster assignment of each actor based on a hard clustering rule of \eqn{\{h | Z_{ih} = max_k Z_{ik}\}}.}
 \item{\code{input_params}}{ A list with the following components: \itemize{
 \item{\code{model}: A character string representing the specific \code{model} used (i.e., 'NDH', 'RS', or 'RSR')}
 \item{\code{IC_selection}: A character string representing the specific information criteria used to select the optimal fit (i.e., 'BIC_logit', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL')}
@@ -34,7 +34,7 @@ A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following 
 \item{\code{clustering_performance}}{ (only if \code{true_labels} is \code{!NULL}) A list with the following components: \itemize{
 \item{\code{CER}: A list with two components: (i) \code{misclassified}: The indexes of the misclassified data points in a minimum error mapping between the cluster labels and the known true cluster labels (i.e., \code{true_labels}) and (ii) \code{errorRate}: The error rate corresponding to a minimum error mapping between the cluster labels and the known true cluster labels (see \code{\link[mclust]{classError}} for details)}
 \item{\code{ARI}: A numeric value representing the adjusted Rand index comparing the cluster labels and the known true cluster labels (see \code{\link[mclust]{adjustedRandIndex}} for details)}
-\item{\code{aricode}: A numeric value representing the normalized mutual information comparing the cluster labels and the known true cluster labels (see \code{\link[aricode]{NMI}} for details)}
+\item{\code{NMI}: A numeric value representing the normalized mutual information comparing the cluster labels and the known true cluster labels (see \code{\link[aricode]{NMI}} for details)}
 \item{\code{confusion_matrix}: A numeric table representing the confusion matrix comparing the cluster labels and the known true cluster labels.}
 }}
 }

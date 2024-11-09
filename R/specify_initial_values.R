@@ -13,7 +13,7 @@
 #' @param mus A numeric \eqn{K \times D} matrix specifying the mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.
 #' @param omegas A numeric \eqn{D \times D \times K} array specifying the precision matrices of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.
 #' @param p A numeric vector of length \eqn{K} specifying the mixture weights of the finite multivariate normal mixture distribution for the latent positions.
-#' @param beta A numeric vector specifying the regression coefficients for the logistic regression model. Specifically a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.
+#' @param beta A numeric vector specifying the regression coefficients for the logistic regression model. Specifically, a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.
 #' @param U A numeric \eqn{N \times D} matrix with rows specifying an actor's position in a \eqn{D}-dimensional social space.
 #' @param Z A numeric \eqn{N \times K} matrix with rows representing the conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.
 #' @details
@@ -67,7 +67,7 @@
 #'                                                    Z = Z,
 #'                                                    beta = beta)         
 #' 
-#' # Run JANE on simulated data (no need to specify D and K as function will 
+#' # Run JANE using my_starting_values (no need to specify D and K as function will 
 #' # determine those values from my_starting_values)
 #' res <- JANE::JANE(A = sim_data$A,
 #'                   initialization = my_starting_values,

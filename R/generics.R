@@ -1,4 +1,4 @@
-#' Summarizing JANE Fits
+#' Summarizing JANE fits
 #' @description S3 summary method for object of class "\code{JANE}".
 #' @param object An object of S3 \code{\link{class}} "\code{JANE}", a result of a call to \code{JANE}.
 #' @param true_labels (optional) A numeric, character, or factor vector of known true cluster labels. Must have the same length as number of actors in the fitted network (default is \code{NULL}). 
@@ -8,10 +8,10 @@
 #' \item{\code{coefficients}}{ A numeric vector representing the estimated coefficients from the logistic regression model.}
 #' \item{\code{p}}{ A numeric vector of length \eqn{K} representing the estimated mixture weights of the finite multivariate normal mixture distribution for the latent positions.}
 #' \item{\code{U}}{ A numeric \eqn{N \times D} matrix with rows representing an actor's estimated latent position in a \eqn{D}-dimensional social space.}
-#' \item{\code{mus}}{ A numeric \eqn{K \times D} matrix representing the estimated mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.}
-#' \item{\code{omegas}}{ A numeric \eqn{D \times D \times K} array representing the estimated precision matrices of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.}
+#' \item{\code{mus}}{ A numeric \eqn{K \times D} matrix representing the estimated mean vectors of the multivariate normal distributions for the latent positions of the \eqn{K} clusters.}
+#' \item{\code{omegas}}{ A numeric \eqn{D \times D \times K} array representing the estimated precision matrices of the multivariate normal distributions for the latent positions of the \eqn{K} clusters.}
 #' \item{\code{Z}}{ A numeric \eqn{N \times K} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
-#' \item{\code{cluster_labels}}{ A numeric vector of length \eqn{N} representing the cluster labels of each actor based on a hard clustering rule of \eqn{\{h | Z_ih = max_k Z_ik\}}.}
+#' \item{\code{cluster_labels}}{ A numeric vector of length \eqn{N} representing the cluster assignment of each actor based on a hard clustering rule of \eqn{\{h | Z_{ih} = max_k Z_{ik}\}}.}
 #' \item{\code{input_params}}{ A list with the following components: \itemize{
 #'                           \item{\code{model}: A character string representing the specific \code{model} used (i.e., 'NDH', 'RS', or 'RSR')}
 #'                           \item{\code{IC_selection}: A character string representing the specific information criteria used to select the optimal fit (i.e., 'BIC_logit', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL')}
@@ -22,7 +22,7 @@
 #' \item{\code{clustering_performance}}{ (only if \code{true_labels} is \code{!NULL}) A list with the following components: \itemize{
 #'                           \item{\code{CER}: A list with two components: (i) \code{misclassified}: The indexes of the misclassified data points in a minimum error mapping between the cluster labels and the known true cluster labels (i.e., \code{true_labels}) and (ii) \code{errorRate}: The error rate corresponding to a minimum error mapping between the cluster labels and the known true cluster labels (see \code{\link[mclust]{classError}} for details)}
 #'                           \item{\code{ARI}: A numeric value representing the adjusted Rand index comparing the cluster labels and the known true cluster labels (see \code{\link[mclust]{adjustedRandIndex}} for details)}
-#'                           \item{\code{aricode}: A numeric value representing the normalized mutual information comparing the cluster labels and the known true cluster labels (see \code{\link[aricode]{NMI}} for details)}
+#'                           \item{\code{NMI}: A numeric value representing the normalized mutual information comparing the cluster labels and the known true cluster labels (see \code{\link[aricode]{NMI}} for details)}
 #'                           \item{\code{confusion_matrix}: A numeric table representing the confusion matrix comparing the cluster labels and the known true cluster labels.}
 #'                           }}
 #' @examples 
@@ -149,10 +149,10 @@ print.summary.JANE <- function(x, ...){
   D <- ncol(x$U)
   n_k <- table(x$cluster_labels)
 
-  cat("Input paramters:\n")
+  cat("Input parameters:\n")
   cat("Model =", x$input_params$model, "\n")
   cat("Information criteria used to select optimal model =", x$input_params$IC_selection, "\n")
-  cat("Case control =", x$input_params$case_control, "\n")
+  cat("Case/control approximation utilized =", x$input_params$case_control, "\n")
   cat("Type of deterministic annealing =", x$input_params$DA_type, "\n")
   
   cat("\nOptimal configuration selected:\n")
@@ -215,32 +215,32 @@ print.JANE <- function(x, ...){
 }
 
 
-#' Plot JANE Fits
+#' Plot JANE fits
 #' @description S3 plot method for object of class "\code{JANE}".
 #' @param x An object of S3 \code{\link{class}} "\code{JANE}", a result of a call to \code{JANE}.
 #' @param type A character string to select the type of plot:
 #'  \itemize{
 #'   \item{'lsnc': plot the network using the estimated latent positions and color-code actors by cluster (default)}
-#'   \item{'misclassified': (can only be used if \code{true_labels} is \code{!NULL}) similar to 'lsnc', but will label misclassified actors in black}
+#'   \item{'misclassified': (can only be used if \code{true_labels} is \code{!NULL}) similar to 'lsnc', but will color misclassified actors in black}
 #'   \item{'uncertainty': similar to 'lsnc', but here the color gradient applied represents the actor-specific classification uncertainty}
 #'   \item{'trace_plot': presents various trace plots across the iterations of the EM algorithm}
 #'   }
-#' @param true_labels (optional) A numeric, character, or factor vector of known true cluster labels. Must have the same length as number of actors in the fitted network (default is \code{NULL}). 
-#' @param initial_values A logical; if \code{TRUE} then summarize fit using the starting parameters used in the EM algorithm (default is \code{FALSE}, i.e., the results after the EM algorithm is run are summarized).
+#' @param true_labels (optional) A numeric, character, or factor vector of known true cluster labels. Must have the same length as number of actors in the fitted network. Need to account for potential isolates removed. 
+#' @param initial_values A logical; if \code{TRUE} then plots fit using the starting parameters used in the EM algorithm (default is \code{FALSE}, i.e., the results after the EM algorithm is run are plotted).
 #' @param density_type 	Choose from one of the following three options: 'contour' (default), 'hdr', 'image', and 'persp' indicating the density plot type.
 #' @param swap_axes A logical; if \code{TRUE} will swap the x and y axes (default is \code{FALSE}).
 #' @param rotation_angle A numeric value that rotates the estimated latent positions and contours of the multivariate normal distributions clockwise (or counterclockwise if \code{swap_axes = TRUE}) through the specified angle about the origin (default is 0 degrees). Only relevant when \code{D} (i.e., dimension of the latent space) \code{>= 2} and \code{type != 'trace_plot'}.
-#' @param zoom A numeric value that controls the magnification of the plot.
-#' @param alpha_edge A numeric value that controls the transparency of the network edges.
-#' @param alpha_node A numeric value that controls the transparency of the actors in the network.
+#' @param zoom A numeric value > 0 that controls the % magnification of the plot (default is 100%).
+#' @param alpha_edge A numeric value in \code{[0,1]} that controls the transparency of the network edges (default is 0.1).
+#' @param alpha_node A numeric value in \code{[0,1]} that controls the transparency of the actors in the network (default is 1).
 #' @param ... Unused.
 #' @details
-#'The classification of actors into specific clusters is based on a hard clustering rule of \eqn{\{h | Z_ih = max_k Z_ik\}}. Additionally, the actor-specific classification uncertainty is derived as 1 - \eqn{max_k Z_ik}.
+#'The classification of actors into specific clusters is based on a hard clustering rule of \eqn{\{h | Z_{ih} = max_k Z_{ik}\}}. Additionally, the actor-specific classification uncertainty is derived as 1 - \eqn{max_k Z_{ik}}.
 #'
-#'The trace plot contains up to five unique plots tracking various metrics across the EM algorithm run, depending on the \code{\link[JANE]{JANE}} control parameter \code{termination_rule}:
+#'The trace plot contains up to five unique plots tracking various metrics across the iterations of the EM algorithm, depending on the \code{\link[JANE]{JANE}} control parameter \code{termination_rule}:
 #'  \itemize{
-#'   \item{\code{termination_rule = 'prob_mat'}: Five plots will be presented. Specifically, in the top panel, the plot on the left presents the change in the absolute difference in \eqn{Z} (i.e., the \eqn{N \times K} cluster assignment probability matrix) between subsequent iterations. The exact quantile of the absolute difference plotted are presented in parentheses and determined by the \code{\link[JANE]{JANE}} control parameter \code{quantile_diff}. For example, the default control parameter \code{quantile_diff} = 1, so the values being plotted are the max absolute difference in \eqn{Z} between subsequent iterations. The plot on the right of the top panel presents the absolute difference in the cumulative average of the absolute change in \eqn{Z}  and \eqn{U} (i.e., the \eqn{N \times D} matrix of latent positions) across subsequent iterations (absolute change in \eqn{Z}  and \eqn{U}  computed in an identical manner as described above). This metric is only tracked beginning at an iteration determined by the \code{n_its_start_CA} control parameter in \code{\link[JANE]{JANE}}. Note, this plot may be empty if the EM algorithm converges before the \code{n_its_start_CA}-th iteration. Finally, the bottom panel presents ARI, NMI, and CER values comparing the classifications between subsequent iterations, respectively. Specifically, at a given iteration we determine the  classification of actors in clusters based on a hard clustering rule of \eqn{\{h | Z_ih = max_k Z_ik\}} and given these labels from two subsequent iterations, we compute and plot the ARI, NMI and CER.}
-#'   \item{\code{termination_rule = 'Q'}: Plots generated are similar to those described in the previous bullet point. However, instead of tracking the change in \eqn{Z} over iterations, here the absolute difference in the objective function of the E-step evaluated using parameters from subsequent iterations is tracked. Furthermore, the cumulative average of the absolute change in \eqn{U} is no longer tracked.}
+#'   \item{\code{termination_rule = 'prob_mat'}: Five plots will be presented. Specifically, in the top panel, the plot on the left presents the change in the absolute difference in \eqn{\hat{Z}} (i.e., the \eqn{N \times K} cluster membership probability matrix) between subsequent iterations. The exact quantile of the absolute difference plotted are presented in parentheses and determined by the \code{\link[JANE]{JANE}} control parameter \code{quantile_diff}. For example, the default control parameter \code{quantile_diff} = 1, so the values being plotted are the max absolute difference in \eqn{\hat{Z}} between subsequent iterations. The plot on the right of the top panel presents the absolute difference in the cumulative average of the absolute change in \eqn{\hat{Z}}  and \eqn{U} (i.e., the \eqn{N \times D} matrix of latent positions) across subsequent iterations (absolute change in \eqn{\hat{Z}}  and \eqn{U}  computed in an identical manner as described above). This metric is only tracked beginning at an iteration determined by the \code{n_its_start_CA} control parameter in \code{\link[JANE]{JANE}}. Note, this plot may be empty if the EM algorithm converges before the \code{n_its_start_CA}-th iteration. Finally, the bottom panel presents ARI, NMI, and CER values comparing the classifications between subsequent iterations, respectively. Specifically, at a given iteration we determine the  classification of actors in clusters based on a hard clustering rule of \eqn{\{h | Z_{ih} = max_k Z_{ik}\}} and given these labels from two subsequent iterations, we compute and plot the ARI, NMI and CER.}
+#'   \item{\code{termination_rule = 'Q'}: Plots generated are similar to those described in the previous bullet point. However, instead of tracking the change in \eqn{\hat{Z}} over iterations, here the absolute difference in the objective function of the E-step evaluated using parameters from subsequent iterations is tracked. Furthermore, the cumulative average of the absolute change in \eqn{U} is no longer tracked.}
 #'  \item{\code{termination_rule \%in\% c('ARI', 'NMI', 'CER')}: Four plots will be presented. Specifically, the top left panel presents a plot of the absolute difference in the cumulative average of the absolute change in the specific \code{termination_rule}  employed and \eqn{U} across iterations. As previously mentioned, if the EM algorithm converges before the \code{n_its_start_CA}-th iteration then this will be an empty plot. Furthermore, the other three plots present ARI, NMI, and CER values comparing the classifications between subsequent iterations, respectively.}
 #'   }
 #'   
