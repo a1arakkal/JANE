@@ -12,7 +12,7 @@ JANE can be installed via the `install_github()` function from the devtools pack
 devtools::install_github("a1arakkal/JANE")
 ```
 
-# Basic Usage
+# Basic usage
 
 ## Simulate a network
 
