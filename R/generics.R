@@ -165,7 +165,7 @@ print.summary.JANE <- function(x, ...){
     print(x$IC)
   }
   
-  cat("\nClustering table:")
+  cat("\nClustering table:\n")
   print(n_k)
   
   if (!is.null(x$clustering_performance)){
