@@ -147,7 +147,9 @@ print.summary.JANE <- function(x, ...){
   p <- x$p
   K <- length(p)
   D <- ncol(x$U)
-  n_k <- table(x$cluster_labels)
+  n_k <- rep(0, K)
+  names(n_k) <- 1:K
+  n_k[names(table(x$cluster_labels))] <- table(x$cluster_labels)
 
   cat("Input parameters:\n")
   cat("Model =", x$input_params$model, "\n")
@@ -198,7 +200,9 @@ print.JANE <- function(x, ...){
   p <- x$optimal_res$p
   K <- length(p)
   D <- ncol(x$optimal_res$U)
-  n_k <- table(x$optimal_res$cluster_labels)
+  n_k <- rep(0, K)
+  names(n_k) <- 1:K
+  n_k[names(table(x$optimal_res$cluster_labels))] <- table(x$optimal_res$cluster_labels)
   
   if(!inherits(x, "JANE")){
     stop("Object is not of class JANE")
