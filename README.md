@@ -48,7 +48,7 @@ res <- JANE::JANE(A = sim_data$A,
                   DA_type = "none")
 ```
 
-## Summarise and plot fit
+## Summarize and plot fit
 
 ``` r
 
