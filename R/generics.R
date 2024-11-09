@@ -152,7 +152,7 @@ print.summary.JANE <- function(x, ...){
   cat("Input parameters:\n")
   cat("Model =", x$input_params$model, "\n")
   cat("Information criteria used to select optimal model =", x$input_params$IC_selection, "\n")
-  cat("Case/control approximation utilized =", x$input_params$case_control, "\n")
+  cat("Case-control approximation utilized =", x$input_params$case_control, "\n")
   cat("Type of deterministic annealing =", x$input_params$DA_type, "\n")
   
   cat("\nOptimal configuration selected:\n")
