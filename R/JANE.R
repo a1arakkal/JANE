@@ -11,7 +11,7 @@
 #'   }
 #' @param initialization A character string or a list to specify the initial values for the EM algorithm:
 #'  \itemize{
-#'   \item{'GNN': uses a type-of graphical neural network approach to generate initial values (default)}
+#'   \item{'GNN': uses a type of graphical neural network approach to generate initial values (default)}
 #'   \item{'random': uses random initial values}
 #'   \item{A user supplied list of initial values. See \code{\link[JANE]{specify_initial_values}} on how to specify initial values}
 #'   }
