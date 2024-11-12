@@ -6,7 +6,6 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/a1arakkal/JANE/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/a1arakkal/JANE/actions/workflows/R-CMD-check.yaml)
-
 [![Code
 Coverage](https://codecov.io/gh/a1arakkal/JANE/branch/master/graph/badge.svg)](https://codecov.io/gh/a1arakkal/JANE)
 
