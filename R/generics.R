@@ -26,7 +26,7 @@
 #'                           \item{\code{confusion_matrix}: A numeric table representing the confusion matrix comparing the cluster labels and the known true cluster labels.}
 #'                           }}
 #' @examples 
-#' \donttest{
+#' \dontrun{
 #' # Simulate network
 #' mus <- matrix(c(-1,-1,1,-1,1,1), 
 #'               nrow = 3,
