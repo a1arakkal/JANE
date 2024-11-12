@@ -1,3 +1,4 @@
-# JANE (development version) News
+# JANE News
 
-* Initial CRAN submission.
+## 0.1
+* Initial public release
