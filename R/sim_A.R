@@ -26,7 +26,7 @@
 #' \item{\code{precision_R_effects}}{ The specific precision_R_effects used to simulate \code{RE}.}
 #' \item{\code{model}}{ A character string representing the specific \code{model} used to simulate the network.}
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' mus <- matrix(c(-1,-1,1,-1,1,1), 
 #'               nrow = 3,
 #'               ncol = 2, 

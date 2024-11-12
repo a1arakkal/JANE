@@ -125,7 +125,7 @@ The \code{control} argument is a named list that the user can supply containing 
 \emph{Warning}: It is not certain whether it is appropriate to use the model selection criterion above to select \code{D}.
 }
 \examples{
-\dontrun{
+\donttest{
 # Simulate network
 mus <- matrix(c(-1,-1,1,-1,1,1), 
               nrow = 3,

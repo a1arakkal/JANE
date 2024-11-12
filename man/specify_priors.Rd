@@ -56,7 +56,7 @@ For the current implementation we require that all elements of the nu vector be 
 \deqn{\beta \sim MVN(e, f^{-1})}
 }
 \examples{
-\dontrun{
+\donttest{
 # Simulate network
 mus <- matrix(c(-1,-1,1,-1,1,1), 
               nrow = 3,

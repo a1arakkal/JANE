@@ -102,7 +102,7 @@
 #' 
 #' 
 #' @examples 
-#' \dontrun{
+#' \donttest{
 #' # Simulate network
 #' mus <- matrix(c(-1,-1,1,-1,1,1), 
 #'               nrow = 3,

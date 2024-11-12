@@ -35,7 +35,7 @@
 #' @return A list of prior hyperparameters for the EM algorithm generated from the input values in a structure accepted by \code{JANE}.
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Simulate network
 #' mus <- matrix(c(-1,-1,1,-1,1,1), 
 #'               nrow = 3,

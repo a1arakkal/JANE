@@ -55,7 +55,7 @@ A list containing the following components:
 Simulate an unweighted network from a \eqn{D}-dimensional latent space cluster model with \eqn{K} clusters and \eqn{N} actors. The \emph{squared} euclidean distance is used (i.e., \eqn{dist(U_i,U_j)^2}), where \eqn{U_i} and \eqn{U_j} are the respective actor's positions in an unobserved social space.
 }
 \examples{
-\dontrun{
+\donttest{
 mus <- matrix(c(-1,-1,1,-1,1,1), 
               nrow = 3,
               ncol = 2, 

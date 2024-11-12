@@ -26,7 +26,7 @@
 #'                           \item{\code{confusion_matrix}: A numeric table representing the confusion matrix comparing the cluster labels and the known true cluster labels.}
 #'                           }}
 #' @examples 
-#' \dontrun{
+#' \donttest{
 #' # Simulate network
 #' mus <- matrix(c(-1,-1,1,-1,1,1), 
 #'               nrow = 3,
@@ -253,7 +253,7 @@ print.JANE <- function(x, ...){
 #' @return A plot of the network or trace plot of the EM run.
 #' 
 #' @examples 
-#' \dontrun{
+#' \donttest{
 #' # Simulate network
 #' mus <- matrix(c(-1,-1,1,-1,1,1), 
 #'               nrow = 3,
@@ -292,10 +292,10 @@ print.JANE <- function(x, ...){
 #' plot(res, type = "misclassified", true_labels = apply(sim_data$Z, 1, which.max))
 #' 
 #' # plot network - uncertainty and swap axes
-#' plot(res, type = "uncertainty", swap_axes = T)
+#' plot(res, type = "uncertainty", swap_axes = TRUE)
 #' 
 #' # plot network - but only show contours of MVNs
-#' plot(res, swap_axes = T, alpha_edge = 0, alpha_node = 0)
+#' plot(res, swap_axes = TRUE, alpha_edge = 0, alpha_node = 0)
 #' 
 #' # plot using starting values of EM algorithm
 #' plot(res, initial_values = TRUE)

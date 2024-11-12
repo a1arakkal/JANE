@@ -64,7 +64,7 @@ The trace plot contains up to five unique plots tracking various metrics across 
 }
 }
 \examples{
-\dontrun{
+\donttest{
 # Simulate network
 mus <- matrix(c(-1,-1,1,-1,1,1), 
               nrow = 3,
@@ -103,10 +103,10 @@ plot(res)
 plot(res, type = "misclassified", true_labels = apply(sim_data$Z, 1, which.max))
 
 # plot network - uncertainty and swap axes
-plot(res, type = "uncertainty", swap_axes = T)
+plot(res, type = "uncertainty", swap_axes = TRUE)
 
 # plot network - but only show contours of MVNs
-plot(res, swap_axes = T, alpha_edge = 0, alpha_node = 0)
+plot(res, swap_axes = TRUE, alpha_edge = 0, alpha_node = 0)
 
 # plot using starting values of EM algorithm
 plot(res, initial_values = TRUE)

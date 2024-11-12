@@ -36,11 +36,12 @@ plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour
   if(uncertainty & is.null(misclassified)){
     uncer <- round(1-apply(data$prob_matrix, 1, max), 2)
     opar <- graphics::par(no.readonly=TRUE)
+    on.exit(graphics::par(opar), add = TRUE)
     nf <- graphics::layout(
       matrix(c(1,2), ncol=2, byrow=TRUE), 
-      widths = c(3,0.5)
+      widths = c(1,0.25)
     )
-    graphics::par(mar=c(4, 4, 2, 0.5), oma=c(1,1,1,1), las=1)
+    graphics::par(mar=c(4, 4, 2, 0.25), oma=c(0,0,1,0), las=1)
   }
   
   mclust::surfacePlot(data = U, 
@@ -114,7 +115,7 @@ plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour
       
       cols <- grDevices::heat.colors(length(levels(break_points)), alpha_node, rev = TRUE)
       graphics::points(U, pch = 16, cex = 0.8, col = cols[break_points])
-      graphics::par(mar = c(5, 0, 5, 5))
+      graphics::par(mar = c(5, 0, 5, 5.5))
       graphics::image(1, 1:length(levels(break_points)), t(seq_along(levels(break_points))), 
                       col = cols, axes = FALSE, xlab = "")
       labels <- strsplit(levels(break_points), ",")
@@ -128,9 +129,8 @@ plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour
           paste0("(",format(round(p1, 2), nsmall = 2),", ", format(round(p2, 2), nsmall = 2), "]")
         }
       }))
-      graphics::axis(4, at = 1:length(labels), labels = labels)
-      on.exit(graphics::par(opar), add = TRUE)
-      
+      graphics::axis(4, at = 1:length(labels), labels = labels, cex.axis=0.70)
+  
     }
   } else {
     graphics::points(U, pch = 16, cex = 0.8, 

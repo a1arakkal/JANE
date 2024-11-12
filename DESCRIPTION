@@ -8,7 +8,11 @@ Authors@R:
       person("Daniel", "Sewell", , "daniel-sewell@uiowa.edu", 
              role = "aut",
              comment = c(ORCID = "0000-0002-9238-4026") ))
-Description: Fit latent space network clustering models using an EM algorithm. 
+Description: Fit and simulate latent space network cluster models using an expectation-maximization algorithm. 
+    Enables flexible modeling of unweighted network data, supporting both directed and undirected networks,
+    with or without degree heterogeneity. Designed to handle large networks efficiently, it allows users to explore 
+    network structure through latent space representations, identify clusters within network data, and simulate models
+    with varying clustering and connectivity patterns.       
 License: GPL (>= 3)
 Encoding: UTF-8
 Depends: R (>= 4.1.0)

@@ -42,7 +42,7 @@ A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following 
 S3 summary method for object of class "\code{JANE}".
 }
 \examples{
-\dontrun{
+\donttest{
 # Simulate network
 mus <- matrix(c(-1,-1,1,-1,1,1), 
               nrow = 3,
