@@ -1,4 +1,7 @@
+
 # JANE News
 
-## 0.1
+## Version Updates
+
+## 0.1.0
 * Initial public release
