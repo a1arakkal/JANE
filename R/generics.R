@@ -26,7 +26,7 @@
 #'                           \item{\code{confusion_matrix}: A numeric table representing the confusion matrix comparing the cluster labels and the known true cluster labels.}
 #'                           }}
 #' @examples 
-#' 
+#' \donttest{
 #' # Simulate network
 #' mus <- matrix(c(-1,-1,1,-1,1,1), 
 #'               nrow = 3,
@@ -63,7 +63,7 @@
 #' 
 #' # Summarize fit using starting values of EM algorithm
 #' summary(res, initial_values = TRUE)
-#'
+#' }
 #' @method summary JANE
 #' @exportS3Method summary JANE
 summary.JANE <- function(object, true_labels = NULL, initial_values = FALSE, ...){
