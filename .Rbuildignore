@@ -7,3 +7,6 @@
 README.md
 ^doc$
 ^Meta$
+^cran-comments\.md$
+^README\.Rmd$
+^\.github$

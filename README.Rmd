@@ -1,15 +1,25 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
 
 # JANE
 
 <!-- badges: start -->
-
 [![R-CMD-check](https://github.com/a1arakkal/JANE/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/a1arakkal/JANE/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-JANE is a package for fitting latent space network clustering models
-using an EM algorithm.
+JANE is a package for fitting latent space network clustering models using an EM algorithm. 
 
 ## Installation
 
@@ -21,6 +31,7 @@ install.packages("JANE")
 # install.packages("devtools")
 devtools::install_github("a1arakkal/JANE")
 ```
+
 
 ## Basic usage
 
@@ -69,3 +80,4 @@ summary(res)
 # plot network
 plot(res)
 ```
+
