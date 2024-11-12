@@ -42,7 +42,7 @@ A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following 
 S3 summary method for object of class "\code{JANE}".
 }
 \examples{
-\dontrun{
+
 # Simulate network
 mus <- matrix(c(-1,-1,1,-1,1,1), 
               nrow = 3,
@@ -79,5 +79,5 @@ summary(res, true_labels = apply(sim_data$Z, 1, which.max))
 
 # Summarize fit using starting values of EM algorithm
 summary(res, initial_values = TRUE)
-}
+
 }
