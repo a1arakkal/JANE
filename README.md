@@ -16,7 +16,7 @@ using an EM algorithm.
 
 ``` r
 # Anticipated release from CRAN
-# install.packages("JANE")
+# instll.packages("JANE")
 
 # Development version from GitHub
 # install.packages("devtools")
