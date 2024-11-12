@@ -1,13 +1,17 @@
 Package: JANE
-Title: Just Another Latent Space Network Clustering Algorithm (JANE)
+Title: Just Another Latent Space Network Clustering Algorithm
 Version: 0.0.0.9000
 Authors@R: 
     c(person("Alan", "Arakkal", , "alan-arakkal@uiowa.edu", 
-           role = c("aut", "cre")),
+             role = c("aut", "cre", "cph"),
+             comment = c(ORCID = "0000-0002-7001-493X") ),
       person("Daniel", "Sewell", , "daniel-sewell@uiowa.edu", 
-           role = "aut"))
+             role = "aut",
+             comment = c(ORCID = "0000-0002-9238-4026") ))
 Description: Fit latent space network clustering models using an EM algorithm. 
 License: GPL (>= 3)
+URL: https://github.com/a1arakkal/JANE
+BugReports: https://github.com/a1arakkal/JANE/issues
 Encoding: UTF-8
 Depends: R (>= 4.1.0)
 LinkingTo: Rcpp, RcppArmadillo
