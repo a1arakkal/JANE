@@ -25,8 +25,8 @@ JANE is a package for fitting latent space network clustering models using an EM
 ## Installation
 
 ``` r
-# Current release from CRAN
-install.packages("JANE")
+# Anticipated release from CRAN
+# install.packages("JANE")
 
 # Development version from GitHub
 # install.packages("devtools")
