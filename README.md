@@ -9,8 +9,14 @@
 
 <!-- badges: end -->
 
-JANE is a package for fitting latent space network clustering models
-using an EM algorithm.
+JANE is a package to fit and simulate latent space network cluster
+models using an expectation-maximization algorithm. Enables flexible
+modeling of unweighted network data, supporting both directed and
+undirected networks, with or without degree heterogeneity. Designed to
+handle large networks efficiently, it allows users to explore network
+structure through latent space representations, identify clusters within
+network data, and simulate models with varying clustering and
+connectivity patterns.
 
 ## Installation
 
