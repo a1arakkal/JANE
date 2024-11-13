@@ -54,3 +54,5 @@ rsconnect/
 # ignore .o or .so files
 *.o
 *.so
+
+^CRAN-SUBMISSION$
