@@ -14,7 +14,8 @@ trace_plot <- function(model_object){
                                                   "Cluster assignment probability matrix",
                                                   "Abs diff. Q current vs. previous iteration"))
   
-  opar <- graphics::par(no.readonly=TRUE)
+  opar <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(opar))
   
   if(model_object$termination_rule == "prob_mat"){
     
@@ -180,7 +181,5 @@ trace_plot <- function(model_object){
          col = "red")
     
   }
-  
-  on.exit(graphics::par(opar), add = TRUE)
   
 }

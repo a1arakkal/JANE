@@ -314,6 +314,9 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
     stop("Please provide one of the following for type: 'lsnc', 'trace_plot', 'misclassified', or 'uncertainty'")
   }
   
+  opar <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(opar))
+  
   trace_plot <- FALSE
   uncertainty <- FALSE
   misclassified <- NULL
@@ -392,7 +395,6 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
       
       if(uncertainty & is.null(misclassified)){
         uncer <- round(1-apply(plot_data$prob_matrix, 1, max), 2)
-        opar <- graphics::par(no.readonly=TRUE)
         nf <- graphics::layout(
           matrix(c(1,2), ncol=2, byrow=TRUE), 
           widths = c(3,0.5)
@@ -457,8 +459,7 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
             }
           }))
           graphics::axis(4, at = 1:length(labels), labels = labels)
-          on.exit(graphics::par(opar), add = TRUE)
-          
+         
         }
       }
       
