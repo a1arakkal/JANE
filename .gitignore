@@ -55,4 +55,5 @@ rsconnect/
 *.o
 *.so
 
-^CRAN-SUBMISSION$
+# ignore CRAN-SUBMISSION 
+CRAN-SUBMISSION
