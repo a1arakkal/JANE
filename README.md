@@ -23,8 +23,8 @@ connectivity patterns.
 ## Installation
 
 ``` r
-# Anticipated release from CRAN
-# install.packages("JANE")
+# Current release from CRAN
+install.packages("JANE")
 
 # Development version from GitHub
 # install.packages("devtools")
