@@ -57,3 +57,4 @@ rsconnect/
 
 # ignore CRAN-SUBMISSION 
 CRAN-SUBMISSION
+cran-comments.md
