@@ -1,6 +1,6 @@
 
 plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour",  rotation_angle = 0,
-                      alpha_edge = 0.1, alpha_node = 1, swap_axes = FALSE, uncertainty = FALSE, 
+                      alpha_edge = 0.1, alpha_node = 1, swap_axes = FALSE, uncertainty = FALSE, cluster_cols = NULL,
                       main = NULL, xlab = NULL, ylab = NULL){
   
   opar <- graphics::par(no.readonly = TRUE)
@@ -56,86 +56,99 @@ plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour
   graphics::title(main = main, 
                   cex.main = ifelse(!is.null(misclassified), 1.0, ifelse(!uncertainty, 1.0, 0.8)))
   
-  
-  if(undirected){
+  if(type != "persp"){
     
-    graphics::segments(x0 = U[k_elist[,1],1],
-                       x1 = U[k_elist[,2],1],
-                       y0 = U[k_elist[,1],2],
-                       y1 = U[k_elist[,2],2],
-                       col= grDevices::gray(0.5, alpha_edge))
-    
-  } else {
-    
-    # get each arrow's length by converting x and y coords to inches
-    units <- graphics::par(c('usr', 'pin'))
-    x_to_inches <- with(units, pin[1L]/diff(usr[1:2])) # scale for x values to convert to inches
-    y_to_inches <- with(units, pin[2L]/diff(usr[3:4])) # scale for y values to convert to inches
-    
-    distances <- matrix(data = 0.0, nrow = nrow(k_elist), ncol = 1)
-    compute_dist(U = U %*% diag(c(x_to_inches, y_to_inches)), 
-                 distances = distances, 
-                 model = "NDH", 
-                 X = matrix(0), 
-                 indices = k_elist - 1,
-                 downsampling = T) # compute L2 norm squared of rescaled U_i-U_j
-    
-    # find too short arrows causing warning (i.e. less than 1/1000 of an inch)
-    idx_short_arrows <- which(sqrt(distances[,1])<0.001) # square root to get L2 norm
-    
-    # remove problem arrows
-    if(length(idx_short_arrows)>0){
-      k_elist <- k_elist[-idx_short_arrows, ]
-    } 
-    
-    graphics::arrows(x0 = U[k_elist[,1],1],
-                     x1 = U[k_elist[,2],1],
-                     y0 = U[k_elist[,1],2],
-                     y1 = U[k_elist[,2],2],
-                     col= grDevices::gray(0.5, alpha_edge),
-                     length = 0.1,
-                     angle = 10) 
-    
-    
-  }
-  
-  if(is.null(misclassified)){
-    if(!uncertainty){
+    if(undirected){
       
-      graphics::points(U,pch = 16, cex = 0.8, col = scales::alpha(Z, alpha_node))
+      graphics::segments(x0 = U[k_elist[,1],1],
+                         x1 = U[k_elist[,2],1],
+                         y0 = U[k_elist[,1],2],
+                         y1 = U[k_elist[,2],2],
+                         col= grDevices::gray(0.5, alpha_edge))
       
     } else {
       
-      if (length(unique(uncer)) > 1){
-        break_points <- cut(uncer, breaks = seq(min(uncer) - 1e-6, max(uncer), length.out = 11))
-      } else {
-        break_points <- as.factor(uncer)
-      }
+      # get each arrow's length by converting x and y coords to inches
+      units <- graphics::par(c('usr', 'pin'))
+      x_to_inches <- with(units, pin[1L]/diff(usr[1:2])) # scale for x values to convert to inches
+      y_to_inches <- with(units, pin[2L]/diff(usr[3:4])) # scale for y values to convert to inches
       
-      cols <- grDevices::heat.colors(length(levels(break_points)), alpha_node, rev = TRUE)
-      graphics::points(U, pch = 16, cex = 0.8, col = cols[break_points])
-      graphics::par(mar = c(5, 0, 5, 5.5))
-      graphics::image(1, 1:length(levels(break_points)), t(seq_along(levels(break_points))), 
-                      col = cols, axes = FALSE, xlab = "")
-      labels <- strsplit(levels(break_points), ",")
-      labels <-  unlist(lapply(labels, function(x){
-        p1 <- as.numeric(sub(pattern = "(\\()", x = x[1] , replacement = ""))
-        p2 <- as.numeric(sub(pattern = "(\\])", x = x[2] , replacement = ""))
-        p1 <- ifelse(p1<0, 0, p1)
-        if(is.na(p2)){
-          paste0(format(round(p1, 2), nsmall = 2))
-        } else {
-          paste0("(",format(round(p1, 2), nsmall = 2),", ", format(round(p2, 2), nsmall = 2), "]")
-        }
-      }))
-      graphics::axis(4, at = 1:length(labels), labels = labels, cex.axis=0.70)
-  
+      distances <- matrix(data = 0.0, nrow = nrow(k_elist), ncol = 1)
+      compute_dist(U = U %*% diag(c(x_to_inches, y_to_inches)), 
+                   distances = distances, 
+                   model = "NDH", 
+                   X = matrix(0), 
+                   indices = k_elist - 1,
+                   downsampling = T) # compute L2 norm squared of rescaled U_i-U_j
+      
+      # find too short arrows causing warning (i.e. less than 1/1000 of an inch)
+      idx_short_arrows <- which(sqrt(distances[,1])<0.001) # square root to get L2 norm
+      
+      # remove problem arrows
+      if(length(idx_short_arrows)>0){
+        k_elist <- k_elist[-idx_short_arrows, ]
+      } 
+      
+      graphics::arrows(x0 = U[k_elist[,1],1],
+                       x1 = U[k_elist[,2],1],
+                       y0 = U[k_elist[,1],2],
+                       y1 = U[k_elist[,2],2],
+                       col= grDevices::gray(0.5, alpha_edge),
+                       length = 0.1,
+                       angle = 10) 
+      
+      
     }
-  } else {
-    graphics::points(U, pch = 16, cex = 0.8, 
-                     col = scales::alpha(ifelse(1:nrow(A) %in% misclassified == T, "black", "white"),
-                                         alpha_node))
+    
+    if(is.null(misclassified)){
+      if(!uncertainty){
+        
+        if(is.null(cluster_cols)){
+          colors <- grDevices::rainbow(n = nrow(mus))
+        } else {
+          colors <- cluster_cols
+        }
+        
+        graphics::points(U, pch = 16, cex = 0.8, col = scales::alpha(colors[Z], alpha_node)) 
+        legend("topright", legend = paste0("Cluster ", sort(unique(Z))), pch = 16,
+               col = colors[sort(unique(Z))],
+               pt.bg = colors[sort(unique(Z))],
+               cex = 0.8)
+        
+      } else {
+        
+        if (length(unique(uncer)) > 1){
+          break_points <- cut(uncer, breaks = seq(min(uncer) - 1e-6, max(uncer), length.out = 11))
+        } else {
+          break_points <- as.factor(uncer)
+        }
+        
+        cols <- grDevices::heat.colors(length(levels(break_points)), alpha_node, rev = TRUE)
+        graphics::points(U, pch = 16, cex = 0.8, col = cols[break_points])
+        graphics::par(mar = c(5, 0, 5, 5.5))
+        graphics::image(1, 1:length(levels(break_points)), t(seq_along(levels(break_points))), 
+                        col = cols, axes = FALSE, xlab = "")
+        labels <- strsplit(levels(break_points), ",")
+        labels <-  unlist(lapply(labels, function(x){
+          p1 <- as.numeric(sub(pattern = "(\\()", x = x[1] , replacement = ""))
+          p2 <- as.numeric(sub(pattern = "(\\])", x = x[2] , replacement = ""))
+          p1 <- ifelse(p1<0, 0, p1)
+          if(is.na(p2)){
+            paste0(format(round(p1, 2), nsmall = 2))
+          } else {
+            paste0("(",format(round(p1, 2), nsmall = 2),", ", format(round(p2, 2), nsmall = 2), "]")
+          }
+        }))
+        graphics::axis(4, at = 1:length(labels), labels = labels, cex.axis=0.70)
+        
+      }
+    } else {
+      graphics::points(U, pch = 16, cex = 0.8, 
+                       col = scales::alpha(ifelse(1:nrow(A) %in% misclassified == T, "black", "white"),
+                                           alpha_node))
+      legend("topright", legend = "Misclassified actor", pch = 16,
+             cex = 0.8)
+    }
   }
-  
 }
 

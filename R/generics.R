@@ -237,6 +237,10 @@ print.JANE <- function(x, ...){
 #' @param zoom A numeric value > 0 that controls the % magnification of the plot (default is 100%).
 #' @param alpha_edge A numeric value in \code{[0,1]} that controls the transparency of the network edges (default is 0.1).
 #' @param alpha_node A numeric value in \code{[0,1]} that controls the transparency of the actors in the network (default is 1).
+#' @param main An optional overall title for the plot.
+#' @param xlab An optional title for the x axis.
+#' @param ylab An optional title for the y axis.
+#' @param cluster_cols An optional vector of colors for the clusters. Must have a length of at least \eqn{K}.
 #' @param ... Unused.
 #' @details
 #'The classification of actors into specific clusters is based on a hard clustering rule of \eqn{\{h | Z_{ih} = max_k Z_{ik}\}}. Additionally, the actor-specific classification uncertainty is derived as 1 - \eqn{max_k Z_{ik}}.
@@ -304,7 +308,8 @@ print.JANE <- function(x, ...){
 #' @exportS3Method plot JANE
 plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
                       zoom = 100, density_type = "contour", rotation_angle = 0,
-                      alpha_edge = 0.1, alpha_node = 1, swap_axes = FALSE, ...){
+                      alpha_edge = 0.1, alpha_node = 1, swap_axes = FALSE,
+                      main, xlab, ylab, cluster_cols, ...){
   
   if(!inherits(x, "JANE")){
     stop("Object is not of class JANE")
@@ -329,6 +334,14 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
       plot_data <- x$optimal_res
     } else {
       plot_data <- x$optimal_starting
+    }
+  }
+  
+  if(!missing(cluster_cols)){
+    if(length(unique(cluster_cols)) < length(plot_data$p)){
+      stop("The number of unique cluster colors supplied is less than the number of clusters")
+    } else {
+      cluster_cols <- cluster_cols[1:length(plot_data$p)]
     }
   }
   
@@ -371,6 +384,14 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
     misclassified <- NULL
   }
   
+  if(missing(main)){
+    main <- ifelse(!is.null(misclassified),
+                   "Latent Space Network Clustering - Misclassified Actors",
+                   ifelse(!uncertainty,
+                          "Latent Space Network Clustering",
+                          "Latent Space Network Clustering - Actor-specific Clustering Uncertainty"))
+  }
+  
   if(trace_plot){
     
     trace_plot(plot_data)
@@ -386,7 +407,12 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
                               function(x){max(stats::dnorm(x = seq(from = xlim[1], to = xlim[2], by = 0.1),
                                                            mean = means[x], 
                                                            sd = sqrt(vars[x])))}))*1.1)
-      colors <- grDevices::rainbow(n = K)
+      if(missing(cluster_cols)){
+        colors <- grDevices::rainbow(n = K)
+      } else {
+        colors <- cluster_cols
+      }
+
       color_actors <- colors[plot_data$cluster_labels]
       
       dnorm_fun <- function(x, i){
@@ -397,43 +423,72 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
         uncer <- round(1-apply(plot_data$prob_matrix, 1, max), 2)
         nf <- graphics::layout(
           matrix(c(1,2), ncol=2, byrow=TRUE), 
-          widths = c(3,0.5)
+          widths = c(1,0.25)
         )
-        graphics::par(mar=c(4, 4, 2, 0.5), oma=c(1,1,1,1), las=1)
+        graphics::par(mar=c(4, 4, 2, 0.25), oma=c(0,0,1,0), las=1)
+      }
+      
+      if(missing(xlab)){
+        xlab <- "Dim 1"
+      }
+      
+      if(missing(ylab)){
+        ylab <- ""
       }
       
       plot(1,
            type = "n",
-           xlab = "Dim 1", 
-           ylab = "", 
+           xlab = xlab, 
+           ylab = ylab, 
            ylim = ylim, 
            xlim = xlim,
-           main = ifelse(!is.null(misclassified),
-                         "Latent Space Network Clustering - Misclassified Actors",
-                         ifelse(!uncertainty,
-                                "Latent Space Network Clustering",
-                                "Latent Space Network Clustering - Actor-specific Clustering Uncertainty")),
+           main = main,
            cex.main = ifelse(!is.null(misclassified), 1.0, ifelse(!uncertainty, 1.0, 0.8)))
       
-      for (i in 1:K){
-        graphics::curve(dnorm_fun(x, i = i),
-                        from = xlim[1], to = xlim[2],
-                        n = 1000,
-                        add = T,
-                        col = colors[i])
-      }
-      
       if(!is.null(misclassified)){
+        
+        for (i in 1:K){
+          graphics::curve(dnorm_fun(x, i = i),
+                          from = xlim[1], to = xlim[2],
+                          n = 1000,
+                          add = T,
+                          col = "black")
+        }
+        
         graphics::points(cbind(plot_data$U[,1], 0), pch = "|", 
-                         cex = 1, 
+                         cex = 1.2, 
                          col = scales::alpha(ifelse(1:nrow(plot_data$U) %in% misclassified == T, "black", "white"),
                                              alpha_node))
+        legend("topright", legend= "Misclassified actor", pch = "|",
+               cex = 0.8) 
+        
       } else {
         if(!uncertainty){
+          
+          for (i in 1:K){
+            graphics::curve(dnorm_fun(x, i = i),
+                            from = xlim[1], to = xlim[2],
+                            n = 1000,
+                            add = T,
+                            col = colors[i])
+          }
+          
           graphics::points(cbind(plot_data$U[,1], 0), pch = "|", 
                            cex = 1, 
                            col = scales::alpha(color_actors, alpha_node))
+          legend("topright", legend= paste0("Cluster ", 1:length(colors)), lty = 1,
+                 col = colors,
+                 cex = 0.8) 
+          
         } else {
+          
+          for (i in 1:K){
+            graphics::curve(dnorm_fun(x, i = i),
+                            from = xlim[1], to = xlim[2],
+                            n = 1000,
+                            add = T,
+                            col = "black")
+          }
           
           if (length(unique(uncer)) > 1){
             break_points <- cut(uncer, breaks = seq(min(uncer) - 1e-6, max(uncer), length.out = 11))
@@ -444,7 +499,7 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
           cols <- grDevices::heat.colors(length(levels(break_points)), alpha_node, rev = TRUE)
           graphics::points(cbind(plot_data$U[,1], 0), pch = "|", 
                            cex = 1, col = cols[break_points])
-          graphics::par(mar = c(5, 0, 5, 5))
+          graphics::par(mar = c(5, 0, 5, 5.5))
           graphics::image(1, 1:length(levels(break_points)), t(seq_along(levels(break_points))), 
                           col = cols, axes = FALSE, xlab = "")
           labels <- strsplit(levels(break_points), ",")
@@ -458,13 +513,27 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
               paste0("(",format(round(p1, 2), nsmall = 2),", ", format(round(p2, 2), nsmall = 2), "]")
             }
           }))
-          graphics::axis(4, at = 1:length(labels), labels = labels)
+          graphics::axis(4, at = 1:length(labels), labels = labels, cex.axis=0.70)
          
         }
       }
       
       
     } else if(D == 2){
+      
+      if(missing(xlab)){
+        xlab <- ifelse(!swap_axes, "Dim 1", "Dim 2")
+      }
+      
+      if(missing(ylab)){
+        ylab <- ifelse(!swap_axes, "Dim 2", "Dim 1")
+      }
+      
+      cluster_cols <-  if(missing(cluster_cols)){
+        NULL
+      } else {
+        cluster_cols
+      }
       
       plot_data(A = x$A,
                 data = plot_data, 
@@ -476,13 +545,10 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
                 alpha_edge = alpha_edge, 
                 alpha_node = alpha_node,
                 uncertainty = uncertainty,
-                main = ifelse(!is.null(misclassified),
-                               "Latent Space Network Clustering - Misclassified Actors",
-                               ifelse(!uncertainty,
-                                      "Latent Space Network Clustering",
-                                      "Latent Space Network Clustering - Actor-specific Clustering Uncertainty")),
-                xlab = ifelse(!swap_axes, "Dim 1", "Dim 2"),
-                ylab = ifelse(!swap_axes, "Dim 2", "Dim 1"))
+                cluster_cols = cluster_cols,
+                main = main,
+                xlab = xlab,
+                ylab = ylab)
     
       
     } else {
@@ -504,6 +570,32 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
                                        dim = c(2,2,K))
         plot_data_temp$mus <- plot_data_temp$mus[, unname(total_n_plots[i, ])]
         
+        xlab_def <- ifelse(!swap_axes,
+                       paste0("Dim ", unname(total_n_plots[i,1])), 
+                       paste0("Dim ", unname(total_n_plots[i,2])))
+        
+        ylab_def <- ifelse(!swap_axes,
+                       paste0("Dim ", unname(total_n_plots[i,2])), 
+                       paste0("Dim ", unname(total_n_plots[i,1])))
+        
+        xlab_supp <- if(missing(xlab)){
+          xlab_def
+        } else {
+          xlab
+        }
+        
+        ylab_supp <- if(missing(ylab)){
+          ylab_def
+        } else {
+          ylab
+        }
+        
+        cluster_cols <-  if(missing(cluster_cols)){
+          NULL
+        } else {
+          cluster_cols
+        }
+        
         plot_data(A = x$A,
                   data = plot_data_temp, 
                   misclassified = misclassified,
@@ -514,17 +606,10 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
                   alpha_edge = alpha_edge, 
                   alpha_node = alpha_node,
                   uncertainty = uncertainty,
-                  main = ifelse(!is.null(misclassified),
-                                "Latent Space Network Clustering - Misclassified Actors",
-                                ifelse(!uncertainty,
-                                       "Latent Space Network Clustering",
-                                       "Latent Space Network Clustering - Actor-specific Clustering Uncertainty")),
-                  xlab = ifelse(!swap_axes,
-                                paste0("Dim ", unname(total_n_plots[i,1])), 
-                                paste0("Dim ", unname(total_n_plots[i,2]))),
-                  ylab = ifelse(!swap_axes,
-                                paste0("Dim ", unname(total_n_plots[i,2])), 
-                                paste0("Dim ", unname(total_n_plots[i,1]))))
+                  cluster_cols = cluster_cols,
+                  main = main,
+                  xlab = xlab_supp,
+                  ylab = ylab_supp)
 
         
         if (i != nrow(total_n_plots)){
@@ -535,4 +620,6 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
       
     }
   }
+  
 }
+
