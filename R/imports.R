@@ -5,6 +5,8 @@
 #' @import aricode
 #' @import rlang
 #' @import future.apply
+#' @import future
+#' @import Rcpp
 #' @import progressr
 #' @import progress
 #' @import graphics
