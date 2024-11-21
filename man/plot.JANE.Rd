@@ -15,6 +15,10 @@
   alpha_edge = 0.1,
   alpha_node = 1,
   swap_axes = FALSE,
+  main,
+  xlab,
+  ylab,
+  cluster_cols,
   ...
 )
 }
@@ -44,6 +48,14 @@
 \item{alpha_node}{A numeric value in \code{[0,1]} that controls the transparency of the actors in the network (default is 1).}
 
 \item{swap_axes}{A logical; if \code{TRUE} will swap the x and y axes (default is \code{FALSE}).}
+
+\item{main}{An optional overall title for the plot.}
+
+\item{xlab}{An optional title for the x axis.}
+
+\item{ylab}{An optional title for the y axis.}
+
+\item{cluster_cols}{An optional vector of colors for the clusters. Must have a length of at least \eqn{K}.}
 
 \item{...}{Unused.}
 }
