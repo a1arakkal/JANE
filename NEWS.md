@@ -12,3 +12,8 @@
 
 ## 0.1.2
 * Add import Rcpp and future to NAMESPACE
+
+## 0.2.0
+* Improve plotting function:
+  * Add options for user-specified titles (i.e., main, xlab, and ylab)
+  * Add option for user-specified colors for clusters 
