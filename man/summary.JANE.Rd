@@ -23,6 +23,7 @@ A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following 
 \item{\code{mus}}{ A numeric \eqn{K \times D} matrix representing the estimated mean vectors of the multivariate normal distributions for the latent positions of the \eqn{K} clusters.}
 \item{\code{omegas}}{ A numeric \eqn{D \times D \times K} array representing the estimated precision matrices of the multivariate normal distributions for the latent positions of the \eqn{K} clusters.}
 \item{\code{Z}}{ A numeric \eqn{N \times K} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
+\item{\code{uncertainty}}{ A numeric vector of length \eqn{N} representing the uncertainty of the \eqn{i^{th}} actor's classification, derived as 1 - \eqn{max_k Z_{ik}}.}
 \item{\code{cluster_labels}}{ A numeric vector of length \eqn{N} representing the cluster assignment of each actor based on a hard clustering rule of \eqn{\{h | Z_{ih} = max_k Z_{ik}\}}.}
 \item{\code{input_params}}{ A list with the following components: \itemize{
 \item{\code{model}: A character string representing the specific \code{model} used (i.e., 'NDH', 'RS', or 'RSR')}

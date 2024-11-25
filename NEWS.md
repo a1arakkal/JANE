@@ -17,3 +17,6 @@
 * Improve plotting function:
   * Add options for user-specified titles (i.e., main, xlab, and ylab)
   * Add option for user-specified colors for clusters 
+  
+## 0.2.1
+* summary.JANE now returns actor-specific uncertainty  
