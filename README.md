@@ -77,6 +77,6 @@ res <- JANE::JANE(A = sim_data$A,
 # Summarize fit 
 summary(res)
 
-# plot network
+# Plot network
 plot(res)
 ```
