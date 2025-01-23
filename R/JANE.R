@@ -3,6 +3,14 @@
 #' @param A A square matrix or sparse matrix of class 'dgCMatrix' representing the adjacency matrix of the \strong{unweighted} network of interest.
 #' @param D Integer (scalar or vector) specifying the dimension of the latent space (default is 2).
 #' @param K Integer (scalar or vector) specifying the number of clusters to consider (default is 2).
+#' @param family A character vector specifying the distribution of the edge weights.
+#'  \itemize{
+#'   \item{'bernoulli': Expects an unweighted network; utilizes a logit link (default)}
+#'   \item{'lognormal': Expects a weighted network with non-negative continuous weights; utilizes an identity link}
+#'   \item{'poisson': Expects a weighted network with weights representing counts; utilizes an log link}
+#'   }
+#' @param noise_weights A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to a unweighted binary network if a weighted network is supplied, i.e., (A > 0)*1.0) and fits a latent space cluster model (default is \code{FALSE}). 
+#' @param mean_noise_weights A numeric value specifying the mean of the noise weight distribution. Only applicable if \code{noise_weights = TRUE} and \code{family \%in\% c('lognormal', 'poisson')}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} and \code{family \%in\% c('lognormal', 'poisson')} then the 1st percentile of the non-zero weights will be used.
 #' @param model A character string specifying the model to fit:
 #'  \itemize{
 #'   \item{'NDH': \strong{undirected} network with no degree heterogeneity}
@@ -211,6 +219,9 @@
 JANE <- function(A,
                  D = 2,
                  K = 2,
+                 family = "bernoulli",
+                 noise_weights = FALSE,
+                 mean_noise_weights = NULL,
                  model,
                  initialization = "GNN", 
                  case_control = FALSE,
@@ -270,11 +281,53 @@ JANE <- function(A,
     A <- methods::as(A, "dgCMatrix")
   }
   
-  # Stop if not unweighted network
-  if(!all(A@x == 1.0)){
-    stop("Please supply an unweighted network")
+  # Check family input
+  if(!family %in% c("bernoulli", "lognormal", "poisson")){
+    stop("family needs to be one of the following: 'bernoulli', 'lognormal', 'poisson'")
+  }
+  
+  # Check if weighted network supplied for family = "bernoulli" and as user if they want to convert to an unweighted network
+  if(family == "bernoulli" & !all(A@x == 1.0)){
+    
+    input <- utils::menu(c("Yes", "No"), 
+                         title = paste0("Weighted edges found in A matrix for family = ",
+                                        family, ", do you want to convert the edges in the A matrix to unweighted edges?"))
+    if(input == 1){
+      A <- 1.0 * ( A > 0.0 )
+      message("Converting edges in A to unweighted edges")
+    } else {
+      stop("A needs to have unweighted edges for family = ", family)
+    }
+    
   }
 
+  # Check if unweighted network supplied for family %in% c("lognormal", "poisson")
+  if(family %in% c("lognormal", "poisson") & all(A@x == 1.0)){
+    stop(paste0("Edges in the A matrix are unweighted with family = ", family, ". Please supply an A matrix with weighted edges for family %in% c('lognormal', 'poisson')"))
+  }
+  
+  # Check if discrete data not supplied for family = "poisson"
+  if(family == "poisson" & !all( (A@x %% 1.0) == 0.0 ) ){
+    stop(paste0("Non-discrete edge weights detected with family = ", family, ". Please supply an A matrix with discrete edge weights for family == 'poisson'"))
+  }
+  
+  # Check noise_weights input convert to unweighted network if noise_weights == FALSE & family %in% c("lognormal", "poisson")
+  if(!noise_weights & family %in% c("lognormal", "poisson")){
+    A <- 1.0 * ( A > 0.0 )
+    message("noise_weights == FALSE & family %in% c('lognormal', 'poisson'), converting A to unweighted matrix and fitting latent space cluster model")
+  }
+  
+  # Check mean_noise_weights
+  if(is.null(mean_noise_weights)){
+    if(family != 'bernoulli' & noise_weights){
+      mean_noise_weights <- unname(stats::quantile(x = A@x, probs = 0.01))
+    }
+  } else {
+    if(family == 'bernoulli' | !noise_weights){
+      mean_noise_weights <- NULL
+    }
+  }
+  
   # Check for self loops 
   if(!all(diag(A) == 0.0)){
     stop("Self-loop(s) detected (i.e., diagonal element(s) of A are not 0)")

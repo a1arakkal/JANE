@@ -8,6 +8,9 @@ JANE(
   A,
   D = 2,
   K = 2,
+  family = "bernoulli",
+  noise_weights = FALSE,
+  mean_noise_weights = NULL,
   model,
   initialization = "GNN",
   case_control = FALSE,
@@ -22,6 +25,17 @@ JANE(
 \item{D}{Integer (scalar or vector) specifying the dimension of the latent space (default is 2).}
 
 \item{K}{Integer (scalar or vector) specifying the number of clusters to consider (default is 2).}
+
+\item{family}{A character vector specifying the distribution of the edge weights.
+\itemize{
+\item{'bernoulli': Expects an unweighted network; utilizes a logit link (default)}
+\item{'lognormal': Expects a weighted network with non-negative continuous weights; utilizes an identity link}
+\item{'poisson': Expects a weighted network with weights representing counts; utilizes an log link}
+}}
+
+\item{noise_weights}{A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to a unweighted binary network if a weighted network is supplied, i.e., (A > 0)*1.0) and fits a latent space cluster model (default is \code{FALSE}).}
+
+\item{mean_noise_weights}{A numeric value specifying the mean of the noise weight distribution. Only applicable if \code{noise_weights = TRUE} and \code{family \%in\% c('lognormal', 'poisson')}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} and \code{family \%in\% c('lognormal', 'poisson')} then the 1st percentile of the non-zero weights will be used.}
 
 \item{model}{A character string specifying the model to fit:
 \itemize{
