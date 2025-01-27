@@ -376,6 +376,37 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// update_prob_matrix_W_DA
+void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, arma::colvec beta, arma::mat U, arma::mat X, double q, double temp_beta);
+RcppExport SEXP _JANE_update_prob_matrix_W_DA(SEXP prob_matrix_WSEXP, SEXP modelSEXP, SEXP betaSEXP, SEXP USEXP, SEXP XSEXP, SEXP qSEXP, SEXP temp_betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type prob_matrix_W(prob_matrix_WSEXP);
+    Rcpp::traits::input_parameter< Rcpp::String >::type model(modelSEXP);
+    Rcpp::traits::input_parameter< arma::colvec >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type U(USEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< double >::type q(qSEXP);
+    Rcpp::traits::input_parameter< double >::type temp_beta(temp_betaSEXP);
+    update_prob_matrix_W_DA(prob_matrix_W, model, beta, U, X, q, temp_beta);
+    return R_NilValue;
+END_RCPP
+}
+// update_q_prob
+void update_q_prob(arma::colvec& q_prob, arma::mat prob_matrix_W, Rcpp::String model, double N, double h, double l);
+RcppExport SEXP _JANE_update_q_prob(SEXP q_probSEXP, SEXP prob_matrix_WSEXP, SEXP modelSEXP, SEXP NSEXP, SEXP hSEXP, SEXP lSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::colvec& >::type q_prob(q_probSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type prob_matrix_W(prob_matrix_WSEXP);
+    Rcpp::traits::input_parameter< Rcpp::String >::type model(modelSEXP);
+    Rcpp::traits::input_parameter< double >::type N(NSEXP);
+    Rcpp::traits::input_parameter< double >::type h(hSEXP);
+    Rcpp::traits::input_parameter< double >::type l(lSEXP);
+    update_q_prob(q_prob, prob_matrix_W, model, N, h, l);
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_JANE_BIC_logit_NDH", (DL_FUNC) &_JANE_BIC_logit_NDH, 2},
@@ -401,6 +432,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_JANE_update_mus_omegas", (DL_FUNC) &_JANE_update_mus_omegas, 8},
     {"_JANE_update_p", (DL_FUNC) &_JANE_update_p, 3},
     {"_JANE_update_prob_matrix_DA", (DL_FUNC) &_JANE_update_prob_matrix_DA, 6},
+    {"_JANE_update_prob_matrix_W_DA", (DL_FUNC) &_JANE_update_prob_matrix_W_DA, 7},
+    {"_JANE_update_q_prob", (DL_FUNC) &_JANE_update_q_prob, 6},
     {NULL, NULL, 0}
 };
 

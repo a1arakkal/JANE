@@ -10,7 +10,7 @@ JANE(
   K = 2,
   family = "bernoulli",
   noise_weights = FALSE,
-  mean_noise_weights = NULL,
+  guess_noise_weights = NULL,
   model,
   initialization = "GNN",
   case_control = FALSE,
@@ -35,7 +35,7 @@ JANE(
 
 \item{noise_weights}{A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to a unweighted binary network if a weighted network is supplied, i.e., (A > 0)*1.0) and fits a latent space cluster model (default is \code{FALSE}).}
 
-\item{mean_noise_weights}{A numeric value specifying the mean of the noise weight distribution. Only applicable if \code{noise_weights = TRUE} and \code{family \%in\% c('lognormal', 'poisson')}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} and \code{family \%in\% c('lognormal', 'poisson')} then the 1st percentile of the non-zero weights will be used.}
+\item{guess_noise_weights}{Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'poisson')} or proportion (i.e. in (0,1)) of noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'poisson')} and 1\% will be used for \code{family = 'bernoulli'}.}
 
 \item{model}{A character string specifying the model to fit:
 \itemize{

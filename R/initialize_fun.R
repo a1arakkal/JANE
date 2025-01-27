@@ -1,16 +1,19 @@
 
-initialize_fun <- function(A, priors, list_name, model, n_interior_knots, n_control, K, D){
+initialize_fun <- function(A, family, noise_weights, prob_matrix_W, priors, list_name, model, n_interior_knots, n_control, K, D){
   
   # Create new environment -----------------------------------------------------
   
   current <- invisible(rlang::new_environment(rlang::duplicate(list_name))) # need to duplicate as C++ modify in place will also change list_name which we don't want
   current$model <- model
+  current$noise_weights <- noise_weights
+  current$family <- family
+  current$prob_matrix_W <- prob_matrix_W
   
   # Update new environment based on model --------------------------------------
   
   if(model == "NDH"){
     
-    current$X <- NULL
+    current$X <- matrix(0, 1, 1)
     
     current$fun_list <- list(update_prob_matrix = update_prob_matrix_DA,
                              update_p = update_p,
@@ -121,9 +124,17 @@ initialize_fun <- function(A, priors, list_name, model, n_interior_knots, n_cont
     
   }
   
+  if(noise_weights){
+    current$fun_list$update_prob_matrix_W <- update_prob_matrix_W_DA
+    current$fun_list$update_q_prob <- update_q_prob
+    current$priors$h <-  1 # prior parameter 1 for q
+    current$priors$l <-  1 # prior parameter 2 for q
+  }
+  
   current$log_Q <- Inf
   current$previous_prob_mat <- current$prob_matrix * 1.0
   current$previous_U <- current$U * 1.0
   
   return(current)
+  
 }

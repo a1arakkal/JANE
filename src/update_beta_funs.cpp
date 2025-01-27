@@ -242,7 +242,7 @@ void update_beta_RE_CC(arma::colvec& beta, arma::sp_mat A, double n_control, arm
       
       p_1 = p_1 + (p_1_p*beta - (p*x_ij.t()));
       p_2 = p_2 + p_1_p;
-      p_3 = p_3 + (x_ij.t());
+      p_3 = p_3 + (A(i,j)*(x_ij.t()));
 
     }
    

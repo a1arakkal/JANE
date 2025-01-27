@@ -92,8 +92,8 @@ void update_U_CC(arma::mat& U, double n_control, arma::sp_mat A, arma::mat mus, 
     }
    
    int N_A_1_i = A_1_red.n_elem;
-   arma::mat p1_2 =  (2.0*N_A_1_i)*arma::eye<arma::mat>(D, D); 
-   arma::colvec p2_2 = 2.0 * arma::sum(U.rows(A_1_red), 0).t();
+   arma::mat p1_2 =  (2.0*arma::accu(A_i))*arma::eye<arma::mat>(D, D); 
+   arma::colvec p2_2 = 2.0 * arma::sum( ( A_i.cols(A_1_red).t()*arma::ones<arma::rowvec>(2.0) ) % U.rows(A_1_red), 0).t();
    arma::colvec p2_3 = arma::zeros<arma::colvec>(D);
    arma::colvec p2_4 = arma::zeros<arma::colvec>(D);   
    
@@ -268,8 +268,8 @@ void update_U_RE_CC(arma::mat& U, double n_control, arma::sp_mat A, arma::mat mu
     }
    
     int N_A_1_i = A_1_red.n_elem;
-    arma::mat p1_2 =  (2.0*N_A_1_i)*arma::eye<arma::mat>(D, D); 
-    arma::colvec p2_2 = 2.0 * arma::sum(U.rows(A_1_red), 0).t();
+    arma::mat p1_2 =  (2.0*arma::accu(A_i))*arma::eye<arma::mat>(D, D); 
+    arma::colvec p2_2 = 2.0 * arma::sum( ( A_i.cols(A_1_red).t()*arma::ones<arma::rowvec>(2.0) ) % U.rows(A_1_red), 0).t();
     arma::colvec p2_3 = arma::zeros<arma::colvec>(D);
     arma::colvec p2_4 = arma::zeros<arma::colvec>(D);   
    
@@ -363,8 +363,8 @@ void update_U_RE_CC(arma::mat& U, double n_control, arma::sp_mat A, arma::mat mu
    
       int N_A_1_col_i = A_1_red_col.n_elem;
      
-      p1_2 = p1_2 + ((2.0*N_A_1_col_i)*arma::eye<arma::mat>(D, D)); 
-      p2_2 = p2_2 + (2.0 * arma::sum(U.rows(A_1_red_col), 0).t());
+      p1_2 = p1_2 + ((2.0*arma::accu(A_i_col))*arma::eye<arma::mat>(D, D)); 
+      p2_2 = p2_2 + (2.0 * arma::sum( ( A_i_col.cols(A_1_red_col).t()*arma::ones<arma::rowvec>(2.0) ) % U.rows(A_1_red_col), 0).t());
     
       for(int l = 0; l < N_A_1_col_i; l++){
        

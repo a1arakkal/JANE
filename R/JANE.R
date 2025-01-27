@@ -10,7 +10,7 @@
 #'   \item{'poisson': Expects a weighted network with weights representing counts; utilizes an log link}
 #'   }
 #' @param noise_weights A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to a unweighted binary network if a weighted network is supplied, i.e., (A > 0)*1.0) and fits a latent space cluster model (default is \code{FALSE}). 
-#' @param mean_noise_weights A numeric value specifying the mean of the noise weight distribution. Only applicable if \code{noise_weights = TRUE} and \code{family \%in\% c('lognormal', 'poisson')}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} and \code{family \%in\% c('lognormal', 'poisson')} then the 1st percentile of the non-zero weights will be used.
+#' @param guess_noise_weights Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'poisson')} or proportion (i.e. in (0,1)) of noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'poisson')} and 1% will be used for \code{family = 'bernoulli'}.
 #' @param model A character string specifying the model to fit:
 #'  \itemize{
 #'   \item{'NDH': \strong{undirected} network with no degree heterogeneity}
@@ -221,14 +221,14 @@ JANE <- function(A,
                  K = 2,
                  family = "bernoulli",
                  noise_weights = FALSE,
-                 mean_noise_weights = NULL,
+                 guess_noise_weights = NULL,
                  model,
                  initialization = "GNN", 
                  case_control = FALSE,
                  DA_type = "none", 
                  seed = NULL, 
                  control = list()){
-
+  
   con <- list(
     verbose = FALSE,
     max_its = 1e3, 
@@ -275,7 +275,9 @@ JANE <- function(A,
   cl$case_control <- NULL
   cl$seed <- NULL
   cl$DA_type <- NULL
-
+  cl$family <- eval(family)
+  cl$noise_weights <- eval(noise_weights)
+  
   # Check for class of A
   if(!"dgCMatrix" %in% class(A)){
     A <- methods::as(A, "dgCMatrix")
@@ -300,7 +302,7 @@ JANE <- function(A,
     }
     
   }
-
+  
   # Check if unweighted network supplied for family %in% c("lognormal", "poisson")
   if(family %in% c("lognormal", "poisson") & all(A@x == 1.0)){
     stop(paste0("Edges in the A matrix are unweighted with family = ", family, ". Please supply an A matrix with weighted edges for family %in% c('lognormal', 'poisson')"))
@@ -314,18 +316,56 @@ JANE <- function(A,
   # Check noise_weights input convert to unweighted network if noise_weights == FALSE & family %in% c("lognormal", "poisson")
   if(!noise_weights & family %in% c("lognormal", "poisson")){
     A <- 1.0 * ( A > 0.0 )
-    message("noise_weights == FALSE & family %in% c('lognormal', 'poisson'), converting A to unweighted matrix and fitting latent space cluster model")
+    family <- "bernoulli"
+    message("noise_weights == FALSE & family %in% c('lognormal', 'poisson'), converting A to unweighted matrix and fitting latent space cluster model assuming no noise weights and family = 'bernoulli'")
   }
   
-  # Check mean_noise_weights
-  if(is.null(mean_noise_weights)){
-    if(family != 'bernoulli' & noise_weights){
-      mean_noise_weights <- unname(stats::quantile(x = A@x, probs = 0.01))
-    }
+  # Check guess_noise_weights
+  if(!noise_weights){
+    
+    guess_noise_weights <- NULL
+    q_prob <- NULL
+    
   } else {
-    if(family == 'bernoulli' | !noise_weights){
-      mean_noise_weights <- NULL
+    
+    if(is.null(guess_noise_weights)){
+      
+      if(family != 'bernoulli'){
+        guess_noise_weights <- unname(stats::quantile(x = A@x, probs = 0.01))
+        q_prob <- 0.01
+      } else {
+        guess_noise_weights <- 0.01
+        q_prob <- guess_noise_weights
+      }
+      
+    } else {
+      
+      if(family != 'bernoulli'){
+        if (guess_noise_weights <= 0){
+          stop("Please supply a postive non-zero numeric value for guess_noise_weights with family ='lognormal' or 'poisson'.")
+        }
+        q_prob <- mean(A@x <= guess_noise_weights)
+      } else {
+        if(!(0 < guess_noise_weights & guess_noise_weights < 1)){
+          stop("Please supply a vaild proportion in (0,1) for guess_noise_weights with family ='bernoulli'.")
+        }
+        q_prob <- guess_noise_weights
+      }
+      
     }
+  }
+
+  cl$guess_noise_weights <- eval(guess_noise_weights)
+  cl$q_prob <- eval(q_prob)
+
+  # Extract edge indices and weights and store as prob_matrix_W
+  prob_matrix_W <- cbind(as.matrix(summary(A)), 1.0, 0.0)
+  colnames(prob_matrix_W) <- c("i", "j", "weight", "hat_zij1", "hat_zij2")  
+  cl$prob_matrix_W <- eval(prob_matrix_W)
+  
+  # Convert A into unweighted network (weights already extracted and stored in prob_matrix_W)
+  if(!all(A@x == 1.0)){
+    A <- 1.0 * ( A > 0.0 )
   }
   
   # Check for self loops 
@@ -544,7 +584,7 @@ JANE <- function(A,
   
   optimal_res <- parallel_res[[optimal_pos]]$EM_results
   if (length(optimal_res) > 1){
-    optimal_res[["cluster_labels"]] <- apply(optimal_res$prob_mat, 1, which.max)
+    optimal_res[["cluster_labels"]] <- apply(optimal_res$prob_matrix, 1, which.max)
     names(optimal_res[["cluster_labels"]]) <- ids
     rownames(optimal_res$prob_matrix) <- ids
     rownames(optimal_res$U) <- ids
@@ -555,7 +595,7 @@ JANE <- function(A,
   optimal_starting <- parallel_res[[optimal_pos]]$starting_params
   if(!is.null(optimal_starting) & is.list(optimal_starting)){
     optimal_starting[["model"]] <- model
-    optimal_starting[["cluster_labels"]] <- apply(optimal_starting$prob_mat, 1, which.max)
+    optimal_starting[["cluster_labels"]] <- apply(optimal_starting$prob_matrix, 1, which.max)
     names(optimal_starting[["cluster_labels"]]) <- ids
     rownames(optimal_starting$prob_matrix) <- ids
     rownames(optimal_starting$U) <- ids
@@ -604,6 +644,9 @@ EM_inner <- function(A,
                      D,
                      K,
                      model,
+                     noise_weights,
+                     prob_matrix_W,
+                     family,
                      starting_params,
                      control,
                      ...){
@@ -613,6 +656,9 @@ EM_inner <- function(A,
   # Run initialize function
   current <- suppressWarnings(initialize_fun(A = A,
                                              list_name = starting_params, 
+                                             family = family,
+                                             noise_weights = noise_weights,
+                                             prob_matrix_W = prob_matrix_W,
                                              model = model, 
                                              n_interior_knots = control$n_interior_knots,
                                              n_control = control$n_control, 
@@ -671,6 +717,28 @@ EM_inner <- function(A,
                                           p = current$p, U = current$U,
                                           temp_beta = as.double(control$beta_temp_schedule[beta_temp]))
       
+      if(noise_weights){
+        # update prob_matrix_W
+        current$fun_list$update_prob_matrix_W(prob_matrix_W = current$prob_matrix_W,
+                                              model = current$model,
+                                              beta = current$beta,
+                                              U = current$U,
+                                              X = current$X,
+                                              q = current$q_prob,
+                                              temp_beta = as.double(control$beta_temp_schedule[beta_temp]))
+        # update A
+        A[current$prob_matrix_W[, 1:2]] <- current$prob_matrix_W[, 4]
+        
+        # update update_q_prob
+        current$fun_list$update_q_prob(q_prob = current$q_prob,
+                                       prob_matrix_W = current$prob_matrix_W,
+                                       N = nrow(A),
+                                       model = current$model,
+                                       h = current$priors$h,
+                                       l = current$priors$l)
+        
+      }
+      
       # update U
       current$fun_list$update_U(U = current$U, 
                                 A = A, 
@@ -701,6 +769,7 @@ EM_inner <- function(A,
                                    e = current$priors$e,
                                    X =  current$X,
                                    model = current$model)
+      
       
       # check termination
       check_convergence <- terminate_EM(A = A,
@@ -787,13 +856,14 @@ EM_inner <- function(A,
                                                        function(x){x[apply(x,1, function(x){!any(is.na(x) & !is.nan(x))}),]},
                                                        simplify = F))
   
+
   dont_return_names <- c("log_Q", "previous_prob_mat", "previous_U", "fun_list")
   out <- mget(x = names(current)[!(names(current) %in% dont_return_names)], envir = current)
   
   # Get IC info
   out$IC <- unlist(BICL(A = A, object = out))
-
-  return(out[!(names(out) %in% "X")])
+  
+  return(out[!(names(out) %in% c("X"))])
   
 }
 
@@ -814,10 +884,14 @@ inner_parallel <- function(x, call_def, A){
       call_def[[1]] <- as.symbol("initialize_starting_values")
       call_def$random_start <- ifelse(call_def$initialization == "GNN", F, T)
       call_def$starting_params <- eval(call_def)
+      call_def$starting_params$q_prob <- call_def$q_prob
       
     } else{
+      
       call_def$starting_params <- call_def$initialization
-    }
+      call_def$starting_params$q_prob <- call_def$q_prob
+    
+      }
     
     run_fun <- tryCatch(
       {
