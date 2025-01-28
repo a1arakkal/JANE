@@ -44,7 +44,7 @@
 #'                         mus = mus, 
 #'                         omegas = omegas, 
 #'                         p = p, 
-#'                         beta0 = beta0, 
+#'                         params_LR = list(beta0 = beta0), 
 #'                         remove_isolates = TRUE)
 #'                         
 #' # Run JANE on simulated data
@@ -60,7 +60,7 @@
 #' summary(res)
 #' 
 #' # Summarize fit and compare to true cluster labels
-#' summary(res, true_labels = apply(sim_data$Z, 1, which.max))
+#' summary(res, true_labels = apply(sim_data$Z_U, 1, which.max))
 #' 
 #' # Summarize fit using starting values of EM algorithm
 #' summary(res, initial_values = TRUE)
@@ -276,7 +276,7 @@ print.JANE <- function(x, ...){
 #'                         mus = mus, 
 #'                         omegas = omegas, 
 #'                         p = p, 
-#'                         beta0 = beta0, 
+#'                         params_LR = list(beta0 = beta0), 
 #'                         remove_isolates = TRUE)
 #'                         
 #' # Run JANE on simulated data
@@ -295,7 +295,7 @@ print.JANE <- function(x, ...){
 #' plot(res)
 #' 
 #' # plot network - misclassified
-#' plot(res, type = "misclassified", true_labels = apply(sim_data$Z, 1, which.max))
+#' plot(res, type = "misclassified", true_labels = apply(sim_data$Z_U, 1, which.max))
 #' 
 #' # plot network - uncertainty and swap axes
 #' plot(res, type = "uncertainty", swap_axes = TRUE)

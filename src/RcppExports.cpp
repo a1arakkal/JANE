@@ -192,6 +192,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_mean_edge_weight
+void compute_mean_edge_weight(arma::mat& temp_edge_indices, double beta0, arma::mat RE, Rcpp::String model);
+RcppExport SEXP _JANE_compute_mean_edge_weight(SEXP temp_edge_indicesSEXP, SEXP beta0SEXP, SEXP RESEXP, SEXP modelSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type temp_edge_indices(temp_edge_indicesSEXP);
+    Rcpp::traits::input_parameter< double >::type beta0(beta0SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type RE(RESEXP);
+    Rcpp::traits::input_parameter< Rcpp::String >::type model(modelSEXP);
+    compute_mean_edge_weight(temp_edge_indices, beta0, RE, model);
+    return R_NilValue;
+END_RCPP
+}
 // update_U
 void update_U(arma::mat& U, arma::sp_mat A, arma::mat mus, arma::cube omegas, arma::mat prob_matrix, arma::colvec beta, void * X, void * n_control, void * model);
 RcppExport SEXP _JANE_update_U(SEXP USEXP, SEXP ASEXP, SEXP musSEXP, SEXP omegasSEXP, SEXP prob_matrixSEXP, SEXP betaSEXP, SEXP XSEXP, SEXP n_controlSEXP, SEXP modelSEXP) {
@@ -421,6 +434,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_JANE_draw_A_NDH_c", (DL_FUNC) &_JANE_draw_A_NDH_c, 2},
     {"_JANE_draw_A_RS_c", (DL_FUNC) &_JANE_draw_A_RS_c, 3},
     {"_JANE_draw_A_RSR_c", (DL_FUNC) &_JANE_draw_A_RSR_c, 4},
+    {"_JANE_compute_mean_edge_weight", (DL_FUNC) &_JANE_compute_mean_edge_weight, 4},
     {"_JANE_update_U", (DL_FUNC) &_JANE_update_U, 9},
     {"_JANE_update_U_CC", (DL_FUNC) &_JANE_update_U_CC, 9},
     {"_JANE_update_U_RE", (DL_FUNC) &_JANE_update_U_RE, 9},

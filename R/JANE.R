@@ -127,7 +127,7 @@
 #'                         mus = mus, 
 #'                         omegas = omegas, 
 #'                         p = p, 
-#'                         beta0 = beta0, 
+#'                         params_LR = list(beta0 = beta0),
 #'                         remove_isolates = TRUE)
 #'                         
 #' # Run JANE on simulated data
@@ -996,3 +996,12 @@ update_prob_matrix_DA <- function(prob_matrix, mus, omegas, p, U, temp_beta) {
   invisible(.Call('_JANE_update_prob_matrix_DA', PACKAGE = 'JANE', prob_matrix, mus, omegas, p, U, temp_beta))
 }
 
+#' @useDynLib JANE  
+update_prob_matrix_W_DA <- function(prob_matrix_W, model, beta, U, X, q, temp_beta) {
+  invisible(.Call('_JANE_update_prob_matrix_W_DA', PACKAGE = 'JANE', prob_matrix_W, model, beta, U, X, q, temp_beta))
+}
+
+#' @useDynLib JANE  
+update_q_prob <- function(q_prob, prob_matrix_W, model, N, h, l) {
+  invisible(.Call('_JANE_update_q_prob', PACKAGE = 'JANE', q_prob, prob_matrix_W, model, N, h, l))
+}

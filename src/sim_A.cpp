@@ -70,3 +70,28 @@ arma::sp_mat draw_A_RSR_c(arma::mat U, double beta0, arma::colvec s, arma::colve
   
   return(A);
 }
+
+
+// [[Rcpp::export]]
+void compute_mean_edge_weight(arma::mat& temp_edge_indices, double beta0, arma::mat RE, Rcpp::String model){
+
+  int N = temp_edge_indices.n_rows;
+  
+  for(int n = 0; n < N; n++){
+
+    int i = temp_edge_indices(n, 0) - 1.0;
+    int j = temp_edge_indices(n, 1) - 1.0;
+    
+  if(model == "RS") {
+
+    temp_edge_indices(n, 2) = beta0 + RE(i, 0) + RE(j, 0);
+
+  } else {
+
+    temp_edge_indices(n, 2) = beta0 + RE(i, 0) + RE(j, 1);
+
+  }
+    
+ }
+
+}

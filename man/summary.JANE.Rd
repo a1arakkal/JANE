@@ -60,7 +60,7 @@ sim_data <- JANE::sim_A(N = 100L,
                         mus = mus, 
                         omegas = omegas, 
                         p = p, 
-                        beta0 = beta0, 
+                        params_LR = list(beta0 = beta0), 
                         remove_isolates = TRUE)
                         
 # Run JANE on simulated data
@@ -76,7 +76,7 @@ res <- JANE::JANE(A = sim_data$A,
 summary(res)
 
 # Summarize fit and compare to true cluster labels
-summary(res, true_labels = apply(sim_data$Z, 1, which.max))
+summary(res, true_labels = apply(sim_data$Z_U, 1, which.max))
 
 # Summarize fit using starting values of EM algorithm
 summary(res, initial_values = TRUE)
