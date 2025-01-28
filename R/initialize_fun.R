@@ -50,7 +50,7 @@ initialize_fun <- function(A, family, noise_weights, prob_matrix_W, priors, list
   } else if(model == "RS"){
     
     # generate NS basis matrix 
-    current$X <- splines::ns(x = rowSums(A), df = n_interior_knots + 1, intercept = F)
+    current$X <- splines::ns(x = (1.0/(nrow(A)-1.0))*rowSums(A), df = n_interior_knots + 1, intercept = F)
     
     current$fun_list <- list(update_prob_matrix = update_prob_matrix_DA,
                              update_p = update_p,
@@ -87,8 +87,8 @@ initialize_fun <- function(A, family, noise_weights, prob_matrix_W, priors, list
   } else {
     
     # generate NS basis matrix 
-    current$X <- cbind(splines::ns(x = rowSums(A), df = n_interior_knots + 1, intercept = F),
-                       splines::ns(x = colSums(A), df = n_interior_knots + 1, intercept = F))
+    current$X <- cbind(splines::ns(x = (1.0/(nrow(A)-1.0))*rowSums(A), df = n_interior_knots + 1, intercept = F),
+                       splines::ns(x = (1.0/(nrow(A)-1.0))*colSums(A), df = n_interior_knots + 1, intercept = F))
     
     current$fun_list <- list(update_prob_matrix = update_prob_matrix_DA,
                              update_p = update_p,

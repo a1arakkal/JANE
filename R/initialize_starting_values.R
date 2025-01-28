@@ -211,7 +211,7 @@ initialize_starting_values <- function(A,
           } else if (model == "RS"){
             
             # generate NS basis matrix for degree
-            X_basis <- splines::ns(x = rowSums(A), df = control$n_interior_knots + 1, intercept = F)
+            X_basis <- splines::ns(x = (1.0/(nrow(A)-1.0))*rowSums(A), df = control$n_interior_knots + 1, intercept = F)
             
             if (control$downsampling_GNN){
               
@@ -307,8 +307,8 @@ initialize_starting_values <- function(A,
           } else {
             
             # generate NS basis matrix for in and out degree
-            X_basis <- cbind(splines::ns(x = rowSums(A), df = control$n_interior_knots + 1, intercept = F),
-                             splines::ns(x = colSums(A), df = control$n_interior_knots + 1, intercept = F))
+            X_basis <- cbind(splines::ns(x = (1.0/(nrow(A)-1.0))*rowSums(A), df = control$n_interior_knots + 1, intercept = F),
+                             splines::ns(x = (1.0/(nrow(A)-1.0))*colSums(A), df = control$n_interior_knots + 1, intercept = F))
             
             if (control$downsampling_GNN){
               
