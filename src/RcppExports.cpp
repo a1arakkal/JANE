@@ -58,6 +58,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// BIC_hurdle
+double BIC_hurdle(arma::sp_mat A, Rcpp::List object);
+RcppExport SEXP _JANE_BIC_hurdle(SEXP ASEXP, SEXP objectSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::sp_mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type object(objectSEXP);
+    rcpp_result_gen = Rcpp::wrap(BIC_hurdle(A, object));
+    return rcpp_result_gen;
+END_RCPP
+}
 // log_like_C
 double log_like_C(arma::colvec par, arma::mat X, arma::colvec y);
 RcppExport SEXP _JANE_log_like_C(SEXP parSEXP, SEXP XSEXP, SEXP ySEXP) {
@@ -426,6 +438,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_JANE_BIC_logit_RS", (DL_FUNC) &_JANE_BIC_logit_RS, 2},
     {"_JANE_BIC_logit_RSR", (DL_FUNC) &_JANE_BIC_logit_RSR, 2},
     {"_JANE_BIC_ICL_MBC", (DL_FUNC) &_JANE_BIC_ICL_MBC, 1},
+    {"_JANE_BIC_hurdle", (DL_FUNC) &_JANE_BIC_hurdle, 2},
     {"_JANE_log_like_C", (DL_FUNC) &_JANE_log_like_C, 3},
     {"_JANE_gradient_C", (DL_FUNC) &_JANE_gradient_C, 3},
     {"_JANE_compute_dist", (DL_FUNC) &_JANE_compute_dist, 6},

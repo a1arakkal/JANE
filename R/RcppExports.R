@@ -17,6 +17,10 @@ BIC_ICL_MBC <- function(object) {
     .Call('_JANE_BIC_ICL_MBC', PACKAGE = 'JANE', object)
 }
 
+BIC_hurdle <- function(A, object) {
+    .Call('_JANE_BIC_hurdle', PACKAGE = 'JANE', A, object)
+}
+
 log_like_C <- function(par, X, y) {
     .Call('_JANE_log_like_C', PACKAGE = 'JANE', par, X, y)
 }

@@ -156,5 +156,76 @@ Rcpp::List BIC_ICL_MBC(Rcpp::List object){
                              
 }
 
+// [[Rcpp::export]]
+double BIC_hurdle(arma::sp_mat A, Rcpp::List object){
+   
+   arma::mat U = object["U"];
+   arma::mat X = object["X"];
+   arma::colvec beta = object["beta"];
+   Rcpp::String model = object["model"];
+   double q_prob = object["q_prob"];
 
+   int N = U.n_rows;
+   double n_edges = 0.0;
+
+   if(model == "RSR"){
+     n_edges = arma::accu(A);
+   } else {
+     n_edges = 0.5*arma::accu(A);
+   }
+
+   double p_1 = 0;
+   
+   for(int i = 0; i < N; i++){
+  
+    for(int j = 0; j < N; j++){
+
+      if(model == "NDH"){
+        
+        if (j > i){
+       
+           arma::rowvec temp = U.row(i) - U.row(j);
+           arma::rowvec cross_prod = temp * temp.t();
+           double eta = beta(0) - cross_prod(0);
+           p_1 = p_1 + ( ( (1.0 - A(i,j))*std::log(1.0 - q_prob) ) - std::log(1.0 + std::exp(eta)) + ( A(i,j)*std::log(std::exp(eta) + q_prob ) ) );
+          
+        }
+
+      } else if (model == "RS"){
+
+        if (j > i){
+        
+          arma::rowvec x_ij = arma::ones<arma::rowvec>(1+X.n_cols);
+          x_ij(arma::span(1, X.n_cols)) = X.row(i) + X.row(j);
+          arma::rowvec x_ij_beta = x_ij*beta; 
+          arma::rowvec temp = U.row(i) - U.row(j);
+          arma::rowvec cross_prod = temp * temp.t();
+          double eta = x_ij_beta(0) - cross_prod(0);
+          p_1 = p_1 + ( ( (1.0 - A(i,j))*std::log(1.0 - q_prob) ) - std::log(1.0 + std::exp(eta)) + ( A(i,j)*std::log(std::exp(eta) + q_prob ) ) );
+       
+        }
+
+      } else {
+
+         if (j != i){
+       
+          arma::rowvec x_ij = arma::ones<arma::rowvec>(1+X.n_cols);
+          x_ij(arma::span(1, X.n_cols)) = arma::join_rows(X.row(i).subvec(0, (X.n_cols*0.5) - 1), X.row(j).subvec(X.n_cols*0.5, X.n_cols - 1));
+          arma::rowvec x_ij_beta = x_ij*beta; 
+          arma::rowvec temp = U.row(i) - U.row(j);
+          arma::rowvec cross_prod = temp * temp.t();
+          double eta = x_ij_beta(0) - cross_prod(0);
+          p_1 = p_1 + ( ( (1.0 - A(i,j))*std::log(1.0 - q_prob) ) - std::log(1.0 + std::exp(eta)) + ( A(i,j)*std::log(std::exp(eta) + q_prob ) ) );
+             
+        }
+
+      }
+            
+    }
+   
+   }
+   
+   return (-2.0*p_1) + ( (beta.n_elem + 1.0) * std::log(n_edges));
+   
+}
 

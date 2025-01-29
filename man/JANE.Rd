@@ -109,11 +109,11 @@ The \code{control} argument is a named list that the user can supply containing 
 \item{\code{n_start}}{An integer specifying the maximum number of starts for the EM algorithm (default is \code{5}).}
 \item{\code{max_retry}}{An integer specifying the maximum number of re-attempts if starting values cause issues with EM algorithm (default is \code{5}).}
 \item{\code{IC_selection}}{A character string to specify the information criteria used to select the optimal fit based on the combinations of \code{K}, \code{D}, and \code{n_start} considered: \itemize{
-\item{\code{'BIC_logit'}: BIC computed from logistic regression component}
+\item{\code{'BIC_model'}: BIC computed from logistic regression or Hurdle model component}
 \item{\code{'BIC_mbc'}: BIC computed from model based clustering component}
 \item{\code{'ICL_mbc'}: ICL computed from model based clustering component}
-\item{\code{'Total_BIC'}: sum of \code{'BIC_logit'} and \code{'BIC_mbc'}}
-\item{\code{'Total_ICL'}: sum of \code{'BIC_logit'} and \code{'ICL_mbc'} (default)}
+\item{\code{'Total_BIC'}: sum of \code{'BIC_model'} and \code{'BIC_mbc'}}
+\item{\code{'Total_ICL'}: sum of \code{'BIC_model'} and \code{'ICL_mbc'} (default)}
 }}
 \item{\code{sd_random_U_GNN}}{(only relevant when \code{initialization = 'GNN'}) A positive numeric value specifying the standard deviation for the random draws from a normal distribution to initialize \eqn{U} (default is \code{1}).}
 \item{\code{max_retry_GNN}}{(only relevant when \code{initialization = 'GNN'}) An integer specifying the maximum number of re-attempts for the \code{GNN} approach before switching to random starting values (default is \code{10}).}
@@ -129,11 +129,11 @@ The \code{control} argument is a named list that the user can supply containing 
 
 \code{JANE} allows for the following model selection criteria to choose the number of clusters:
 \itemize{
-\item{\code{'BIC_logit'}: BIC computed from logistic regression component}
+\item{\code{'BIC_model'}: BIC computed from logistic regression or Hurdle model component}
 \item{\code{'BIC_mbc'}: BIC computed from model based clustering component}
 \item{\code{'ICL_mbc'}: ICL (Biernacki et al. (2000)) computed from model based clustering component}
-\item{\code{'Total_BIC'}: Sum of \code{'BIC_logit'} and \code{'BIC_mbc'}, this is the model selection criterion proposed by Handcock et al. (2007)}
-\item{\code{'Total_ICL'}: (default) sum of \code{'BIC_logit'} and \code{'ICL_mbc'}, this criterion is similar to \code{'Total_BIC'}, but uses ICL for the model based clustering component which tends to favor more well-separated clusters.}
+\item{\code{'Total_BIC'}: Sum of \code{'BIC_model'} and \code{'BIC_mbc'}, this is the model selection criterion proposed by Handcock et al. (2007)}
+\item{\code{'Total_ICL'}: (default) sum of \code{'BIC_model'} and \code{'ICL_mbc'}, this criterion is similar to \code{'Total_BIC'}, but uses ICL for the model based clustering component which tends to favor more well-separated clusters.}
 }
 
 \emph{Warning}: It is not certain whether it is appropriate to use the model selection criterion above to select \code{D}.
