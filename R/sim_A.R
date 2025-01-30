@@ -253,7 +253,7 @@ sim_A <- function(N,
       
       RE_W <- matrix(stats::rnorm(n = N*2), ncol = 2) %*% t(solve(chol(params_weights$precision_R_effects)))
       colnames(RE_W) <- c("s", "r")
-   
+      
       temp_edge_indices <- edge_indices
       compute_mean_edge_weight(temp_edge_indices = temp_edge_indices,
                                beta0 = params_weights$beta0,
@@ -266,7 +266,7 @@ sim_A <- function(N,
       RE_W <- NULL
       params_weights$precision_R_effects <- NULL
       mean_edges <- params_weights$beta0
-
+      
     }
     
     params_weights$RE <- RE_W
@@ -279,7 +279,7 @@ sim_A <- function(N,
     }
     
     if(family == "poisson"){
-
+      
       precision_weights <- NULL
       true_weights <- extraDistr::rtpois(n = nrow(edge_indices), lambda = exp(mean_edges), a = 0.0)
       W[as.matrix(edge_indices[, c("i", "j")])] <- true_weights
@@ -295,8 +295,14 @@ sim_A <- function(N,
     diag(temp_A) <- 0.0
     non_edge_indices <- as.matrix(summary(as(temp_A, "sparseMatrix")))
     
+    if(model != "RSR"){
+      
+      non_edge_indices <- non_edge_indices[non_edge_indices[,"j"]>non_edge_indices[,"i"], ]
+      
+    }  
+    
     # Draw cluster labels
-    Z_W <-  apply(t(stats::rmultinom(n = nrow(non_edge_indices), 
+    Z_W <-  apply(t(stats::rmultinom(n = nrow(non_edge_indices),
                                      size = 1.0, prob = c(1.0-q_prob, q_prob))),
                   1.0, which.max)
     
@@ -320,6 +326,12 @@ sim_A <- function(N,
     }
     
     W[cbind(non_edge_indices[,1], non_edge_indices[,2])] <- noise_weights
+    
+    if(model != "RSR"){
+      
+      W[cbind(non_edge_indices[,2], non_edge_indices[,1])] <- noise_weights
+      
+    }
     
     non_edge_indices[, 3] <- noise_weights
     non_edge_indices <- cbind(non_edge_indices, Z_W)
