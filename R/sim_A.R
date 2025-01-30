@@ -323,7 +323,7 @@ sim_A <- function(N,
     
     non_edge_indices[, 3] <- noise_weights
     non_edge_indices <- cbind(non_edge_indices, Z_W)
-    names(non_edge_indices) <- c("i", "j", "noise_weight", "Z_W")
+    colnames(non_edge_indices) <- c("i", "j", "noise_weight", "Z_W")
     
   } else {
     
