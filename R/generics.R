@@ -198,6 +198,18 @@ print.summary.JANE <- function(x, ...){
 #' @exportS3Method print JANE
 print.JANE <- function(x, ...){
   
+  if(!inherits(x, "JANE")){
+    stop("Object is not of class JANE")
+  }
+  
+  if(!(length(x$IC_out[, "selected"]) == 1) && all(x$IC_out[, "selected"] == 1)){
+    stop("Unable to select the best K, D, and n_start using infomation criteria. See output matrix IC_out for infomation criteria values. Try different initialization approaches or only specify one K, D, and n_start.")
+  }
+  
+  if(is.null(x$optimal_res) | is.null(x$optimal_starting)){
+    stop("Unable to fit the model")
+  }
+  
   model <- x$optimal_res$model
   p <- x$optimal_res$p
   K <- length(p)
@@ -205,10 +217,6 @@ print.JANE <- function(x, ...){
   n_k <- rep(0, K)
   names(n_k) <- 1:K
   n_k[names(table(x$optimal_res$cluster_labels))] <- table(x$optimal_res$cluster_labels)
-  
-  if(!inherits(x, "JANE")){
-    stop("Object is not of class JANE")
-  }
   
   cat(model, "latent space network clustering with", D, "dimensions and", K, "clusters of sizes", paste0(n_k, collapse = ", "))
   
@@ -315,6 +323,14 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
   
   if(!inherits(x, "JANE")){
     stop("Object is not of class JANE")
+  }
+  
+  if(!(length(x$IC_out[, "selected"]) == 1) && all(x$IC_out[, "selected"] == 1)){
+    stop("Unable to select the best K, D, and n_start using infomation criteria. See output matrix IC_out for infomation criteria values. Try different initialization approaches or only specify one K, D, and n_start.")
+  }
+  
+  if(is.null(x$optimal_res) | is.null(x$optimal_starting)){
+    stop("Unable to fit the model")
   }
   
   if(!type %in% c("lsnc", "trace_plot", "misclassified", "uncertainty")){
