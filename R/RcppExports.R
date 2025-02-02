@@ -53,8 +53,8 @@ draw_A_RSR_c <- function(U, beta0, s, r) {
     .Call('_JANE_draw_A_RSR_c', PACKAGE = 'JANE', U, beta0, s, r)
 }
 
-compute_mean_edge_weight <- function(temp_edge_indices, beta0, RE, model) {
-    invisible(.Call('_JANE_compute_mean_edge_weight', PACKAGE = 'JANE', temp_edge_indices, beta0, RE, model))
+compute_mean_edge_weight <- function(edge_indices, beta0, RE, model) {
+    invisible(.Call('_JANE_compute_mean_edge_weight', PACKAGE = 'JANE', edge_indices, beta0, RE, model))
 }
 
 update_U <- function(U, A, mus, omegas, prob_matrix, beta, X, n_control, model) {

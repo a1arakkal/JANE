@@ -205,15 +205,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // compute_mean_edge_weight
-void compute_mean_edge_weight(arma::mat& temp_edge_indices, double beta0, arma::mat RE, Rcpp::String model);
-RcppExport SEXP _JANE_compute_mean_edge_weight(SEXP temp_edge_indicesSEXP, SEXP beta0SEXP, SEXP RESEXP, SEXP modelSEXP) {
+void compute_mean_edge_weight(arma::mat& edge_indices, double beta0, arma::mat RE, Rcpp::String model);
+RcppExport SEXP _JANE_compute_mean_edge_weight(SEXP edge_indicesSEXP, SEXP beta0SEXP, SEXP RESEXP, SEXP modelSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat& >::type temp_edge_indices(temp_edge_indicesSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type edge_indices(edge_indicesSEXP);
     Rcpp::traits::input_parameter< double >::type beta0(beta0SEXP);
     Rcpp::traits::input_parameter< arma::mat >::type RE(RESEXP);
     Rcpp::traits::input_parameter< Rcpp::String >::type model(modelSEXP);
-    compute_mean_edge_weight(temp_edge_indices, beta0, RE, model);
+    compute_mean_edge_weight(edge_indices, beta0, RE, model);
     return R_NilValue;
 END_RCPP
 }

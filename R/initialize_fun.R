@@ -129,6 +129,7 @@ initialize_fun <- function(A, family, noise_weights, prob_matrix_W, priors, list
     current$fun_list$update_q_prob <- update_q_prob
     current$priors$h <-  1 # prior parameter 1 for q
     current$priors$l <-  1 # prior parameter 2 for q
+    current$previous_prob_mat_W <- current$prob_matrix_W * 1.0
   }
   
   current$log_Q <- Inf

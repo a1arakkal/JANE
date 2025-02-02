@@ -283,6 +283,53 @@ JANE <- function(A,
     A <- methods::as(A, "dgCMatrix")
   }
   
+  # Check for self loops 
+  if(!all(diag(A) == 0.0)){
+    stop("Self-loop(s) detected (i.e., diagonal element(s) of A are not 0)")
+  }
+  
+  # if A is named either col or row use that as id, else give id as row number
+  if (( length(unique(rownames(A))) == nrow(A) ) | ( length(unique(colnames(A))) == nrow(A) )){
+    ids <- if(length(unique(rownames(A))) != nrow(A)){ colnames(A) } else { rownames(A) }
+  } else {
+    message(paste0("Rownames/colnames for A missing or not unique, generating node IDs 1:", nrow(A)))
+    ids <- 1:nrow(A)
+  }
+  
+  # Check for isolates and remove
+  isolates <- which(rowSums(A)==0 & colSums(A)==0)
+  
+  if (length(isolates) > 0){
+    A <- A[-isolates, -isolates]
+    message(paste0(length(isolates), " isolate(s) removed. Specifically node(s): ", paste(ids[isolates], collapse = ", ")))
+    ids <- ids[-isolates]
+  }
+  
+  # Check if max K supplied >= N
+  if(max(K) >= nrow(A)){
+    stop("Number of clusters is greater than or equal to number of actors, please supply smaller K(s)")
+  }
+  
+  # Check model 
+  if(!model %in% c("NDH", "RS", "RSR")){
+    stop("Model needs to be one of the following: 'NDH', 'RS', or 'RSR'")
+  } else{
+    cl$model <- eval(model)
+  }
+  
+  # If unsymmetric A provided for model = "NDH" or "RS" convert to symmetric A and warn
+  if(!isSymmetric(A) & (model %in% c("NDH", "RS"))){
+    input <- utils::menu(c("Yes", "No"), 
+                         title = paste0("Unsymmetric A matrix supplied for model = ",
+                                        model, ", do you want to convert A to a symmetric matrix?"))
+    if(input == 1){
+      A <- 1.0 * ( (A + t(A)) > 0.0 )
+      message("Converting A to symmetric matrix")
+    } else {
+      stop("A needs to be symmetric for model = ", model)
+    }
+  }
+  
   # Check family input
   if(!family %in% c("bernoulli", "lognormal", "poisson")){
     stop("family needs to be one of the following: 'bernoulli', 'lognormal', 'poisson'")
@@ -361,58 +408,19 @@ JANE <- function(A,
   # Extract edge indices and weights and store as prob_matrix_W
   prob_matrix_W <- cbind(as.matrix(summary(A)), 1.0, 0.0)
   colnames(prob_matrix_W) <- c("i", "j", "weight", "hat_zij1", "hat_zij2")  
+  
+  # Only store upper triangular for RS and NDH as it is symmetric
+  if(model != "RSR"){
+    
+    prob_matrix_W <- prob_matrix_W[prob_matrix_W[,"j"]>prob_matrix_W[,"i"], ]
+    
+  }
+  
   cl$prob_matrix_W <- eval(prob_matrix_W)
   
   # Convert A into unweighted network (weights already extracted and stored in prob_matrix_W)
   if(!all(A@x == 1.0)){
     A <- 1.0 * ( A > 0.0 )
-  }
-  
-  # Check for self loops 
-  if(!all(diag(A) == 0.0)){
-    stop("Self-loop(s) detected (i.e., diagonal element(s) of A are not 0)")
-  }
-  
-  # if A is named either col or row use that as id, else give id as row number
-  if (( length(unique(rownames(A))) == nrow(A) ) | ( length(unique(colnames(A))) == nrow(A) )){
-    ids <- if(length(unique(rownames(A))) != nrow(A)){ colnames(A) } else { rownames(A) }
-  } else {
-    message(paste0("Rownames/colnames for A missing or not unique, generating node IDs 1:", nrow(A)))
-    ids <- 1:nrow(A)
-  }
-  
-  # Check for isolates and remove
-  isolates <- which(rowSums(A)==0 & colSums(A)==0)
-  
-  if (length(isolates) > 0){
-    A <- A[-isolates, -isolates]
-    message(paste0(length(isolates), " isolate(s) removed. Specifically node(s): ", paste(ids[isolates], collapse = ", ")))
-    ids <- ids[-isolates]
-  }
-  
-  # Check if max K supplied >= N
-  if(max(K) >= nrow(A)){
-    stop("Number of clusters is greater than or equal to number of actors, please supply smaller K(s)")
-  }
-  
-  # Check model 
-  if(!model %in% c("NDH", "RS", "RSR")){
-    stop("Model needs to be one of the following: 'NDH', 'RS', or 'RSR'")
-  } else{
-    cl$model <- eval(model)
-  }
-  
-  # If unsymmetric A provided for model = "NDH" or "RS" convert to symmetric A and warn
-  if(!isSymmetric(A) & (model %in% c("NDH", "RS"))){
-    input <- utils::menu(c("Yes", "No"), 
-                         title = paste0("Unsymmetric A matrix supplied for model = ",
-                                        model, ", do you want to convert A to a symmetric matrix?"))
-    if(input == 1){
-      A <- 1.0 * ( (A + t(A)) > 0.0 )
-      message("Converting A to symmetric matrix")
-    } else {
-      stop("A needs to be symmetric for model = ", model)
-    }
   }
   
   # Check initialization
@@ -483,9 +491,14 @@ JANE <- function(A,
     stop("Please supply a quantile_diff in [0,1]")
   }
   
-  # Check termination rule supplied and create array for results
-  if (!con[["termination_rule"]] %in% c("ARI", "NMI", "CER", "prob_mat","Q")){
+  # Check termination rule supplied 
+  if(!con[["termination_rule"]] %in% c("ARI", "NMI", "CER", "prob_mat", "Q")){
     stop("Please provide one of the following termination rules: 'ARI', 'NMI', 'CER', 'prob_mat', or 'Q'")
+  }
+  
+  # Check termination rule supplied when noise_weights = TRUE
+  if(noise_weights & (con[["termination_rule"]] == "Q")){
+    stop("For the current implementation, when noise_weights = TRUE the termination_rule 'Q' is unavailable")
   }
   
   # Check n_its_start_CA
@@ -669,10 +682,27 @@ EM_inner <- function(A,
   current$termination_rule <- control$termination_rule
   
   current$termination_metric <- array(NA, dim = c(control$max_its, 
-                                                  ncol = 6 + (!(control$termination_rule %in% c("ARI", "NMI", "CER", "Q"))) - (control$termination_rule == "Q"),
+                                                  ncol = 6 + (!(control$termination_rule %in% c("ARI", "NMI", "CER", "Q"))) - (control$termination_rule == "Q") + 2*(current$noise_weights)*(control$termination_rule != "Q"),
                                                   length(control$beta_temp_schedule)))
   
-  colnames(current$termination_metric) <- if(ncol(current$termination_metric) == 7){
+  colnames(current$termination_metric) <- if(ncol(current$termination_metric) == 9){
+    
+    c("ARI", "NMI", "CER", 
+      paste0(control$termination_rule, ifelse(control$termination_rule == "prob_mat", 
+                                              paste0("_*",control$quantile_diff),
+                                              "")), 
+      paste0(control$termination_rule, "_W", ifelse(control$termination_rule == "prob_mat", 
+                                              paste0("_*",control$quantile_diff),
+                                              "")), 
+      "abs_diff_U", "abs_diff_MA_metric", "abs_diff_MA_metric_W", "abs_diff_MA_U")
+  
+  } else if(ncol(current$termination_metric) == 8){
+    
+    c("ARI", "NMI", "CER", paste0(control$termination_rule, "_W"), 
+      "abs_diff_U", "abs_diff_MA_metric", "abs_diff_MA_metric_W", "abs_diff_MA_U")
+    
+  } else if(ncol(current$termination_metric) == 7){
+    
     c("ARI", "NMI", "CER", paste0(control$termination_rule, ifelse(control$termination_rule == "prob_mat", 
                                                                    paste0("_*",control$quantile_diff),
                                                                    "")), 
@@ -685,8 +715,8 @@ EM_inner <- function(A,
   } else { 
     
     c("ARI", "NMI", "CER", "abs_diff_U", "abs_diff_MA", "abs_diff_MA_U")
+    
   }
-  
   
   col_term_metric <- grep(control$termination_rule, 
                           colnames(current$termination_metric))
@@ -728,6 +758,10 @@ EM_inner <- function(A,
                                               temp_beta = as.double(control$beta_temp_schedule[beta_temp]))
         # update A
         A[current$prob_matrix_W[, 1:2]] <- current$prob_matrix_W[, 4]
+        
+        if(current$model != "RSR"){
+          A[current$prob_matrix_W[, 2:1]] <- current$prob_matrix_W[, 4]
+        }
         
         # update update_q_prob
         current$fun_list$update_q_prob(q_prob = current$q_prob,
@@ -790,10 +824,26 @@ EM_inner <- function(A,
       
       if(n_its <= control$n_its_start_CA){
         
-        MA <- ifelse(is.infinite(check_convergence$metric[col_term_metric]), 0,
-                     check_convergence$metric[col_term_metric])
-        diff_MA <- Inf
-        counter <- 0
+        if(!noise_weights){
+          
+          MA <- ifelse(is.infinite(check_convergence$metric[col_term_metric]), 0,
+                       check_convergence$metric[col_term_metric])
+          diff_MA <- Inf
+          counter <- 0
+          
+        } else {
+          
+          MA <- ifelse(is.infinite(check_convergence$metric[col_term_metric[1]]), 0,
+                       check_convergence$metric[col_term_metric[1]])
+          diff_MA <- Inf
+          counter <- 0
+          
+          MA_W <- ifelse(is.infinite(check_convergence$metric[col_term_metric[2]]), 0,
+                       check_convergence$metric[col_term_metric[2]])
+          diff_MA_W <- Inf
+          counter_W <- 0
+          
+        }
         
         if(control$termination_rule != "Q"){
           MA_U <- ifelse(is.infinite(check_convergence$metric[col_term_U]), 0,
@@ -805,10 +855,27 @@ EM_inner <- function(A,
       } else {
         
         n_its_temp <- n_its-control$n_its_start_CA+1
-        diff_MA_prev <- diff_MA
-        diff_MA <- abs( ((MA - check_convergence$metric[col_term_metric]))/(n_its_temp) )
-        counter <- (counter + 1) * (diff_MA<control$tolerance_diff_CA)*(diff_MA_prev<control$tolerance_diff_CA)
-        MA <- (check_convergence$metric[col_term_metric] + (n_its_temp-1)*MA)/(n_its_temp)
+        
+        if(!noise_weights){
+          
+          diff_MA_prev <- diff_MA
+          diff_MA <- abs( ((MA - check_convergence$metric[col_term_metric]))/(n_its_temp) )
+          counter <- (counter + 1) * (diff_MA<control$tolerance_diff_CA)*(diff_MA_prev<control$tolerance_diff_CA)
+          MA <- (check_convergence$metric[col_term_metric] + (n_its_temp-1)*MA)/(n_its_temp)
+          
+        } else {
+         
+          diff_MA_prev <- diff_MA
+          diff_MA <- abs( ((MA - check_convergence$metric[col_term_metric[1]]))/(n_its_temp) )
+          counter <- (counter + 1) * (diff_MA<control$tolerance_diff_CA)*(diff_MA_prev<control$tolerance_diff_CA)
+          MA <- (check_convergence$metric[col_term_metric[1]] + (n_its_temp-1)*MA)/(n_its_temp)
+          
+          diff_MA_prev_W <- diff_MA_W
+          diff_MA_W <- abs( ((MA_W - check_convergence$metric[col_term_metric[2]]))/(n_its_temp) )
+          counter_W <- (counter_W + 1) * (diff_MA_W<control$tolerance_diff_CA)*(diff_MA_prev_W<control$tolerance_diff_CA)
+          MA_W <- (check_convergence$metric[col_term_metric[2]] + (n_its_temp-1)*MA_W)/(n_its_temp)
+          
+        }
         
         if(control$termination_rule != "Q"){
           diff_MA_U_prev <- diff_MA_U
@@ -821,14 +888,28 @@ EM_inner <- function(A,
       
       if(control$termination_rule != "Q"){
         
-        current$termination_metric[n_its,,beta_temp] <- c(check_convergence$metric, diff_MA, diff_MA_U)
-        
-        if((check_convergence$terminate | (counter >= control$consecutive_diff_CA & counter_U >= control$consecutive_diff_CA)) & (n_its > control$min_its)){
-          current$convergence_ind[beta_temp, "convergence_ind"] <- 1L
-          current$convergence_ind[beta_temp, "n_iterations"] <- n_its
-          break
+        if(!noise_weights){
+          
+          current$termination_metric[n_its,,beta_temp] <- c(check_convergence$metric, diff_MA, diff_MA_U)
+          
+          if((check_convergence$terminate | (counter >= control$consecutive_diff_CA & counter_U >= control$consecutive_diff_CA)) & (n_its > control$min_its)){
+            current$convergence_ind[beta_temp, "convergence_ind"] <- 1L
+            current$convergence_ind[beta_temp, "n_iterations"] <- n_its
+            break
+          }
+          
+        } else {
+          
+          current$termination_metric[n_its,,beta_temp] <- c(check_convergence$metric, diff_MA, diff_MA_W, diff_MA_U)
+          
+          if((check_convergence$terminate | (counter >= control$consecutive_diff_CA & counter_W >= control$consecutive_diff_CA & counter_U >= control$consecutive_diff_CA)) & (n_its > control$min_its)){
+            current$convergence_ind[beta_temp, "convergence_ind"] <- 1L
+            current$convergence_ind[beta_temp, "n_iterations"] <- n_its
+            break
+          }
+          
         }
-        
+
       } else {
         
         current$termination_metric[n_its,,beta_temp] <- c(check_convergence$metric, diff_MA)

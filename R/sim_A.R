@@ -37,9 +37,9 @@
 #'       \item{'RSR': a numeric matrix specifying the precision matrix of the multivariate normal distribution of the random sender and receiver effects, if missing will generate from a Wishart(df = 3, Sigma = \eqn{I_2})}
 #'     } 
 #'    }
+#'   \item{'precision_weights': A positive, non-zero, numeric representing the precision (on the log scale) of the log-normal weight distribution. Only relevant for \code{family = 'lognormal'}}
 #'   }
 #' @param q_prob A numeric in \[0,1\] representing the probability of a non-edge to be converted to noise edge (default is 0.0).
-#' @param precision_weights A positive, non-zero, numeric representing the precision (on the log scale) of the log-normal weight distribution. Only relevant for \code{family = 'lognormal'}.
 #' @param mean_noise_weights A numeric representing the mean of the noise weight distribution. Only relevant for \code{family \%in\% c('lognormal', 'poisson')} and \code{q_prob>0.0}. For family = 'poisson' value has to be > 0.0, for family = "lognormal" the mean is on the log scale.
 #' @param precision_noise_weights A positive, non-zero, numeric representing the precision of the log-normal noise weight distribution. Only relevant for \code{family = 'lognormal'} and \code{q_prob>0.0}.
 #' @param remove_isolates A logical; if \code{TRUE} then isolates from the network are removed (default is \code{TRUE}).
@@ -79,9 +79,8 @@ sim_A <- function(N,
                   model = "NDH",
                   family = "bernoulli",
                   params_LR,
-                  params_weights,
+                  params_weights = NULL,
                   q_prob = 0.0,
-                  precision_weights,
                   mean_noise_weights,
                   precision_noise_weights,
                   remove_isolates = TRUE){
@@ -102,8 +101,8 @@ sim_A <- function(N,
     stop("Please supply a proportion in [0,1] for q_prob")
   }
   
-  if( ( missing(params_weights) & (family != "bernoulli"))  || ( (family != "bernoulli") && is.null(params_weights$beta0) ) ){
-    stop("Please supply a named list for params_weights. At minimum params_weights$beta0 needs to be specified")
+  if( ( is.null(params_weights) & (family != "bernoulli"))  || ( (family != "bernoulli") && is.null(params_weights$beta0) ) ){
+    stop("Please supply a named list for params_weights. At minimum, for family = 'poisson' a params_weights$beta0 needs to be specified and for family = 'lognromal' params_weights$beta0 and params_weights$precision_weights needs to be suppied")
   }
   
   if(missing(mean_noise_weights) & (family != "bernoulli") & (q_prob > 0.0)){
@@ -114,12 +113,12 @@ sim_A <- function(N,
     stop("Please supply a numeric >0 for precision_noise_weights")
   }
   
-  if(missing(precision_weights) & (family == "lognormal")){
-    stop("Please supply a numeric >0 for precision_weights")
+  if(is.null(params_weights$precision_weights) & (family == "lognormal")){
+    stop("Please supply a numeric >0 for params_weights$precision_weights")
   }
   
-  if( (!missing(precision_weights) & (family == "lognormal")) && precision_weights <= 0.0){
-    stop("Please supply a numeric >0 for precision_weights")
+  if( (!is.null(params_weights$precision_weights) & (family == "lognormal")) && params_weights$precision_weights <= 0.0){
+    stop("Please supply a numeric >0 for params_weights$precision_weights")
   }
   
   if( (!missing(mean_noise_weights) & (family == "poisson")) && mean_noise_weights <= 0.0){
@@ -207,18 +206,22 @@ sim_A <- function(N,
   
   params_LR$RE <- RE
   
+  # Extract edge indices
+  W <- A
+  edge_indices <- as.matrix(summary(W))
+  
+  if(model != "RSR"){
+    
+    edge_indices <- edge_indices[edge_indices[,"j"]>edge_indices[,"i"], ]
+    
+  }
+  
   if(family == "bernoulli"){
     
-    W <- A
     params_weights <- NULL
-    precision_weights <- NULL
     
   } else {
-    
-    # Extract edge indices
-    W <- A
-    edge_indices <- as.matrix(summary(W))
-    
+  
     if(model == "RS"){
       
       if(!is.null(params_weights$precision_R_effects)){
@@ -234,12 +237,11 @@ sim_A <- function(N,
       RE_W <- matrix(s, nrow = N, ncol = 1)
       colnames(RE_W) <- "s"
       
-      temp_edge_indices <- edge_indices
-      compute_mean_edge_weight(temp_edge_indices = temp_edge_indices,
+      compute_mean_edge_weight(edge_indices = edge_indices,
                                beta0 = params_weights$beta0,
                                RE = RE_W,
                                model = "RS")
-      mean_edges <- temp_edge_indices[, 3]
+      mean_edges <- edge_indices[, 3]
       
     } else if(model == "RSR"){
       
@@ -254,12 +256,11 @@ sim_A <- function(N,
       RE_W <- matrix(stats::rnorm(n = N*2), ncol = 2) %*% t(solve(chol(params_weights$precision_R_effects)))
       colnames(RE_W) <- c("s", "r")
       
-      temp_edge_indices <- edge_indices
-      compute_mean_edge_weight(temp_edge_indices = temp_edge_indices,
+      compute_mean_edge_weight(edge_indices = edge_indices,
                                beta0 = params_weights$beta0,
                                RE = RE_W,
                                model = "RSR")
-      mean_edges <- temp_edge_indices[, 3]
+      mean_edges <- edge_indices[, 3]
       
     } else {
       
@@ -273,16 +274,29 @@ sim_A <- function(N,
     
     if(family == "lognormal"){
       
-      true_weights <- unname(exp(mean_edges + stats::rnorm(n = nrow(edge_indices), mean = 0.0, sd = sqrt(1/precision_weights))))
+      true_weights <- unname(exp(mean_edges + stats::rnorm(n = nrow(edge_indices), mean = 0.0, sd = sqrt(1/params_weights$precision_weights))))
+      edge_indices[, 3] <- true_weights
       W[as.matrix(edge_indices[, c("i", "j")])] <- true_weights
+      
+      if(model != "RSR"){
+        
+        W[as.matrix(edge_indices[, c("j", "i")])] <- true_weights
+        
+      }
       
     }
     
     if(family == "poisson"){
       
-      precision_weights <- NULL
       true_weights <- extraDistr::rtpois(n = nrow(edge_indices), lambda = exp(mean_edges), a = 0.0)
+      edge_indices[, 3] <- true_weights
       W[as.matrix(edge_indices[, c("i", "j")])] <- true_weights
+      
+      if(model != "RSR"){
+        
+        W[as.matrix(edge_indices[, c("j", "i")])] <- true_weights
+        
+      }
       
     }
     
@@ -335,25 +349,29 @@ sim_A <- function(N,
     
     non_edge_indices[, 3] <- noise_weights
     non_edge_indices <- cbind(non_edge_indices, Z_W)
-    colnames(non_edge_indices) <- c("i", "j", "noise_weight", "Z_W")
-    
+    Z_W_out <- rbind(cbind(edge_indices, 1), 
+                 non_edge_indices[non_edge_indices[, "Z_W"] == 2, ])
+    colnames(Z_W_out) <- c("i", "j", "weight", "Z_W")
+    Z_W_out <- Z_W_out[order(Z_W_out[, "j"],
+                             Z_W_out[, "i"]), ]
+                 
   } else {
     
     mean_noise_weights <- NULL
     precision_noise_weights <- NULL
     non_edge_indices <- NULL
+    Z_W_out <- NULL
     
   }
-  
+
   return(list(A = A,
               W = W,
               Z_U = Z,
               U = U,
-              Z_W = non_edge_indices,
+              Z_W = Z_W_out,
               params_LR = params_LR,
               params_weights = params_weights,
               q_prob = q_prob,
-              precision_weights = precision_weights,
               mean_noise_weights = mean_noise_weights,
               precision_noise_weights = precision_noise_weights,
               model = model))
@@ -376,6 +394,6 @@ draw_A_RSR_c <- function(U, beta0, s, r) {
 }
 
 #' @useDynLib JANE   
-compute_mean_edge_weight <- function(temp_edge_indices, beta0, RE, model) {
-  invisible(.Call('_JANE_compute_mean_edge_weight', PACKAGE = 'JANE', temp_edge_indices, beta0, RE, model))
+compute_mean_edge_weight <- function(edge_indices, beta0, RE, model) {
+  invisible(.Call('_JANE_compute_mean_edge_weight', PACKAGE = 'JANE', edge_indices, beta0, RE, model))
 }

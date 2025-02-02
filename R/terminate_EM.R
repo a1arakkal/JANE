@@ -17,8 +17,29 @@ terminate_EM <- function(A, current, termination_rule = "ARI",
   previous_prob_mat <- current$previous_prob_mat * 1.0
   current$previous_prob_mat <- current_prob_mat * 1.0
   
+  if(current$noise_weights){
+    
+    current_Z_W <- as.double(apply(current$prob_matrix_W, 1, which.max))
+    previous_Z_W <- as.double(apply(current$previous_prob_mat_W, 1, which.max))
+    
+    current_prob_mat_W <- current$prob_matrix_W * 1.0
+    previous_prob_mat_W <- current$previous_prob_mat_W * 1.0
+    current$previous_prob_mat_W <- current_prob_mat_W * 1.0
+    
+    ARI_metric_W <- mclust::adjustedRandIndex(current_Z_W, previous_Z_W) 
+    NMI_metric_W <- aricode::NMI(current_Z_W, previous_Z_W) 
+    CER_metric_W <- mclust::classError(current_Z_W, previous_Z_W)$errorRate 
+    
+  } else {
+    
+    ARI_metric_W <- Inf
+    NMI_metric_W <- Inf
+    CER_metric_W <- -Inf
+    
+  }
+  
   ARI_metric <- mclust::adjustedRandIndex(current_Z, previous_Z) 
-  NMI_metric<-  aricode::NMI(current_Z, previous_Z) 
+  NMI_metric <- aricode::NMI(current_Z, previous_Z) 
   CER_metric <- mclust::classError(current_Z, previous_Z)$errorRate 
   metric <- NA
   
@@ -29,19 +50,19 @@ terminate_EM <- function(A, current, termination_rule = "ARI",
   
   if(termination_rule == "ARI"){
     
-    if(ARI_metric > tolerance_ARI){
+    if(all(c(ARI_metric, ARI_metric_W) > tolerance_ARI)){
       terminate <- 1
     }
     
   } else if (termination_rule == "NMI"){
     
-    if(NMI_metric > tolerance_NMI){
+    if(all(c(NMI_metric, NMI_metric_W) > tolerance_NMI)){
       terminate <- 1
     }
     
   } else if (termination_rule == "CER"){
     
-    if(CER_metric < tolerance_CER){
+    if(all(c(CER_metric, CER_metric_W) < tolerance_CER)){
       terminate <- 1
     }
     
@@ -49,7 +70,13 @@ terminate_EM <- function(A, current, termination_rule = "ARI",
     
     metric <- unname(stats::quantile(abs(current_prob_mat - previous_prob_mat), quantile_diff))
     
-    if(metric < tolerance){
+    if(current$noise_weights){
+      metricW <- unname(stats::quantile(abs(current_prob_mat_W[, c("hat_zij1", "hat_zij2")] - previous_prob_mat_W[, c("hat_zij1", "hat_zij2")]), quantile_diff))
+    } else {
+      metricW <- -Inf
+    }
+
+    if(all(c(metric, metricW) < tolerance)){
       terminate <- 1
     }
     
@@ -87,11 +114,30 @@ terminate_EM <- function(A, current, termination_rule = "ARI",
   
   if (termination_rule %in% c("ARI","NMI","CER")){
     
-    out_metric_table <- c(ARI_metric, NMI_metric, CER_metric, diff_U)
+    if(!current$noise_weights){
+      
+      out_metric_table <- c(ARI_metric, NMI_metric, CER_metric, diff_U)
+      
+    } else {
+      
+      loc <- grep(termination_rule, c("ARI_metric_W", "NMI_metric_W", "CER_metric_W"))
+      out_metric_table <- c(ARI_metric, NMI_metric, CER_metric,
+                            c(ARI_metric_W, NMI_metric_W, CER_metric_W)[loc],
+                            diff_U)
+      
+    }
     
   } else if(termination_rule == "prob_mat"){
     
-    out_metric_table <- c(ARI_metric, NMI_metric, CER_metric, metric, diff_U)
+    if(!current$noise_weights){
+      
+      out_metric_table <- c(ARI_metric, NMI_metric, CER_metric, metric, diff_U)
+      
+    } else {
+      
+      out_metric_table <- c(ARI_metric, NMI_metric, CER_metric, metric, metricW, diff_U)
+      
+    }
     
   } else {
     
