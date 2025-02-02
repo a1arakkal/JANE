@@ -336,7 +336,7 @@ JANE <- function(A,
   }
   
   # Check if edges weights are >0
-  if(all(A@x > 0.0)){
+  if(!all(A@x > 0.0)){
     stop("Negative edge weights detected, edge weights need to be > 0")
   }
   
