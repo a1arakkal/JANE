@@ -502,8 +502,8 @@ JANE <- function(A,
   }
   
   # Check termination rule supplied when noise_weights = TRUE
-  if(noise_weights & (con[["termination_rule"]] == "Q")){
-    stop("For the current implementation, when noise_weights = TRUE the termination_rule 'Q' is unavailable")
+  if(noise_weights & (con[["termination_rule"]] %in% c("ARI", "NMI", "CER", "Q"))){
+    stop("For the current implementation, when noise_weights = TRUE the only available termination_rule is 'prob_mat'")
   }
   
   # Check n_its_start_CA

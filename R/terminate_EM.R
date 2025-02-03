@@ -19,16 +19,18 @@ terminate_EM <- function(A, current, termination_rule = "ARI",
   
   if(current$noise_weights){
     
-    current_Z_W <- as.double(apply(current$prob_matrix_W, 1, which.max))
-    previous_Z_W <- as.double(apply(current$previous_prob_mat_W, 1, which.max))
+    # Commented out as computing ARI, NMI and CER on density*N*(N-1) obs is slow
+    # current_Z_W <- as.double(apply(current$prob_matrix_W, 1, which.max))
+    # previous_Z_W <- as.double(apply(current$previous_prob_mat_W, 1, which.max))
     
     current_prob_mat_W <- current$prob_matrix_W * 1.0
     previous_prob_mat_W <- current$previous_prob_mat_W * 1.0
     current$previous_prob_mat_W <- current_prob_mat_W * 1.0
     
-    ARI_metric_W <- mclust::adjustedRandIndex(current_Z_W, previous_Z_W) 
-    NMI_metric_W <- aricode::NMI(current_Z_W, previous_Z_W) 
-    CER_metric_W <- mclust::classError(current_Z_W, previous_Z_W)$errorRate 
+    # Commented out as computing ARI, NMI and CER on density*N*(N-1) obs is slow
+    # ARI_metric_W <- mclust::adjustedRandIndex(current_Z_W, previous_Z_W) 
+    # NMI_metric_W <- aricode::NMI(current_Z_W, previous_Z_W) 
+    # CER_metric_W <- mclust::classError(current_Z_W, previous_Z_W)$errorRate 
     
   } else {
     
