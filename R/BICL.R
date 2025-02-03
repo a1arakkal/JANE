@@ -15,6 +15,10 @@ BICL <- function(A, object){
     
     A[object$prob_matrix_W[, 1:2]] <- 1.0
     
+    if(object$model != "RSR"){
+      A[object$prob_matrix_W[, 2:1]] <- 1.0
+    }
+    
     if(object$family == "bernoulli"){
       BIC_model <- BIC_hurdle(A, object)
     }
