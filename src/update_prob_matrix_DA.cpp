@@ -23,7 +23,7 @@ void update_prob_matrix_DA(arma::mat& prob_matrix, arma::mat mus, arma::cube ome
    prob_matrix.row(i) = p_vec/sum(p_vec);
 
    if(prob_matrix.row(i).has_nan()){
-     prob_matrix.row(i) = (1.0/K) * arma::ones<arma::rowvec>(K);
+     prob_matrix.row(i) = (1.0/(K*1.0)) * arma::ones<arma::rowvec>(K);
    } 
   
   }

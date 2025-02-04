@@ -19,7 +19,7 @@ void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, arma:
       if (model == "NDH"){
          
          double eta_exp = std::exp(beta(0) - cross_prod(0));
-         pij = eta_exp/(1.0 + eta_exp);
+         pij = 1.0/(1.0 + (1.0/eta_exp));
       
       } else if (model == "RS"){
 
@@ -27,7 +27,7 @@ void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, arma:
          x_ij(arma::span(1, X.n_cols)) = X.row(i) + X.row(j);
          arma::rowvec x_ij_beta = x_ij*beta; 
          double eta_exp = std::exp(x_ij_beta(0) - cross_prod(0));
-         pij = eta_exp/(1.0 + eta_exp);
+         pij = 1.0/(1.0 + (1.0/eta_exp));
 
       } else {
        
@@ -35,7 +35,7 @@ void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, arma:
          x_ij(arma::span(1, X.n_cols)) = arma::join_rows(X.row(i).subvec(0, (X.n_cols*0.5) - 1), X.row(j).subvec(X.n_cols*0.5, X.n_cols - 1));
          arma::rowvec x_ij_beta = x_ij*beta; 
          double eta_exp = std::exp(x_ij_beta(0) - cross_prod(0));
-         pij = eta_exp/(1.0 + eta_exp);
+         pij = 1.0/(1.0 + (1.0/eta_exp));
 
       }
      
