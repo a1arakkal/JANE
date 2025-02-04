@@ -943,7 +943,7 @@ EM_inner <- function(A,
                                                        simplify = F))
   
 
-  dont_return_names <- c("log_Q", "previous_prob_mat", "previous_U", "fun_list")
+  dont_return_names <- c("log_Q", "previous_prob_mat", "previous_prob_mat_W", "previous_U", "fun_list")
   out <- mget(x = names(current)[!(names(current) %in% dont_return_names)], envir = current)
   
   # Get IC info
