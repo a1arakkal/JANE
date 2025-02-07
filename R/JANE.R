@@ -9,8 +9,8 @@
 #'   \item{'lognormal': Expects a weighted network with non-negative continuous weights; utilizes an identity link}
 #'   \item{'poisson': Expects a weighted network with weights representing counts; utilizes an log link}
 #'   }
-#' @param noise_weights A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to a unweighted binary network if a weighted network is supplied, i.e., (A > 0)*1.0) and fits a latent space cluster model (default is \code{FALSE}). 
-#' @param guess_noise_weights Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'poisson')} or proportion (i.e. in (0,1)) of noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'poisson')} and 1% will be used for \code{family = 'bernoulli'}.
+#' @param noise_weights A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to a unweighted binary network if a weighted network is supplied, i.e., (A > 0.0)*1.0) and fits a latent space cluster model (default is \code{FALSE}). 
+#' @param guess_noise_weights Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'poisson')} (mean is on the log-scale for lognormal) or proportion (i.e. in (0,1)) of all edges that are noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'poisson')} and 1% will be used for \code{family = 'bernoulli'}.
 #' @param model A character string specifying the model to fit:
 #'  \itemize{
 #'   \item{'NDH': \strong{undirected} network with no degree heterogeneity}
@@ -382,26 +382,54 @@ JANE <- function(A,
     
     if(is.null(guess_noise_weights)){
       
+     
       if(family != 'bernoulli'){
-        guess_noise_weights <- unname(stats::quantile(x = A@x, probs = 0.01))
-        q_prob <- 0.01
+        
+        prob_noise <- 0.01
+        if(family == "poisson"){
+          guess_noise_weights <- unname(stats::quantile(x = A@x, 
+                                                        probs = prob_noise))
+        } else {
+          guess_noise_weights <- unname(stats::quantile(x = log(A@x), 
+                                                        probs = prob_noise))
+        }
+        density_A <- sum(A@x > guess_noise_weights)/(nrow(A) * (nrow(A)-1.0))
+        q_prob <- (prob_noise*density_A)/((1.0-density_A)*(1.0-prob_noise))
+        
       } else {
+        
         guess_noise_weights <- 0.01
-        q_prob <- guess_noise_weights
+        density_A <- (length(A@x) * (1.0-guess_noise_weights))/(nrow(A) * (nrow(A)-1.0))
+        q_prob <- (guess_noise_weights*density_A)/((1.0-density_A)*(1.0-guess_noise_weights))
+        
       }
       
     } else {
       
       if(family != 'bernoulli'){
-        if (guess_noise_weights <= 0){
-          stop("Please supply a postive non-zero numeric value for guess_noise_weights with family ='lognormal' or 'poisson'.")
+        
+        if (guess_noise_weights <= 0 & family == "poisson"){
+          stop("Please supply a postive non-zero numeric value for guess_noise_weights with family = 'poisson'.")
         }
-        q_prob <- mean(A@x <= guess_noise_weights)
+       
+        if (family == "poisson"){
+          prob_noise <- mean(A@x <= guess_noise_weights)
+          density_A <- sum(A@x > guess_noise_weights)/(nrow(A) * (nrow(A)-1.0))
+          q_prob <- (prob_noise*density_A)/((1.0-density_A)*(1.0-prob_noise))
+        } else {
+          prob_noise <- mean(log(A@x) <= guess_noise_weights)
+          density_A <- sum(log(A@x) > guess_noise_weights)/(nrow(A) * (nrow(A)-1.0))
+          q_prob <- (prob_noise*density_A)/((1.0-density_A)*(1.0-prob_noise))
+        }
+        
       } else {
         if(!(0 < guess_noise_weights & guess_noise_weights < 1)){
           stop("Please supply a vaild proportion in (0,1) for guess_noise_weights with family ='bernoulli'.")
         }
-        q_prob <- guess_noise_weights
+        prob_noise <- guess_noise_weights
+        density_A <- (length(A@x) * (1.0-guess_noise_weights))/(nrow(A) * (nrow(A)-1.0))
+        q_prob <- (prob_noise*density_A)/((1.0-density_A)*(1.0-prob_noise))
+        
       }
       
     }
@@ -970,14 +998,12 @@ inner_parallel <- function(x, call_def, A){
       call_def[[1]] <- as.symbol("initialize_starting_values")
       call_def$random_start <- ifelse(call_def$initialization == "GNN", F, T)
       call_def$starting_params <- eval(call_def)
-      call_def$starting_params$q_prob <- call_def$q_prob
       
     } else{
       
       call_def$starting_params <- call_def$initialization
-      call_def$starting_params$q_prob <- call_def$q_prob
-    
-      }
+      
+    }
     
     run_fun <- tryCatch(
       {
@@ -1090,4 +1116,14 @@ update_prob_matrix_W_DA <- function(prob_matrix_W, model, beta, U, X, q, temp_be
 #' @useDynLib JANE  
 update_q_prob <- function(q_prob, prob_matrix_W, model, N, h, l) {
   invisible(.Call('_JANE_update_q_prob', PACKAGE = 'JANE', q_prob, prob_matrix_W, model, N, h, l))
+}
+
+#' @useDynLib JANE  
+trunc_poisson_density <- function(w, mean) {
+.Call('_JANE_trunc_poisson_density', PACKAGE = 'JANE', w, mean)
+}
+
+#' @useDynLib JANE  
+lognormal_density <- function(w, precision, mean) {
+  .Call('_JANE_lognormal_density', PACKAGE = 'JANE', w, precision, mean)
 }

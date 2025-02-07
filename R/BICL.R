@@ -21,6 +21,10 @@ BICL <- function(A, object){
     
     if(object$family == "bernoulli"){
       BIC_model <- BIC_hurdle(A, object)
+    } else if (object$family == "poisson"){
+      BIC_model <- 100
+    } else {
+      BIC_model <- 100
     }
     
   }

@@ -374,7 +374,8 @@ sim_A <- function(N,
               q_prob = q_prob,
               mean_noise_weights = mean_noise_weights,
               precision_noise_weights = precision_noise_weights,
-              model = model))
+              model = model,
+              family = family))
   
 }
 

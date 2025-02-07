@@ -33,9 +33,9 @@ JANE(
 \item{'poisson': Expects a weighted network with weights representing counts; utilizes an log link}
 }}
 
-\item{noise_weights}{A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to a unweighted binary network if a weighted network is supplied, i.e., (A > 0)*1.0) and fits a latent space cluster model (default is \code{FALSE}).}
+\item{noise_weights}{A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to a unweighted binary network if a weighted network is supplied, i.e., (A > 0.0)*1.0) and fits a latent space cluster model (default is \code{FALSE}).}
 
-\item{guess_noise_weights}{Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'poisson')} or proportion (i.e. in (0,1)) of noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'poisson')} and 1\% will be used for \code{family = 'bernoulli'}.}
+\item{guess_noise_weights}{Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'poisson')} (mean is on the log-scale for lognormal) or proportion (i.e. in (0,1)) of all edges that are noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'poisson')} and 1\% will be used for \code{family = 'bernoulli'}.}
 
 \item{model}{A character string specifying the model to fit:
 \itemize{

@@ -125,11 +125,90 @@ initialize_fun <- function(A, family, noise_weights, prob_matrix_W, priors, list
   }
   
   if(noise_weights){
+    
     current$fun_list$update_prob_matrix_W <- update_prob_matrix_W_DA
     current$fun_list$update_q_prob <- update_q_prob
-    current$priors$h <-  1 # prior parameter 1 for q
-    current$priors$l <-  1 # prior parameter 2 for q
     current$previous_prob_mat_W <- current$prob_matrix_W * 1.0
+    
+    if(is.null(current$priors$h) | is.null(current$priors$l)){
+      current$priors$h <-  1 # prior parameter 1 for q
+      current$priors$l <-  1 # prior parameter 2 for q
+    }
+    
+    if(family != "bernoulli"){
+      
+      if(model == "NDH"){
+        
+        current$X2 <- matrix(0, 1, 1)
+        
+      } else if(model == "RS"){
+        
+        w <- prob_matrix_W[,3]
+        
+        # generate NS basis matrix for node strength
+        degree <- tapply(rep(1, length(w)*2), rbind(prob_matrix_W[, c(1,2,3)],
+                                                    prob_matrix_W[, c(2,1,3)])[,1], FUN = sum)
+        
+        node_strength <- tapply(c(w,w), rbind(prob_matrix_W[, c(1,2,3)],
+                                              prob_matrix_W[, c(2,1,3)])[,1], FUN = sum)
+        
+        temp_scaled_node_strength <- node_strength/degree
+        
+        scaled_node_strength <- numeric(nrow(A))
+        scaled_node_strength[as.numeric(names(temp_scaled_node_strength))] <- as.numeric(temp_scaled_node_strength)
+        
+        current$X2 <- splines::ns(x = scaled_node_strength, df = n_interior_knots + 1, intercept = F)
+        
+      } else {
+        
+        w <- prob_matrix_W[,3]
+        
+        # generate NS basis matrix for node strength
+        degree_out <- tapply(rep(1, length(w)), prob_matrix_W[, 1], FUN = sum)
+        
+        degree_in <- tapply(rep(1, length(w)), prob_matrix_W[, 2], FUN = sum)
+        
+        node_strength_out <- tapply(w, prob_matrix_W[, 1], FUN = sum)
+        
+        node_strength_in <- tapply(w, prob_matrix_W[, 2], FUN = sum)
+        
+        temp_scaled_node_strength_out <- node_strength_out/degree_out
+        
+        temp_scaled_node_strength_in <- node_strength_in/degree_in
+        
+        scaled_node_strength_out <- numeric(nrow(A))
+        scaled_node_strength_out[as.numeric(names(temp_scaled_node_strength_out))] <- as.numeric(temp_scaled_node_strength_out)
+        
+        scaled_node_strength_in <- numeric(nrow(A))
+        scaled_node_strength_in[as.numeric(names(temp_scaled_node_strength_in))] <- as.numeric(temp_scaled_node_strength_in)
+        
+        current$X2  <- cbind(splines::ns(x = scaled_node_strength_out, df = n_interior_knots + 1, intercept = F),
+                             splines::ns(x = scaled_node_strength_in, df = n_interior_knots + 1, intercept = F))
+        
+      }
+      
+      if(is.null(current$priors$e_1) | is.null(current$priors$f_2)){
+        
+        current$priors$e_1 <- rep(0, 1 + ncol(current$X2)) # prior mean on beta2
+        current$priors$f_2 <- diag(c(1/100, rep(1/(2.5^2), ncol(current$X2)))) # prior precision on beta2
+        
+      } 
+      
+    }
+    
+    if(family == "lognormal"){
+      
+      if(is.null(current$priors$m_1) | is.null(current$priors$o_1) | is.null(current$priors$m_2) | is.null(current$priors$o_2) ){
+        
+        current$priors$m_1 <- 2 # prior parameter 1 for tau
+        current$priors$o_1 <- 2 # prior parameter 2 for tau
+        current$priors$m_2 <- 2 # prior parameter 1 for tau_noise
+        current$priors$o_2 <- 2 # prior parameter 2 for tau_noise
+        
+      } 
+      
+    }
+    
   }
   
   current$log_Q <- Inf

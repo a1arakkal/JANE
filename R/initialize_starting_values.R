@@ -5,6 +5,11 @@ initialize_starting_values <- function(A,
                                        model,
                                        random_start,
                                        control,
+                                       family,
+                                       noise_weights,
+                                       guess_noise_weights,
+                                       q_prob,
+                                       prob_matrix_W,
                                        ...){
   
   N <- nrow(A)
@@ -514,6 +519,23 @@ initialize_starting_values <- function(A,
       starting_params$beta <- stats::rnorm(n = 1 + 2*(1 + control$n_interior_knots))
       
     }
+    
+  }
+  
+  
+  if(noise_weights){
+    
+    starting_params2 <- initialize_starting_values_weighted_network(A = A,
+                                                                    model = model,
+                                                                    random_start = random_start,
+                                                                    control = control,
+                                                                    family = family,
+                                                                    prob_matrix_W = prob_matrix_W,
+                                                                    noise_weights = noise_weights,
+                                                                    guess_noise_weights = guess_noise_weights,
+                                                                    q_prob = q_prob)
+    
+    starting_params <- do.call(c, list(starting_params, starting_params2))
     
   }
   

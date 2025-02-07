@@ -70,6 +70,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// trunc_poisson_density
+double trunc_poisson_density(double w, double mean);
+RcppExport SEXP _JANE_trunc_poisson_density(SEXP wSEXP, SEXP meanSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
+    rcpp_result_gen = Rcpp::wrap(trunc_poisson_density(w, mean));
+    return rcpp_result_gen;
+END_RCPP
+}
+// lognormal_density
+double lognormal_density(double w, double precision, double mean);
+RcppExport SEXP _JANE_lognormal_density(SEXP wSEXP, SEXP precisionSEXP, SEXP meanSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type precision(precisionSEXP);
+    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
+    rcpp_result_gen = Rcpp::wrap(lognormal_density(w, precision, mean));
+    return rcpp_result_gen;
+END_RCPP
+}
 // log_like_C
 double log_like_C(arma::colvec par, arma::mat X, arma::colvec y);
 RcppExport SEXP _JANE_log_like_C(SEXP parSEXP, SEXP XSEXP, SEXP ySEXP) {
@@ -439,6 +464,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_JANE_BIC_logit_RSR", (DL_FUNC) &_JANE_BIC_logit_RSR, 2},
     {"_JANE_BIC_ICL_MBC", (DL_FUNC) &_JANE_BIC_ICL_MBC, 1},
     {"_JANE_BIC_hurdle", (DL_FUNC) &_JANE_BIC_hurdle, 2},
+    {"_JANE_trunc_poisson_density", (DL_FUNC) &_JANE_trunc_poisson_density, 2},
+    {"_JANE_lognormal_density", (DL_FUNC) &_JANE_lognormal_density, 3},
     {"_JANE_log_like_C", (DL_FUNC) &_JANE_log_like_C, 3},
     {"_JANE_gradient_C", (DL_FUNC) &_JANE_gradient_C, 3},
     {"_JANE_compute_dist", (DL_FUNC) &_JANE_compute_dist, 6},

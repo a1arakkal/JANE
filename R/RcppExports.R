@@ -21,6 +21,14 @@ BIC_hurdle <- function(A, object) {
     .Call('_JANE_BIC_hurdle', PACKAGE = 'JANE', A, object)
 }
 
+trunc_poisson_density <- function(w, mean) {
+    .Call('_JANE_trunc_poisson_density', PACKAGE = 'JANE', w, mean)
+}
+
+lognormal_density <- function(w, precision, mean) {
+    .Call('_JANE_lognormal_density', PACKAGE = 'JANE', w, precision, mean)
+}
+
 log_like_C <- function(par, X, y) {
     .Call('_JANE_log_like_C', PACKAGE = 'JANE', par, X, y)
 }
