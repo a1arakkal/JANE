@@ -13,19 +13,13 @@ BICL <- function(A, object){
     
   } else {
     
-    A[object$prob_matrix_W[, 1:2]] <- 1.0
+    A[object$prob_matrix_W[, 1:2]] <- object$prob_matrix_W[, 3]
     
     if(object$model != "RSR"){
-      A[object$prob_matrix_W[, 2:1]] <- 1.0
+      A[object$prob_matrix_W[, 2:1]] <- object$prob_matrix_W[, 3]
     }
     
-    if(object$family == "bernoulli"){
-      BIC_model <- BIC_hurdle(A, object)
-    } else if (object$family == "poisson"){
-      BIC_model <- 100
-    } else {
-      BIC_model <- 100
-    }
+    BIC_model <- BIC_hurdle(A, object)
     
   }
   
@@ -61,6 +55,16 @@ BIC_ICL_MBC <- function(object) {
 }
 
 #' @useDynLib JANE  
-BIC_hurdle <- function(A, object) {
-  .Call('_JANE_BIC_hurdle', PACKAGE = 'JANE', A, object)
+BIC_hurdle <- function(W, object) {
+  .Call('_JANE_BIC_hurdle', PACKAGE = 'JANE', W, object)
+}
+
+#' @useDynLib JANE  
+trunc_poisson_density_BIC <- function(w, mean, log) {
+  .Call('_JANE_trunc_poisson_density_BIC', PACKAGE = 'JANE', w, mean, log)
+}
+
+#' @useDynLib JANE  
+lognormal_density_BIC <- function(w, precision, mean, log) {
+  .Call('_JANE_lognormal_density_BIC', PACKAGE = 'JANE', w, precision, mean, log)
 }

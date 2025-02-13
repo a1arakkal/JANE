@@ -412,6 +412,11 @@ initialize_starting_values <- function(A,
             
           }
           
+          # Check for NAs in beta
+          if(any(is.na(starting_beta))){
+            stop()
+          }
+          
           # Run K-means algo for GMM based on starting U
           starting_params <- stats::kmeans(x = starting_U,
                                            centers = K,

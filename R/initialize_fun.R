@@ -130,7 +130,7 @@ initialize_fun <- function(A, family, noise_weights, prob_matrix_W, priors, list
     current$fun_list$update_q_prob <- update_q_prob
     current$previous_prob_mat_W <- current$prob_matrix_W * 1.0
     
-    if(is.null(current$priors$h) | is.null(current$priors$l)){
+    if(is.null(priors)){
       current$priors$h <-  1 # prior parameter 1 for q
       current$priors$l <-  1 # prior parameter 2 for q
     }
@@ -187,23 +187,28 @@ initialize_fun <- function(A, family, noise_weights, prob_matrix_W, priors, list
         
       }
       
-      if(is.null(current$priors$e_1) | is.null(current$priors$f_2)){
+      if(is.null(priors)){
         
-        current$priors$e_1 <- rep(0, 1 + ncol(current$X2)) # prior mean on beta2
-        current$priors$f_2 <- diag(c(1/100, rep(1/(2.5^2), ncol(current$X2)))) # prior precision on beta2
-        
+        if(model != "NDH"){
+          current$priors$e_2 <- rep(0, 1 + ncol(current$X2)) # prior mean on beta2
+          current$priors$f_2 <- diag(c(1/100, rep(1/(2.5^2), ncol(current$X2)))) # prior precision on beta2
+        } else {
+          current$priors$e_2 <- 0 # prior mean on beta2
+          current$priors$f_2 <- 1/100 # prior precision on beta2
+        }
+
       } 
       
     }
     
     if(family == "lognormal"){
       
-      if(is.null(current$priors$m_1) | is.null(current$priors$o_1) | is.null(current$priors$m_2) | is.null(current$priors$o_2) ){
+      if(is.null(priors)){
         
-        current$priors$m_1 <- 2 # prior parameter 1 for tau
-        current$priors$o_1 <- 2 # prior parameter 2 for tau
-        current$priors$m_2 <- 2 # prior parameter 1 for tau_noise
-        current$priors$o_2 <- 2 # prior parameter 2 for tau_noise
+        current$priors$m_1 <- 2 # prior parameter 1 for precision_weights
+        current$priors$o_1 <- 2 # prior parameter 2 for precision_weights
+        current$priors$m_2 <- 2 # prior parameter 1 for precision_noise_weights
+        current$priors$o_2 <- 2 # prior parameter 2 for precision_noise_weights
         
       } 
       

@@ -11,6 +11,33 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// trunc_poisson_density_BIC
+double trunc_poisson_density_BIC(double w, double mean, double log);
+RcppExport SEXP _JANE_trunc_poisson_density_BIC(SEXP wSEXP, SEXP meanSEXP, SEXP logSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
+    Rcpp::traits::input_parameter< double >::type log(logSEXP);
+    rcpp_result_gen = Rcpp::wrap(trunc_poisson_density_BIC(w, mean, log));
+    return rcpp_result_gen;
+END_RCPP
+}
+// lognormal_density_BIC
+double lognormal_density_BIC(double w, double precision, double mean, double log);
+RcppExport SEXP _JANE_lognormal_density_BIC(SEXP wSEXP, SEXP precisionSEXP, SEXP meanSEXP, SEXP logSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type precision(precisionSEXP);
+    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
+    Rcpp::traits::input_parameter< double >::type log(logSEXP);
+    rcpp_result_gen = Rcpp::wrap(lognormal_density_BIC(w, precision, mean, log));
+    return rcpp_result_gen;
+END_RCPP
+}
 // BIC_logit_NDH
 double BIC_logit_NDH(arma::sp_mat A, Rcpp::List object);
 RcppExport SEXP _JANE_BIC_logit_NDH(SEXP ASEXP, SEXP objectSEXP) {
@@ -59,39 +86,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // BIC_hurdle
-double BIC_hurdle(arma::sp_mat A, Rcpp::List object);
-RcppExport SEXP _JANE_BIC_hurdle(SEXP ASEXP, SEXP objectSEXP) {
+double BIC_hurdle(arma::sp_mat W, Rcpp::List object);
+RcppExport SEXP _JANE_BIC_hurdle(SEXP WSEXP, SEXP objectSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::sp_mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< arma::sp_mat >::type W(WSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type object(objectSEXP);
-    rcpp_result_gen = Rcpp::wrap(BIC_hurdle(A, object));
-    return rcpp_result_gen;
-END_RCPP
-}
-// trunc_poisson_density
-double trunc_poisson_density(double w, double mean);
-RcppExport SEXP _JANE_trunc_poisson_density(SEXP wSEXP, SEXP meanSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type w(wSEXP);
-    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
-    rcpp_result_gen = Rcpp::wrap(trunc_poisson_density(w, mean));
-    return rcpp_result_gen;
-END_RCPP
-}
-// lognormal_density
-double lognormal_density(double w, double precision, double mean);
-RcppExport SEXP _JANE_lognormal_density(SEXP wSEXP, SEXP precisionSEXP, SEXP meanSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type w(wSEXP);
-    Rcpp::traits::input_parameter< double >::type precision(precisionSEXP);
-    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
-    rcpp_result_gen = Rcpp::wrap(lognormal_density(w, precision, mean));
+    rcpp_result_gen = Rcpp::wrap(BIC_hurdle(W, object));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -314,6 +316,22 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// update_beta2
+void update_beta2(arma::colvec& beta2, arma::mat prob_matrix_W, arma::mat f_2, arma::colvec e_2, arma::mat X2, Rcpp::String model, Rcpp::String family);
+RcppExport SEXP _JANE_update_beta2(SEXP beta2SEXP, SEXP prob_matrix_WSEXP, SEXP f_2SEXP, SEXP e_2SEXP, SEXP X2SEXP, SEXP modelSEXP, SEXP familySEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::colvec& >::type beta2(beta2SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type prob_matrix_W(prob_matrix_WSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type f_2(f_2SEXP);
+    Rcpp::traits::input_parameter< arma::colvec >::type e_2(e_2SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X2(X2SEXP);
+    Rcpp::traits::input_parameter< Rcpp::String >::type model(modelSEXP);
+    Rcpp::traits::input_parameter< Rcpp::String >::type family(familySEXP);
+    update_beta2(beta2, prob_matrix_W, f_2, e_2, X2, model, family);
+    return R_NilValue;
+END_RCPP
+}
 // update_beta
 void update_beta(arma::colvec& beta, arma::sp_mat A, arma::mat U, double f, double e, void * X, void * n_control, void * model);
 RcppExport SEXP _JANE_update_beta(SEXP betaSEXP, SEXP ASEXP, SEXP USEXP, SEXP fSEXP, SEXP eSEXP, SEXP XSEXP, SEXP n_controlSEXP, SEXP modelSEXP) {
@@ -426,19 +444,52 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// trunc_poisson_density
+double trunc_poisson_density(double w, double mean, double log);
+RcppExport SEXP _JANE_trunc_poisson_density(SEXP wSEXP, SEXP meanSEXP, SEXP logSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
+    Rcpp::traits::input_parameter< double >::type log(logSEXP);
+    rcpp_result_gen = Rcpp::wrap(trunc_poisson_density(w, mean, log));
+    return rcpp_result_gen;
+END_RCPP
+}
+// lognormal_density
+double lognormal_density(double w, double precision, double mean, double log);
+RcppExport SEXP _JANE_lognormal_density(SEXP wSEXP, SEXP precisionSEXP, SEXP meanSEXP, SEXP logSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type precision(precisionSEXP);
+    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
+    Rcpp::traits::input_parameter< double >::type log(logSEXP);
+    rcpp_result_gen = Rcpp::wrap(lognormal_density(w, precision, mean, log));
+    return rcpp_result_gen;
+END_RCPP
+}
 // update_prob_matrix_W_DA
-void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, arma::colvec beta, arma::mat U, arma::mat X, double q, double temp_beta);
-RcppExport SEXP _JANE_update_prob_matrix_W_DA(SEXP prob_matrix_WSEXP, SEXP modelSEXP, SEXP betaSEXP, SEXP USEXP, SEXP XSEXP, SEXP qSEXP, SEXP temp_betaSEXP) {
+void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, Rcpp::String family, arma::colvec beta, arma::colvec beta2, double precision_weights, double precision_noise_weights, double guess_noise_weights, arma::mat U, arma::mat X, arma::mat X2, double q, double temp_beta);
+RcppExport SEXP _JANE_update_prob_matrix_W_DA(SEXP prob_matrix_WSEXP, SEXP modelSEXP, SEXP familySEXP, SEXP betaSEXP, SEXP beta2SEXP, SEXP precision_weightsSEXP, SEXP precision_noise_weightsSEXP, SEXP guess_noise_weightsSEXP, SEXP USEXP, SEXP XSEXP, SEXP X2SEXP, SEXP qSEXP, SEXP temp_betaSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat& >::type prob_matrix_W(prob_matrix_WSEXP);
     Rcpp::traits::input_parameter< Rcpp::String >::type model(modelSEXP);
+    Rcpp::traits::input_parameter< Rcpp::String >::type family(familySEXP);
     Rcpp::traits::input_parameter< arma::colvec >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< arma::colvec >::type beta2(beta2SEXP);
+    Rcpp::traits::input_parameter< double >::type precision_weights(precision_weightsSEXP);
+    Rcpp::traits::input_parameter< double >::type precision_noise_weights(precision_noise_weightsSEXP);
+    Rcpp::traits::input_parameter< double >::type guess_noise_weights(guess_noise_weightsSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type U(USEXP);
     Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X2(X2SEXP);
     Rcpp::traits::input_parameter< double >::type q(qSEXP);
     Rcpp::traits::input_parameter< double >::type temp_beta(temp_betaSEXP);
-    update_prob_matrix_W_DA(prob_matrix_W, model, beta, U, X, q, temp_beta);
+    update_prob_matrix_W_DA(prob_matrix_W, model, family, beta, beta2, precision_weights, precision_noise_weights, guess_noise_weights, U, X, X2, q, temp_beta);
     return R_NilValue;
 END_RCPP
 }
@@ -457,15 +508,47 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// update_precision_weights
+void update_precision_weights(arma::colvec& precision_weights, arma::mat prob_matrix_W, Rcpp::String model, arma::colvec beta2, arma::mat X2, double m_1, double o_1, arma::mat f_2, arma::colvec e_2);
+RcppExport SEXP _JANE_update_precision_weights(SEXP precision_weightsSEXP, SEXP prob_matrix_WSEXP, SEXP modelSEXP, SEXP beta2SEXP, SEXP X2SEXP, SEXP m_1SEXP, SEXP o_1SEXP, SEXP f_2SEXP, SEXP e_2SEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::colvec& >::type precision_weights(precision_weightsSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type prob_matrix_W(prob_matrix_WSEXP);
+    Rcpp::traits::input_parameter< Rcpp::String >::type model(modelSEXP);
+    Rcpp::traits::input_parameter< arma::colvec >::type beta2(beta2SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X2(X2SEXP);
+    Rcpp::traits::input_parameter< double >::type m_1(m_1SEXP);
+    Rcpp::traits::input_parameter< double >::type o_1(o_1SEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type f_2(f_2SEXP);
+    Rcpp::traits::input_parameter< arma::colvec >::type e_2(e_2SEXP);
+    update_precision_weights(precision_weights, prob_matrix_W, model, beta2, X2, m_1, o_1, f_2, e_2);
+    return R_NilValue;
+END_RCPP
+}
+// update_precision_noise_weights
+void update_precision_noise_weights(arma::colvec& precision_noise_weights, arma::mat prob_matrix_W, double guess_noise_weights, double m_2, double o_2);
+RcppExport SEXP _JANE_update_precision_noise_weights(SEXP precision_noise_weightsSEXP, SEXP prob_matrix_WSEXP, SEXP guess_noise_weightsSEXP, SEXP m_2SEXP, SEXP o_2SEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::colvec& >::type precision_noise_weights(precision_noise_weightsSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type prob_matrix_W(prob_matrix_WSEXP);
+    Rcpp::traits::input_parameter< double >::type guess_noise_weights(guess_noise_weightsSEXP);
+    Rcpp::traits::input_parameter< double >::type m_2(m_2SEXP);
+    Rcpp::traits::input_parameter< double >::type o_2(o_2SEXP);
+    update_precision_noise_weights(precision_noise_weights, prob_matrix_W, guess_noise_weights, m_2, o_2);
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_JANE_trunc_poisson_density_BIC", (DL_FUNC) &_JANE_trunc_poisson_density_BIC, 3},
+    {"_JANE_lognormal_density_BIC", (DL_FUNC) &_JANE_lognormal_density_BIC, 4},
     {"_JANE_BIC_logit_NDH", (DL_FUNC) &_JANE_BIC_logit_NDH, 2},
     {"_JANE_BIC_logit_RS", (DL_FUNC) &_JANE_BIC_logit_RS, 2},
     {"_JANE_BIC_logit_RSR", (DL_FUNC) &_JANE_BIC_logit_RSR, 2},
     {"_JANE_BIC_ICL_MBC", (DL_FUNC) &_JANE_BIC_ICL_MBC, 1},
     {"_JANE_BIC_hurdle", (DL_FUNC) &_JANE_BIC_hurdle, 2},
-    {"_JANE_trunc_poisson_density", (DL_FUNC) &_JANE_trunc_poisson_density, 2},
-    {"_JANE_lognormal_density", (DL_FUNC) &_JANE_lognormal_density, 3},
     {"_JANE_log_like_C", (DL_FUNC) &_JANE_log_like_C, 3},
     {"_JANE_gradient_C", (DL_FUNC) &_JANE_gradient_C, 3},
     {"_JANE_compute_dist", (DL_FUNC) &_JANE_compute_dist, 6},
@@ -479,6 +562,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_JANE_update_U_CC", (DL_FUNC) &_JANE_update_U_CC, 9},
     {"_JANE_update_U_RE", (DL_FUNC) &_JANE_update_U_RE, 9},
     {"_JANE_update_U_RE_CC", (DL_FUNC) &_JANE_update_U_RE_CC, 9},
+    {"_JANE_update_beta2", (DL_FUNC) &_JANE_update_beta2, 7},
     {"_JANE_update_beta", (DL_FUNC) &_JANE_update_beta, 8},
     {"_JANE_update_beta_CC", (DL_FUNC) &_JANE_update_beta_CC, 8},
     {"_JANE_update_beta_RE", (DL_FUNC) &_JANE_update_beta_RE, 8},
@@ -486,8 +570,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_JANE_update_mus_omegas", (DL_FUNC) &_JANE_update_mus_omegas, 8},
     {"_JANE_update_p", (DL_FUNC) &_JANE_update_p, 3},
     {"_JANE_update_prob_matrix_DA", (DL_FUNC) &_JANE_update_prob_matrix_DA, 6},
-    {"_JANE_update_prob_matrix_W_DA", (DL_FUNC) &_JANE_update_prob_matrix_W_DA, 7},
+    {"_JANE_trunc_poisson_density", (DL_FUNC) &_JANE_trunc_poisson_density, 3},
+    {"_JANE_lognormal_density", (DL_FUNC) &_JANE_lognormal_density, 4},
+    {"_JANE_update_prob_matrix_W_DA", (DL_FUNC) &_JANE_update_prob_matrix_W_DA, 13},
     {"_JANE_update_q_prob", (DL_FUNC) &_JANE_update_q_prob, 6},
+    {"_JANE_update_precision_weights", (DL_FUNC) &_JANE_update_precision_weights, 9},
+    {"_JANE_update_precision_noise_weights", (DL_FUNC) &_JANE_update_precision_noise_weights, 5},
     {NULL, NULL, 0}
 };
 

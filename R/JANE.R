@@ -340,7 +340,7 @@ JANE <- function(A,
     stop("Negative edge weights detected, edge weights need to be > 0")
   }
   
-  # Check if weighted network supplied for family = "bernoulli" and as user if they want to convert to an unweighted network
+  # Check if weighted network supplied for family = "bernoulli" and ask user if they want to convert to an unweighted network
   if(family == "bernoulli" & !all(A@x == 1.0)){
     
     input <- utils::menu(c("Yes", "No"), 
@@ -382,10 +382,10 @@ JANE <- function(A,
     
     if(is.null(guess_noise_weights)){
       
-     
       if(family != 'bernoulli'){
         
         prob_noise <- 0.01
+        
         if(family == "poisson"){
           guess_noise_weights <- unname(stats::quantile(x = A@x, 
                                                         probs = prob_noise))
@@ -393,6 +393,7 @@ JANE <- function(A,
           guess_noise_weights <- unname(stats::quantile(x = log(A@x), 
                                                         probs = prob_noise))
         }
+        
         density_A <- sum(A@x > guess_noise_weights)/(nrow(A) * (nrow(A)-1.0))
         q_prob <- (prob_noise*density_A)/((1.0-density_A)*(1.0-prob_noise))
         
@@ -426,9 +427,9 @@ JANE <- function(A,
         if(!(0 < guess_noise_weights & guess_noise_weights < 1)){
           stop("Please supply a vaild proportion in (0,1) for guess_noise_weights with family ='bernoulli'.")
         }
-        prob_noise <- guess_noise_weights
+
         density_A <- (length(A@x) * (1.0-guess_noise_weights))/(nrow(A) * (nrow(A)-1.0))
-        q_prob <- (prob_noise*density_A)/((1.0-density_A)*(1.0-prob_noise))
+        q_prob <- (guess_noise_weights*density_A)/((1.0-density_A)*(1.0-guess_noise_weights))
         
       }
       
@@ -781,14 +782,22 @@ EM_inner <- function(A,
                                           temp_beta = as.double(control$beta_temp_schedule[beta_temp]))
       
       if(noise_weights){
+        
         # update prob_matrix_W
         current$fun_list$update_prob_matrix_W(prob_matrix_W = current$prob_matrix_W,
                                               model = current$model,
+                                              family = current$family,
                                               beta = current$beta,
+                                              beta2 = if(current$family == "bernoulli"){matrix(0.0, 1, 1)}else{current$beta2},
+                                              precision_weights = ifelse(current$family != "lognormal", 0.0, current$precision_weights),
+                                              precision_noise_weights = ifelse(current$family != "lognormal", 0.0, current$precision_noise_weights),
+                                              guess_noise_weights = current$guess_noise_weights,
                                               U = current$U,
                                               X = current$X,
+                                              X2 = if(current$family == "bernoulli"){matrix(0.0, 1, 1)}else{current$X2},
                                               q = current$q_prob,
                                               temp_beta = as.double(control$beta_temp_schedule[beta_temp]))
+        
         # update A
         A[current$prob_matrix_W[, 1:2]] <- current$prob_matrix_W[, 4]
         
@@ -796,13 +805,49 @@ EM_inner <- function(A,
           A[current$prob_matrix_W[, 2:1]] <- current$prob_matrix_W[, 4]
         }
         
-        # update update_q_prob
+        # update q_prob
         current$fun_list$update_q_prob(q_prob = current$q_prob,
                                        prob_matrix_W = current$prob_matrix_W,
                                        N = nrow(A),
                                        model = current$model,
                                        h = current$priors$h,
                                        l = current$priors$l)
+        
+        if(family != "bernoulli"){
+          
+          # update beta2
+          update_beta2(beta2 = current$beta2,
+                       prob_matrix_W = current$prob_matrix_W,
+                       X2 = current$X2, 
+                       model = current$model, 
+                       family = current$family,
+                       f_2 = if(current$model == "NDH"){matrix(current$priors$f_2, 1, 1)}else{current$priors$f_2}, 
+                       e_2 = if(current$model == "NDH"){matrix(current$priors$e_2, 1, 1)}else{current$priors$e_2})
+          
+          
+        }
+        
+        if (family == "lognormal"){
+          
+          # update precision_weights
+          update_precision_weights(precision_weights = current$precision_weights,
+                                   beta2 = current$beta2,
+                                   prob_matrix_W = current$prob_matrix_W,
+                                   X2 = current$X2, 
+                                   model = current$model, 
+                                   f_2 = if(current$model == "NDH"){matrix(current$priors$f_2, 1, 1)}else{current$priors$f_2}, 
+                                   e_2 = if(current$model == "NDH"){matrix(current$priors$e_2, 1, 1)}else{current$priors$e_2},
+                                   m_1 = current$priors$m_1,
+                                   o_1 = current$priors$o_1)
+          
+          # update precision_noise_weights
+          update_precision_noise_weights(precision_noise_weights = current$precision_noise_weights,
+                                         prob_matrix_W = current$prob_matrix_W,
+                                         guess_noise_weights = current$guess_noise_weights,
+                                         m_2 = current$priors$m_2,
+                                         o_2 = current$priors$o_2)
+          
+        }
         
       }
       
@@ -977,7 +1022,7 @@ EM_inner <- function(A,
   # Get IC info
   out$IC <- unlist(BICL(A = A, object = out))
   
-  return(out[!(names(out) %in% c("X"))])
+  return(out[!(names(out) %in% c("X", "X2"))])
   
 }
 
@@ -1094,6 +1139,11 @@ update_beta_RE_CC <- function(beta, A, n_control, U, f, e, X, model) {
 }
 
 #' @useDynLib JANE  
+update_beta2 <- function(beta2, prob_matrix_W, f_2, e_2, X2, model, family) {
+  invisible(.Call('_JANE_update_beta2', PACKAGE = 'JANE', beta2, prob_matrix_W, f_2, e_2, X2, model, family))
+}
+
+#' @useDynLib JANE  
 update_mus_omegas <- function(prob_matrix, U, b, a, c, G, mus, omegas) {
   invisible(.Call('_JANE_update_mus_omegas', PACKAGE = 'JANE', prob_matrix, U, b, a, c, G, mus, omegas))
 }
@@ -1109,8 +1159,8 @@ update_prob_matrix_DA <- function(prob_matrix, mus, omegas, p, U, temp_beta) {
 }
 
 #' @useDynLib JANE  
-update_prob_matrix_W_DA <- function(prob_matrix_W, model, beta, U, X, q, temp_beta) {
-  invisible(.Call('_JANE_update_prob_matrix_W_DA', PACKAGE = 'JANE', prob_matrix_W, model, beta, U, X, q, temp_beta))
+update_prob_matrix_W_DA <- function(prob_matrix_W, model, family, beta, beta2, precision_weights, precision_noise_weights, guess_noise_weights, U, X, X2, q, temp_beta) {
+  invisible(.Call('_JANE_update_prob_matrix_W_DA', PACKAGE = 'JANE', prob_matrix_W, model, family, beta, beta2, precision_weights, precision_noise_weights, guess_noise_weights, U, X, X2, q, temp_beta))
 }
 
 #' @useDynLib JANE  
@@ -1119,11 +1169,21 @@ update_q_prob <- function(q_prob, prob_matrix_W, model, N, h, l) {
 }
 
 #' @useDynLib JANE  
-trunc_poisson_density <- function(w, mean) {
-.Call('_JANE_trunc_poisson_density', PACKAGE = 'JANE', w, mean)
+trunc_poisson_density <- function(w, mean, log) {
+  .Call('_JANE_trunc_poisson_density', PACKAGE = 'JANE', w, mean, log)
 }
 
 #' @useDynLib JANE  
-lognormal_density <- function(w, precision, mean) {
-  .Call('_JANE_lognormal_density', PACKAGE = 'JANE', w, precision, mean)
+lognormal_density <- function(w, precision, mean, log) {
+  .Call('_JANE_lognormal_density', PACKAGE = 'JANE', w, precision, mean, log)
+}
+
+#' @useDynLib JANE  
+update_precision_weights <- function(precision_weights, prob_matrix_W, model, beta2, X2, m_1, o_1, f_2, e_2) {
+  invisible(.Call('_JANE_update_precision_weights', PACKAGE = 'JANE', precision_weights, prob_matrix_W, model, beta2, X2, m_1, o_1, f_2, e_2))
+}
+
+#' @useDynLib JANE  
+update_precision_noise_weights <- function(precision_noise_weights, prob_matrix_W, guess_noise_weights, m_2, o_2) {
+  invisible(.Call('_JANE_update_precision_noise_weights', PACKAGE = 'JANE', precision_noise_weights, prob_matrix_W, guess_noise_weights, m_2, o_2))
 }

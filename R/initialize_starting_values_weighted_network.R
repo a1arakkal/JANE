@@ -22,6 +22,9 @@ initialize_starting_values_weighted_network <- function(A,
           
           prob_matrix_W_temp <- prob_matrix_W[log(prob_matrix_W[, 3]) > guess_noise_weights, ]
           w <- prob_matrix_W_temp[,3]
+          precision_noise_weights <- 1.0/stats::var(log(prob_matrix_W[, 3])[log(prob_matrix_W[, 3]) <= guess_noise_weights])
+          precision_noise_weights <- ifelse(is.infinite(precision_noise_weights) | is.nan(precision_noise_weights) | is.na(precision_noise_weights),
+                                            stats::rgamma(n = 1, 1, 1), precision_noise_weights)
           
           if(model == "NDH"){
             
@@ -41,14 +44,7 @@ initialize_starting_values_weighted_network <- function(A,
             
             scaled_node_strength <- numeric(nrow(A))
             scaled_node_strength[as.numeric(names(temp_scaled_node_strength))] <- as.numeric(temp_scaled_node_strength)
-            
-            # AA <- sim_data$W*0
-            # AA[prob_matrix_W_temp[, 1:2]] <- prob_matrix_W_temp[, 3]
-            # AA[prob_matrix_W_temp[, 2:1]] <- prob_matrix_W_temp[, 3]
-            # 
-            # all.equal(ifelse(is.na(rowSums(AA)/(rowSums(AA>0))), 0, rowSums(AA)/(rowSums(AA>0))), 
-            #           scaled_node_strength)
-            
+
             X_basis <- splines::ns(x = scaled_node_strength, df = control$n_interior_knots + 1, intercept = F)
             
             distances <- matrix(0, nrow = nrow(prob_matrix_W_temp), ncol =  1 + (control$n_interior_knots + 1))
@@ -84,17 +80,6 @@ initialize_starting_values_weighted_network <- function(A,
             scaled_node_strength_in <- numeric(nrow(A))
             scaled_node_strength_in[as.numeric(names(temp_scaled_node_strength_in))] <- as.numeric(temp_scaled_node_strength_in)
             
-            
-            # AA <- sim_data$W*0
-            # AA[prob_matrix_W_temp[, 1:2]] <- prob_matrix_W_temp[, 3]
-            # 
-            # all.equal(ifelse(is.na(rowSums(AA)/(rowSums(AA>0))), 0, rowSums(AA)/(rowSums(AA>0))),
-            #           scaled_node_strength_out)
-            # 
-            # all.equal(ifelse(is.na(colSums(AA)/(colSums(AA>0))), 0, colSums(AA)/(colSums(AA>0))),
-            #           scaled_node_strength_in)
-            
-            
             X_basis <- cbind(splines::ns(x = scaled_node_strength_out, df = control$n_interior_knots + 1, intercept = F),
                              splines::ns(x = scaled_node_strength_in, df = control$n_interior_knots + 1, intercept = F))
             
@@ -113,11 +98,17 @@ initialize_starting_values_weighted_network <- function(A,
             
           }
           
+          # Check for NAs in beta2
+          if(any(is.na(beta2))){
+            stop()
+          }
+          
           list(
             q_prob = q_prob,
             guess_noise_weights = guess_noise_weights,
             beta2 = beta2,
-            precision_weights = precision_weights
+            precision_weights = precision_weights,
+            precision_noise_weights = precision_noise_weights
           )
           
         } else if(family == "poisson"){
@@ -142,14 +133,7 @@ initialize_starting_values_weighted_network <- function(A,
             
             scaled_node_strength <- numeric(nrow(A))
             scaled_node_strength[as.numeric(names(temp_scaled_node_strength))] <- as.numeric(temp_scaled_node_strength)
-            
-            # AA <- sim_data$W*0
-            # AA[prob_matrix_W_temp[, 1:2]] <- prob_matrix_W_temp[, 3]
-            # AA[prob_matrix_W_temp[, 2:1]] <- prob_matrix_W_temp[, 3]
-            # 
-            # all.equal(ifelse(is.na(rowSums(AA)/(rowSums(AA>0))), 0, rowSums(AA)/(rowSums(AA>0))), 
-            #           scaled_node_strength)
-            
+
             X_basis <- splines::ns(x = scaled_node_strength, df = control$n_interior_knots + 1, intercept = F)
             
             distances <- matrix(0, nrow = nrow(prob_matrix_W_temp), ncol =  1 + (control$n_interior_knots + 1))
@@ -184,17 +168,6 @@ initialize_starting_values_weighted_network <- function(A,
             scaled_node_strength_in <- numeric(nrow(A))
             scaled_node_strength_in[as.numeric(names(temp_scaled_node_strength_in))] <- as.numeric(temp_scaled_node_strength_in)
             
-            
-            # AA <- sim_data$W*0
-            # AA[prob_matrix_W_temp[, 1:2]] <- prob_matrix_W_temp[, 3]
-            # 
-            # all.equal(ifelse(is.na(rowSums(AA)/(rowSums(AA>0))), 0, rowSums(AA)/(rowSums(AA>0))),
-            #           scaled_node_strength_out)
-            # 
-            # all.equal(ifelse(is.na(colSums(AA)/(colSums(AA>0))), 0, colSums(AA)/(colSums(AA>0))),
-            #           scaled_node_strength_in)
-            
-            
             X_basis <- cbind(splines::ns(x = scaled_node_strength_out, df = control$n_interior_knots + 1, intercept = F),
                              splines::ns(x = scaled_node_strength_in, df = control$n_interior_knots + 1, intercept = F))
             
@@ -211,6 +184,11 @@ initialize_starting_values_weighted_network <- function(A,
             fit <- suppressWarnings(stats::glm(w~distances[, -ncol(distances)], family = "poisson"))
             beta2 <- unname(fit$coefficients)
             
+          }
+          
+          # Check for NAs in beta2
+          if(any(is.na(beta2))){
+            stop()
           }
           
           list(
@@ -278,6 +256,7 @@ initialize_starting_values_weighted_network <- function(A,
     
     if(family == "lognormal"){
       starting_params$precision_weights <- stats::rgamma(n = 1, 1, 1)
+      starting_params$precision_noise_weights <- stats::rgamma(n = 1, 1, 1)
     }
     
   }

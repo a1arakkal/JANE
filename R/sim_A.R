@@ -316,41 +316,37 @@ sim_A <- function(N,
     }  
     
     # Draw cluster labels
-    Z_W <-  apply(t(stats::rmultinom(n = nrow(non_edge_indices),
-                                     size = 1.0, prob = c(1.0-q_prob, q_prob))),
-                  1.0, which.max)
-    
-    noise_weights <- numeric(length = length(Z_W))
+    Z_W_noise_weights  <- which(stats::runif(n = nrow(non_edge_indices)) < q_prob)
+    non_edge_indices <- non_edge_indices[Z_W_noise_weights, ]
     
     if(family == "bernoulli"){
       
-      noise_weights[which(Z_W==2)] <- 1.0
+      noise_weights <- 1.0
       mean_noise_weights <- NULL
       precision_noise_weights <- NULL
       
     } else if(family == "poisson"){
       
-      noise_weights[which(Z_W==2)] <- extraDistr::rtpois(n = sum(Z_W==2), lambda = mean_noise_weights, a = 0.0)
+      noise_weights <- extraDistr::rtpois(n = length(Z_W_noise_weights), lambda = mean_noise_weights, a = 0.0)
       precision_noise_weights <- NULL
       
     } else {
       
-      noise_weights[which(Z_W==2)] <- unname(exp(mean_noise_weights + stats::rnorm(n = sum(Z_W==2), mean = 0.0, sd = sqrt(1/precision_noise_weights))))
+      noise_weights <- unname(exp(mean_noise_weights + stats::rnorm(n = length(Z_W_noise_weights), mean = 0.0, sd = sqrt(1/precision_noise_weights))))
       
     }
     
-    W[cbind(non_edge_indices[,1], non_edge_indices[,2])] <- noise_weights
+    W[non_edge_indices[, 1:2]] <- noise_weights
     
     if(model != "RSR"){
       
-      W[cbind(non_edge_indices[,2], non_edge_indices[,1])] <- noise_weights
+      W[non_edge_indices[, 2:1]] <- noise_weights
       
     }
-    
+     
     non_edge_indices[, 3] <- noise_weights
-    non_edge_indices <- cbind(non_edge_indices, Z_W)
     Z_W_out <- rbind(cbind(edge_indices, 1), 
-                 non_edge_indices[non_edge_indices[, "Z_W"] == 2, ])
+                     cbind(non_edge_indices, 2))
     colnames(Z_W_out) <- c("i", "j", "weight", "Z_W")
     Z_W_out <- Z_W_out[order(Z_W_out[, "j"],
                              Z_W_out[, "i"]), ]
