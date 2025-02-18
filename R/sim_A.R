@@ -39,9 +39,9 @@
 #'    }
 #'   \item{'precision_weights': A positive, non-zero, numeric representing the precision (on the log scale) of the log-normal weight distribution. Only relevant for \code{family = 'lognormal'}}
 #'   }
-#' @param q_prob A numeric in \[0,1\] representing the probability of a non-edge to be converted to noise edge (default is 0.0).
-#' @param mean_noise_weights A numeric representing the mean of the noise weight distribution. Only relevant for \code{family \%in\% c('lognormal', 'poisson')} and \code{q_prob>0.0}. For family = 'poisson' value has to be > 0.0, for family = "lognormal" the mean is on the log scale.
-#' @param precision_noise_weights A positive, non-zero, numeric representing the precision of the log-normal noise weight distribution. Only relevant for \code{family = 'lognormal'} and \code{q_prob>0.0}.
+#' @param noise_weights_prob A numeric in \[0,1\] representing the proportion of edges that are noise edge (default is 0.0). ADD DETAILS
+#' @param mean_noise_weights A numeric representing the mean of the noise weight distribution. Only relevant for \code{family \%in\% c('lognormal', 'poisson')} and \code{noise_weights_prob>0.0}. For family = 'poisson' value has to be > 0.0, for family = "lognormal" the mean is on the log scale.
+#' @param precision_noise_weights A positive, non-zero, numeric representing the precision of the log-normal noise weight distribution. Only relevant for \code{family = 'lognormal'} and \code{noise_weights_prob>0.0}.
 #' @param remove_isolates A logical; if \code{TRUE} then isolates from the network are removed (default is \code{TRUE}).
 #' @return A list containing the following components:
 #' \item{\code{A}}{ A sparse adjacency matrix of class 'dgCMatrix' representing the simulated network.}
@@ -80,7 +80,7 @@ sim_A <- function(N,
                   family = "bernoulli",
                   params_LR,
                   params_weights = NULL,
-                  q_prob = 0.0,
+                  noise_weights_prob = 0.0,
                   mean_noise_weights,
                   precision_noise_weights,
                   remove_isolates = TRUE){
@@ -97,19 +97,19 @@ sim_A <- function(N,
     stop("Please supply a named list for params_LR At minimum params_LR$beta0 needs to be specified")
   }
   
-  if(!(0.0 <= q_prob & q_prob <= 1.0)){
-    stop("Please supply a proportion in [0,1] for q_prob")
+  if(!(0.0 <= noise_weights_prob & noise_weights_prob <= 1.0)){
+    stop("Please supply a proportion in [0,1] for noise_weights_prob")
   }
   
   if( ( is.null(params_weights) & (family != "bernoulli"))  || ( (family != "bernoulli") && is.null(params_weights$beta0) ) ){
     stop("Please supply a named list for params_weights. At minimum, for family = 'poisson' a params_weights$beta0 needs to be specified and for family = 'lognromal' params_weights$beta0 and params_weights$precision_weights needs to be suppied")
   }
   
-  if(missing(mean_noise_weights) & (family != "bernoulli") & (q_prob > 0.0)){
+  if(missing(mean_noise_weights) & (family != "bernoulli") & (noise_weights_prob > 0.0)){
     stop("Please supply a numeric for mean_noise_weights")
   }
   
-  if(missing(precision_noise_weights) & (family == "lognormal") & (q_prob > 0.0)){
+  if(missing(precision_noise_weights) & (family == "lognormal") & (noise_weights_prob > 0.0)){
     stop("Please supply a numeric >0 for precision_noise_weights")
   }
   
@@ -302,8 +302,11 @@ sim_A <- function(N,
     
   }
   
-  if(q_prob > 0.0){
+  if(noise_weights_prob > 0.0){
     
+    density <- sum(A)/(nrow(A)*(nrow(A)-1.0))
+    q_prob <- (noise_weights_prob*density)/((1-density)*(1-noise_weights_prob))
+      
     # non-link indices
     temp_A <- (A - 1.0)*-1.0
     diag(temp_A) <- 0.0
@@ -357,6 +360,7 @@ sim_A <- function(N,
     precision_noise_weights <- NULL
     non_edge_indices <- NULL
     Z_W_out <- NULL
+    q_prob <- NULL
     
   }
 
@@ -368,6 +372,7 @@ sim_A <- function(N,
               params_LR = params_LR,
               params_weights = params_weights,
               q_prob = q_prob,
+              noise_weights_prob = noise_weights_prob,
               mean_noise_weights = mean_noise_weights,
               precision_noise_weights = precision_noise_weights,
               model = model,

@@ -13,7 +13,7 @@ sim_A(
   family = "bernoulli",
   params_LR,
   params_weights = NULL,
-  q_prob = 0,
+  noise_weights_prob = 0,
   mean_noise_weights,
   precision_noise_weights,
   remove_isolates = TRUE
@@ -67,11 +67,11 @@ sim_A(
 \item{'precision_weights': A positive, non-zero, numeric representing the precision (on the log scale) of the log-normal weight distribution. Only relevant for \code{family = 'lognormal'}}
 }}
 
-\item{q_prob}{A numeric in [0,1] representing the probability of a non-edge to be converted to noise edge (default is 0.0).}
+\item{noise_weights_prob}{A numeric in [0,1] representing the proportion of edges that are noise edge (default is 0.0). ADD DETAILS}
 
-\item{mean_noise_weights}{A numeric representing the mean of the noise weight distribution. Only relevant for \code{family \%in\% c('lognormal', 'poisson')} and \code{q_prob>0.0}. For family = 'poisson' value has to be > 0.0, for family = "lognormal" the mean is on the log scale.}
+\item{mean_noise_weights}{A numeric representing the mean of the noise weight distribution. Only relevant for \code{family \%in\% c('lognormal', 'poisson')} and \code{noise_weights_prob>0.0}. For family = 'poisson' value has to be > 0.0, for family = "lognormal" the mean is on the log scale.}
 
-\item{precision_noise_weights}{A positive, non-zero, numeric representing the precision of the log-normal noise weight distribution. Only relevant for \code{family = 'lognormal'} and \code{q_prob>0.0}.}
+\item{precision_noise_weights}{A positive, non-zero, numeric representing the precision of the log-normal noise weight distribution. Only relevant for \code{family = 'lognormal'} and \code{noise_weights_prob>0.0}.}
 
 \item{remove_isolates}{A logical; if \code{TRUE} then isolates from the network are removed (default is \code{TRUE}).}
 }
