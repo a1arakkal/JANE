@@ -389,12 +389,13 @@ JANE <- function(A,
         if(family == "poisson"){
           guess_noise_weights <- unname(stats::quantile(x = A@x, 
                                                         probs = prob_noise))
+          density_A <- sum(A@x > guess_noise_weights)/(nrow(A) * (nrow(A)-1.0))
         } else {
           guess_noise_weights <- unname(stats::quantile(x = log(A@x), 
                                                         probs = prob_noise))
+          density_A <- sum(log(A@x) > guess_noise_weights)/(nrow(A) * (nrow(A)-1.0))
         }
         
-        density_A <- sum(A@x > guess_noise_weights)/(nrow(A) * (nrow(A)-1.0))
         q_prob <- (prob_noise*density_A)/((1.0-density_A)*(1.0-prob_noise))
         
       } else {
