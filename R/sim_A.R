@@ -212,7 +212,7 @@ sim_A <- function(N,
   
   if(model != "RSR"){
     
-    edge_indices <- edge_indices[edge_indices[,"j"]>edge_indices[,"i"], ]
+    edge_indices <- edge_indices[edge_indices[,"j"]>edge_indices[,"i"], , drop = FALSE]
     
   }
   
@@ -276,11 +276,11 @@ sim_A <- function(N,
       
       true_weights <- unname(exp(mean_edges + stats::rnorm(n = nrow(edge_indices), mean = 0.0, sd = sqrt(1/params_weights$precision_weights))))
       edge_indices[, 3] <- true_weights
-      W[as.matrix(edge_indices[, c("i", "j")])] <- true_weights
+      W[edge_indices[, c("i", "j"), drop = FALSE]] <- true_weights
       
       if(model != "RSR"){
         
-        W[as.matrix(edge_indices[, c("j", "i")])] <- true_weights
+        W[edge_indices[, c("j", "i"), drop = FALSE]] <- true_weights
         
       }
       
@@ -290,11 +290,11 @@ sim_A <- function(N,
       
       true_weights <- extraDistr::rtpois(n = nrow(edge_indices), lambda = exp(mean_edges), a = 0.0)
       edge_indices[, 3] <- true_weights
-      W[as.matrix(edge_indices[, c("i", "j")])] <- true_weights
+      W[edge_indices[, c("i", "j"), drop = FALSE]] <- true_weights
       
       if(model != "RSR"){
         
-        W[as.matrix(edge_indices[, c("j", "i")])] <- true_weights
+        W[edge_indices[, c("j", "i"), drop = FALSE]] <- true_weights
         
       }
       
@@ -314,13 +314,13 @@ sim_A <- function(N,
     
     if(model != "RSR"){
       
-      non_edge_indices <- non_edge_indices[non_edge_indices[,"j"]>non_edge_indices[,"i"], ]
+      non_edge_indices <- non_edge_indices[non_edge_indices[,"j"]>non_edge_indices[,"i"], , drop = FALSE]
       
     }  
     
     # Draw cluster labels
     Z_W_noise_weights  <- which(stats::runif(n = nrow(non_edge_indices)) < q_prob)
-    non_edge_indices <- non_edge_indices[Z_W_noise_weights, ]
+    non_edge_indices <- non_edge_indices[Z_W_noise_weights, , drop = FALSE]
     
     if(family == "bernoulli"){
       
@@ -339,11 +339,11 @@ sim_A <- function(N,
       
     }
     
-    W[non_edge_indices[, 1:2]] <- noise_weights
+    W[non_edge_indices[, 1:2, drop = FALSE]] <- noise_weights
     
     if(model != "RSR"){
       
-      W[non_edge_indices[, 2:1]] <- noise_weights
+      W[non_edge_indices[, 2:1, drop = FALSE]] <- noise_weights
       
     }
      

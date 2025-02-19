@@ -146,11 +146,11 @@ initialize_fun <- function(A, family, noise_weights, prob_matrix_W, priors, list
         w <- prob_matrix_W[,3]
         
         # generate NS basis matrix for node strength
-        degree <- tapply(rep(1, length(w)*2), rbind(prob_matrix_W[, c(1,2,3)],
-                                                    prob_matrix_W[, c(2,1,3)])[,1], FUN = sum)
+        degree <- tapply(rep(1, length(w)*2), rbind(prob_matrix_W[, c(1,2,3), drop = FALSE],
+                                                    prob_matrix_W[, c(2,1,3), drop = FALSE])[,1], FUN = sum)
         
-        node_strength <- tapply(c(w,w), rbind(prob_matrix_W[, c(1,2,3)],
-                                              prob_matrix_W[, c(2,1,3)])[,1], FUN = sum)
+        node_strength <- tapply(c(w,w), rbind(prob_matrix_W[, c(1,2,3), drop = FALSE],
+                                              prob_matrix_W[, c(2,1,3), drop = FALSE])[,1], FUN = sum)
         
         temp_scaled_node_strength <- node_strength/degree
         

@@ -20,7 +20,7 @@ initialize_starting_values_weighted_network <- function(A,
         
         if(family == "lognormal"){
           
-          prob_matrix_W_temp <- prob_matrix_W[log(prob_matrix_W[, 3]) > guess_noise_weights, ]
+          prob_matrix_W_temp <- prob_matrix_W[log(prob_matrix_W[, 3]) > guess_noise_weights, , drop = FALSE]
           w <- prob_matrix_W_temp[,3]
           precision_noise_weights <- 1.0/stats::var(log(prob_matrix_W[, 3])[log(prob_matrix_W[, 3]) <= guess_noise_weights])
           precision_noise_weights <- ifelse(is.infinite(precision_noise_weights) | is.nan(precision_noise_weights) | is.na(precision_noise_weights),
@@ -34,11 +34,11 @@ initialize_starting_values_weighted_network <- function(A,
           } else if(model == "RS"){
             
             # generate NS basis matrix for node strength
-            degree <- tapply(rep(1, length(w)*2), rbind(prob_matrix_W_temp[, c(1,2,3)],
-                                                        prob_matrix_W_temp[, c(2,1,3)])[,1], FUN = sum)
+            degree <- tapply(rep(1, length(w)*2), rbind(prob_matrix_W_temp[, c(1,2,3), drop = FALSE],
+                                                        prob_matrix_W_temp[, c(2,1,3), drop = FALSE])[,1], FUN = sum)
             
-            node_strength <- tapply(c(w,w), rbind(prob_matrix_W_temp[, c(1,2,3)],
-                                                  prob_matrix_W_temp[, c(2,1,3)])[,1], FUN = sum)
+            node_strength <- tapply(c(w,w), rbind(prob_matrix_W_temp[, c(1,2,3), drop = FALSE],
+                                                  prob_matrix_W_temp[, c(2,1,3), drop = FALSE])[,1], FUN = sum)
             
             temp_scaled_node_strength <- node_strength/degree
             
@@ -113,7 +113,7 @@ initialize_starting_values_weighted_network <- function(A,
           
         } else if(family == "poisson"){
           
-          prob_matrix_W_temp <- prob_matrix_W[prob_matrix_W[, 3] > guess_noise_weights, ]
+          prob_matrix_W_temp <- prob_matrix_W[prob_matrix_W[, 3] > guess_noise_weights, , drop = FALSE]
           w <- prob_matrix_W_temp[,3]
           
           if(model == "NDH"){
@@ -123,11 +123,11 @@ initialize_starting_values_weighted_network <- function(A,
           } else if(model == "RS"){
             
             # generate NS basis matrix for node strength
-            degree <- tapply(rep(1, length(w)*2), rbind(prob_matrix_W_temp[, c(1,2,3)],
-                                                        prob_matrix_W_temp[, c(2,1,3)])[,1], FUN = sum)
+            degree <- tapply(rep(1, length(w)*2), rbind(prob_matrix_W_temp[, c(1,2,3), drop = FALSE],
+                                                        prob_matrix_W_temp[, c(2,1,3), drop = FALSE])[,1], FUN = sum)
             
-            node_strength <- tapply(c(w,w), rbind(prob_matrix_W_temp[, c(1,2,3)],
-                                                  prob_matrix_W_temp[, c(2,1,3)])[,1], FUN = sum)
+            node_strength <- tapply(c(w,w), rbind(prob_matrix_W_temp[, c(1,2,3), drop = FALSE],
+                                                  prob_matrix_W_temp[, c(2,1,3), drop = FALSE])[,1], FUN = sum)
             
             temp_scaled_node_strength <- node_strength/degree
             

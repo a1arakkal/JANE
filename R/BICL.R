@@ -13,10 +13,10 @@ BICL <- function(A, object){
     
   } else {
     
-    A[object$prob_matrix_W[, 1:2]] <- object$prob_matrix_W[, 3]
+    A[object$prob_matrix_W[, 1:2, drop = FALSE]] <- object$prob_matrix_W[, 3]
     
     if(object$model != "RSR"){
-      A[object$prob_matrix_W[, 2:1]] <- object$prob_matrix_W[, 3]
+      A[object$prob_matrix_W[, 2:1, drop = FALSE]] <- object$prob_matrix_W[, 3]
     }
     
     BIC_model <- BIC_hurdle(A, object)

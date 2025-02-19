@@ -447,7 +447,7 @@ JANE <- function(A,
   # Only store upper triangular for RS and NDH as it is symmetric
   if(model != "RSR"){
     
-    prob_matrix_W <- prob_matrix_W[prob_matrix_W[,"j"]>prob_matrix_W[,"i"], ]
+    prob_matrix_W <- prob_matrix_W[prob_matrix_W[,"j"]>prob_matrix_W[,"i"], , drop = FALSE]
     
   }
   
@@ -800,10 +800,10 @@ EM_inner <- function(A,
                                               temp_beta = as.double(control$beta_temp_schedule[beta_temp]))
         
         # update A
-        A[current$prob_matrix_W[, 1:2]] <- current$prob_matrix_W[, 4]
+        A[current$prob_matrix_W[, 1:2, drop = FALSE]] <- current$prob_matrix_W[, 4]
         
         if(current$model != "RSR"){
-          A[current$prob_matrix_W[, 2:1]] <- current$prob_matrix_W[, 4]
+          A[current$prob_matrix_W[, 2:1, drop = FALSE]] <- current$prob_matrix_W[, 4]
         }
         
         # update q_prob
