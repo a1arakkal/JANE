@@ -360,7 +360,7 @@ sim_A <- function(N,
     precision_noise_weights <- NULL
     non_edge_indices <- NULL
     Z_W_out <- NULL
-    q_prob <- NULL
+    q_prob <- 0.0
     
   }
 
@@ -376,7 +376,10 @@ sim_A <- function(N,
               mean_noise_weights = mean_noise_weights,
               precision_noise_weights = precision_noise_weights,
               model = model,
-              family = family))
+              family = family,
+              mus = mus, 
+              omegas = omegas, 
+              p = p))
   
 }
 
