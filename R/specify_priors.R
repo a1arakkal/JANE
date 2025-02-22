@@ -2,12 +2,14 @@
 #' @description A function that allows the user to specify the prior hyperparameters for the EM algorithm in a structure accepted by \code{JANE}. 
 #' @param D An integer specifying the dimension of the latent positions.
 #' @param K An integer specifying the total number of clusters.
+#' @param family A character string specifying the model:
 #' @param model A character string specifying the model:
 #'  \itemize{
 #'   \item{'NDH': \strong{undirected} network with no degree heterogeneity}
 #'   \item{'RS': \strong{undirected} network with degree heterogeneity}
 #'   \item{'RSR': \strong{directed} network with degree heterogeneity}
 #'   }
+#' @param noise_weights A character string specifying the model:
 #' @param n_interior_knots An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only; default is \code{NULL}).   
 #' @param a A numeric vector of length \eqn{D} specifying the mean of the multivariate normal prior on \eqn{\mu_k} for \eqn{k = 1,\ldots,K}, where \eqn{\mu_k} represents the mean of the multivariate normal distribution for the latent positions of the \eqn{k^{th}} cluster.
 #' @param b A numeric value specifying the scaling factor on the precision of the multivariate normal prior on \eqn{\mu_k} for \eqn{k = 1,\ldots,K}, where \eqn{\mu_k} represents the mean of the multivariate normal distribution for the latent positions of the \eqn{k^{th}} cluster.
@@ -16,6 +18,14 @@
 #' @param nu A numeric vector of length \eqn{K} specifying the concentration parameters of the Dirichlet prior on \eqn{p}, where \eqn{p} represents the mixture weights of the finite multivariate normal mixture distribution for the latent positions.
 #' @param e A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.
 #' @param f A numeric square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.
+#' @param h A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.
+#' @param l A numeric square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.
+#' @param e_2 A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.
+#' @param f_2 A numeric square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.
+#' @param m_1 A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.
+#' @param o_1 A numeric square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.
+#' @param m_2 A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.
+#' @param o_2 A numeric square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.
 #' @details
 #' 
 #' \strong{Prior on \eqn{\mu_k} and \eqn{\Omega_k}} (note: the same prior is used for \eqn{k = 1,\ldots,K}) :
@@ -96,6 +106,8 @@
 specify_priors <- function(D, 
                            K,
                            model,
+                           family = "bernoulli",
+                           noise_weights = FALSE,
                            n_interior_knots = NULL,
                            a, 
                            b, 
@@ -103,19 +115,48 @@ specify_priors <- function(D,
                            G, 
                            nu,
                            e, 
-                           f){
+                           f,
+                           h,
+                           l,
+                           e_2,
+                           f_2,
+                           m_1,
+                           o_1,
+                           m_2,
+                           o_2){
   
   # Stop if any argument is missing
   defined <- ls()
-  passed <- c(names(as.list(match.call())[-1]), "n_interior_knots")
-  
-  if (any(!defined %in% passed)) {
-    stop(paste("Please supply values for argument(s): ", paste(setdiff(defined, passed), collapse=", ")))
+  passed <- names(as.list(match.call())[-1])
+  if(!noise_weights){
+    required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "h", "l", "e_2", "f_2", "m_1", "o_1", "m_2", "o_2")]
+  } else {
+    if(family == "bernoulli"){
+      required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "e_2", "f_2", "m_1", "o_1", "m_2", "o_2")]
+    } else if(family == "poisson"){
+      required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "m_1", "o_1", "m_2", "o_2")]
+    } else {
+      required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots")]
+    }
   }
   
-  # Stop if model not supplied or length > 1
-  if(missing(model) || !(length(model) == 1 & is.character(model))){
-    stop("Argument 'model' missing or not a character vector of length 1, please supply a model (i.e., 'NDH', 'RS', or 'RSR')")
+  if (any(!required %in% passed)) {
+    stop(paste("Please supply values for argument(s): ", paste(setdiff(required, passed), collapse=", ")))
+  }
+  
+  # Stop if model length > 1
+  if(!(length(model) == 1 & is.character(model))){
+    stop("Argument 'model'is not a character vector of length 1, please supply a model (i.e., 'NDH', 'RS', or 'RSR')")
+  }
+
+  # Stop if family length > 1
+  if(!(length(family) == 1 & is.character(family))){
+    stop("Argument 'family' is not a character vector of length 1, please supply a family (i.e., 'bernoulli', 'poisson', or 'lognormal')")
+  }
+
+  # Check family 
+  if(!family %in% c("bernoulli", "poisson", "lognormal")){
+    stop("family needs to be one of the following: 'bernoulli', 'poisson', or 'lognormal")
   }
   
   # Check model 
@@ -133,8 +174,10 @@ specify_priors <- function(D,
     stop("Please supply scalar integer values for D and K")
   }
   
-  # Stop if everything but model is not numeric
-  check_numeric <- sapply(defined[names(defined) != "model"], is.numeric) 
+  # Stop if everything but model, family, noise_weights is not numeric
+  check_numeric <- sapply(required[!(required %in% c("model", "family", "noise_weights"))],
+                          function(x){is.numeric(eval(parse(text = x)))})
+  
   if(any(!check_numeric)){
     stop(paste0("Please supply numeric values in the correct structure for: ", paste0(names(check_numeric[!check_numeric]), collapse=", ")))
   }
@@ -144,21 +187,72 @@ specify_priors <- function(D,
     stop("For the current implementation we require that all elements of the nu vector be >= 1 to prevent against negative mixture probabilities for empty clusters")
   }
   
-  priors <- list(
-    a = t(a),
-    b = b,
-    c = c,
-    G = G,
-    nu = nu,
-    e = e,
-    f = f
-  )
+  
+  if (!noise_weights){
+    priors <- list(
+      a = t(a),
+      b = b,
+      c = c,
+      G = G,
+      nu = nu,
+      e = e,
+      f = f
+    )
+  } else {
+    if(family == "bernoulli"){
+      priors <- list(
+        a = t(a),
+        b = b,
+        c = c,
+        G = G,
+        nu = nu,
+        e = e,
+        f = f,
+        h = h, 
+        l = l
+      )
+    } else if(family == "poisson"){
+      priors <- list(
+        a = t(a),
+        b = b,
+        c = c,
+        G = G,
+        nu = nu,
+        e = e,
+        f = f,
+        h = h, 
+        l = l,
+        e_2 = e_2,
+        f_2 = f_2
+      )
+    } else {
+      priors <- list(
+        a = t(a),
+        b = b,
+        c = c,
+        G = G,
+        nu = nu,
+        e = e,
+        f = f,
+        h = h, 
+        l = l,
+        e_2 = e_2,
+        f_2 = f_2,
+        m_1 = m_1,
+        o_1 = o_1,
+        m_2 = m_2,
+        o_2 = o_2
+      )
+    }
+  }
   
   check_priors(priors = priors,
                D = D,
                K = K,
                n_interior_knots = n_interior_knots,
-               model = model)
+               model = model,
+               family = family,
+               noise_weights = noise_weights)
   
   return(priors)
 }

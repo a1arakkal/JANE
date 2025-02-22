@@ -7,7 +7,7 @@ initialize_fun <- function(A, family, noise_weights, prob_matrix_W, priors, list
   current$model <- model
   current$noise_weights <- noise_weights
   current$family <- family
-  current$prob_matrix_W <- prob_matrix_W
+  current$prob_matrix_W <- prob_matrix_W*1.0
   
   # Update new environment based on model --------------------------------------
   

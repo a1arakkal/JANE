@@ -4,7 +4,9 @@ check_initial_values <- function(list_name,
                                  K,
                                  D,
                                  n_interior_knots,
-                                 model){
+                                 model,
+                                 family,
+                                 noise_weights){
   
   # Initial parameters dimension input check -----------------------------------
   params <- c("U", "omegas",  "mus", "p", "prob_matrix", "beta")
@@ -89,5 +91,56 @@ check_initial_values <- function(list_name,
     } 
     
   } 
+  
+  if(noise_weights){
+
+    if(family != "bernoulli"){
+      
+      if(model == "NDH"){
+        
+        check_dim_beta <- length(list_name[["beta2"]]) == 1
+        
+        if(!check_dim_beta){
+          stop("Length of beta2 vector incorrect, needs to be 1")
+        } 
+        
+      } else if (model == "RS"){
+        
+        check_dim_beta <- length(list_name[["beta2"]]) == (1 + 1 + n_interior_knots)
+        
+        if(!check_dim_beta){
+          stop(paste0("Length of beta2 vector incorrect, needs to be ", 1 + 1 + n_interior_knots))
+        } 
+        
+        
+      } else {
+        
+        check_dim_beta <- length(list_name[["beta2"]]) == (1 + 2*(1 + n_interior_knots))
+        
+        if(!check_dim_beta){
+          stop(paste0("Length of beta2 vector incorrect, needs to be ", 1 + 2*(1 + n_interior_knots)))
+        } 
+        
+      } 
+      
+    }
+    
+    if (family == "lognormal"){
+      
+       check_dim_precision_weights <- length(list_name[["precision_weights"]]) == 1 & list_name[["precision_weights"]] > 0
+      
+      if(!check_dim_precision_weights){
+        stop(paste0("precision_weights needs to be a postive scalar"))
+      } 
+      
+      check_dim_precision_noise_weights <- length(list_name[["precision_noise_weights"]]) == 1 & list_name[["precision_noise_weights"]] > 0
+      
+      if(!check_dim_precision_noise_weights){
+        stop(paste0("precision_noise_weights needs to be a postive scalar"))
+      } 
+      
+    }
+    
+  }
   
 }

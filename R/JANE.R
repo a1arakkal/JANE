@@ -556,7 +556,16 @@ JANE <- function(A,
                          K = K,
                          D = D,
                          n_interior_knots = con$n_interior_knots,
-                         model = model)
+                         model = model,
+                         family = family,
+                         noise_weights = noise_weights)
+    
+    if(noise_weights){
+      initialization$q_prob <- q_prob
+      initialization$guess_noise_weights <- guess_noise_weights
+      cl$initialization <- eval(initialization)
+    }
+    
   }
   
   # Check prior if supplied
@@ -565,7 +574,9 @@ JANE <- function(A,
                  D = D,
                  K = K,
                  n_interior_knots = con$n_interior_knots,
-                 model = model)
+                 model = model,
+                 family = family,
+                 noise_weights = noise_weights)
   }
   
   combinations_2run <- as.matrix(expand.grid(K = unique(K), D = unique(D), n_start = 1:con$n_start))
@@ -642,7 +653,6 @@ JANE <- function(A,
   
   optimal_starting <- parallel_res[[optimal_pos]]$starting_params
   if(!is.null(optimal_starting) & is.list(optimal_starting)){
-    optimal_starting[["model"]] <- model
     optimal_starting[["cluster_labels"]] <- apply(optimal_starting$prob_matrix, 1, which.max)
     names(optimal_starting[["cluster_labels"]]) <- ids
     rownames(optimal_starting$prob_matrix) <- ids
@@ -680,7 +690,10 @@ JANE <- function(A,
                         optimal_starting = optimal_starting[sort(names(optimal_starting))],
                         input_params =  list(IC_selection = con$IC_selection,
                                              case_control = case_control,
-                                             DA_type = DA_type),
+                                             DA_type = DA_type,
+                                             model = model,
+                                             family = family,
+                                             noise_weights = noise_weights),
                         IC_out = IC_out,
                         all_convergence_ind = all_convergence_ind,
                         A = A), class = "JANE"))
@@ -1023,7 +1036,7 @@ EM_inner <- function(A,
   # Get IC info
   out$IC <- unlist(BICL(A = A, object = out))
   
-  return(out[!(names(out) %in% c("X", "X2"))])
+  return(out[!(names(out) %in% c("X", "X2", "model", "family", "noise_weights"))])
   
 }
 
