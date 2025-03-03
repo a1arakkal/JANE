@@ -106,7 +106,7 @@ specify_initial_values <- function(A,
     if(family == "bernoulli"){
       required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "beta2", "precision_weights", "precision_noise_weights")]
     } else if(family == "poisson"){
-      required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "beta2")]
+      required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "precision_weights", "precision_noise_weights")]
     } else {
       required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots")]
     }

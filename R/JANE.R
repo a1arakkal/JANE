@@ -1052,7 +1052,7 @@ inner_parallel <- function(x, call_def, A){
   
   while(retry & retry_counter <= call_def$control$max_retry){
     
-    if (!is.list(call_def$initialization)){
+    if(!is.list(call_def$initialization)){
       
       call_def[[1]] <- as.symbol("initialize_starting_values")
       call_def$random_start <- ifelse(call_def$initialization == "GNN", F, T)
@@ -1061,6 +1061,7 @@ inner_parallel <- function(x, call_def, A){
     } else{
       
       call_def$starting_params <- call_def$initialization
+      retry_counter <- Inf
       
     }
     
@@ -1072,19 +1073,23 @@ inner_parallel <- function(x, call_def, A){
       
       error = function(e) {
         if(call_def$control$verbose){
-          message("Issues with starting values. Retrying with new starting values.\n")
+          if(!is.list(call_def$initialization)){
+            message("Issues with starting values. Retrying with new starting values.\n")
+          } 
         }
         NA
       },
       warning = function(w) {
         if(call_def$control$verbose){
-          message("Issues with starting values. Retrying with new starting values.\n")
+          if(!is.list(call_def$initialization)){
+            message("Issues with starting values. Retrying with new starting values.\n")
+          } 
         }
         NA
       }
     ) 
     
-    if (length(run_fun)>1){
+    if(length(run_fun)>1){
       
       return(list(EM_results = run_fun,
                   starting_params = call_def$starting_params))
@@ -1099,7 +1104,12 @@ inner_parallel <- function(x, call_def, A){
   
   if(retry){
     
-    warning("Max re-try (i.e., max_retry) attempts reached. Issues with starting values. Returning Inf values. If this occurs often consider using alternative initialization.")
+    if(!is.list(call_def$initialization)){
+      warning("Max re-try (i.e., max_retry) attempts reached. Issues with starting values. Returning Inf values. If this occurs often consider using alternative initialization.")
+    } else {
+      warning("Issues with starting values. Returning Inf values. Consider using alternative initialization.")
+    }
+
     
     return(list(EM_results = list(IC = c(BIC_model = Inf,
                                          BIC_mbc = Inf,
