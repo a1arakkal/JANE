@@ -335,9 +335,9 @@ JANE <- function(A,
     stop("family needs to be one of the following: 'bernoulli', 'lognormal', 'poisson'")
   }
   
-  # Check if edges weights are >0
-  if(!all(A@x > 0.0)){
-    stop("Negative edge weights detected, edge weights need to be > 0")
+  # Check if edges weights are >=0
+  if(!all(A@x >= 0.0)){
+    stop("Negative edge weights detected, edge weights need to be >= 0")
   }
   
   # Check if weighted network supplied for family = "bernoulli" and ask user if they want to convert to an unweighted network
