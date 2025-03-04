@@ -497,7 +497,7 @@ initialize_starting_values <- function(A,
     
     if(retry & !random_start){
       if(control$verbose){
-        message("Reached max GNN re-attempts, switching to random values.\n")
+        message("Reached max GNN reattempts, switching to random values.\n")
       }
     } 
     

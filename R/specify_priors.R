@@ -187,7 +187,6 @@ specify_priors <- function(D,
     stop("For the current implementation we require that all elements of the nu vector be >= 1 to prevent against negative mixture probabilities for empty clusters")
   }
   
-  
   if (!noise_weights){
     priors <- list(
       a = t(a),

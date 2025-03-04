@@ -229,7 +229,7 @@ initialize_starting_values_weighted_network <- function(A,
     
     if(retry & !random_start){
       if(control$verbose){
-        message("Reached max GNN re-attempts, switching to random values.\n")
+        message("Reached max GNN reattempts, switching to random values.\n")
       }
     } 
     

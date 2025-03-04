@@ -42,7 +42,7 @@ trace_plot <- function(model_object){
     if(has_prob_W){
       graphics::lines(plot_data[,5], col = "blue", type = "l")
       graphics::legend("topright", 
-                       legend=c("Actor cluster assignment prob. matrix", "Weight cluster assignment prob. matrix"),
+                       legend=c("Actor cluster assignment prob. matrix", "Edge weight cluster assignment prob. matrix"),
                        col=c("black", "blue"), lty = 1, cex=0.8)
     }
     
@@ -79,7 +79,7 @@ trace_plot <- function(model_object){
         graphics::lines(plot_data[, grep("abs_diff_MA_U", colnames(plot_data))-2], col = "black", type = "l")
         graphics::lines(plot_data[, grep("abs_diff_MA_U", colnames(plot_data))-1], col = "blue", type = "l")
         graphics::legend("topright", 
-                         legend=c("U", "Actor cluster assignment prob. matrix", "Weight cluster assignment prob. matrix"),
+                         legend=c("U", "Actor cluster assignment prob. matrix", "Edge weight cluster assignment prob. matrix"),
                          col=c("red", "black" ,"blue"), lty = 1, cex=0.8)
       }
     } else {
@@ -94,7 +94,7 @@ trace_plot <- function(model_object){
                          col=c("red", "blue"), lty = 1, cex=0.8)
       }else {
         graphics::legend("topright", 
-                         legend=c("U", "Actor cluster assignment prob. matrix", "Weight cluster assignment prob. matrix"),
+                         legend=c("U", "Actor cluster assignment prob. matrix", "Edge weight cluster assignment prob. matrix"),
                          col=c("red", "black" ,"blue"), lty = 1, cex=0.8)
       }
     }

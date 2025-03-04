@@ -1058,7 +1058,7 @@ inner_parallel <- function(x, call_def, A){
       call_def$random_start <- ifelse(call_def$initialization == "GNN", F, T)
       call_def$starting_params <- eval(call_def)
       
-    } else{
+    } else {
       
       call_def$starting_params <- call_def$initialization
       retry_counter <- Inf
@@ -1079,6 +1079,7 @@ inner_parallel <- function(x, call_def, A){
         }
         NA
       },
+      
       warning = function(w) {
         if(call_def$control$verbose){
           if(!is.list(call_def$initialization)){
@@ -1105,7 +1106,7 @@ inner_parallel <- function(x, call_def, A){
   if(retry){
     
     if(!is.list(call_def$initialization)){
-      warning("Max re-try (i.e., max_retry) attempts reached. Issues with starting values. Returning Inf values. If this occurs often consider using alternative initialization.")
+      warning("Max retry (i.e., max_retry) attempts reached. Issues with starting values. Returning Inf values. If this occurs often consider using alternative initialization.")
     } else {
       warning("Issues with starting values. Returning Inf values. Consider using alternative initialization.")
     }
