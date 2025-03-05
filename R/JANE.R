@@ -335,9 +335,9 @@ JANE <- function(A,
     stop("family needs to be one of the following: 'bernoulli', 'lognormal', 'poisson'")
   }
   
-  # Check if edges weights are >=0
-  if(!all(A@x >= 0.0)){
-    stop("Negative edge weights detected, edge weights need to be >= 0")
+  # Check if edges weights are >0
+  if(!all(A@x > 0.0)){
+    stop("Negative edge weights detected, edge weights need to be >0. This error can also be generated if a sparse adjacency matrix is supplied containing values of 0 for its 'non-zero' values (e.g., if a 'non-zero' element in the sparse matrix is replaced by a 0).")
   }
   
   # Check if weighted network supplied for family = "bernoulli" and ask user if they want to convert to an unweighted network
