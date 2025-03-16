@@ -2,16 +2,20 @@
 % Please edit documentation in R/sim_A.R
 \name{sim_A}
 \alias{sim_A}
-\title{Simulate unweighted networks from latent space cluster models}
+\title{Simulate unweighted or weighted networks, with or without noise edges, from latent space cluster models}
 \usage{
 sim_A(
   N,
   mus,
   omegas,
   p,
-  beta0,
-  model,
-  precision_R_effects,
+  model = "NDH",
+  family = "bernoulli",
+  params_LR,
+  params_weights = NULL,
+  noise_weights_prob = 0,
+  mean_noise_weights,
+  precision_noise_weights,
   remove_isolates = TRUE
 )
 }
@@ -24,8 +28,6 @@ sim_A(
 
 \item{p}{A numeric vector of length \eqn{K} specifying the mixture weights of the finite multivariate normal mixture distribution for the latent positions.}
 
-\item{beta0}{A numeric value specifying the intercept parameter for the logistic regression model.}
-
 \item{model}{A character string to specify the model to simulate the network from:
 \itemize{
 \item{'NDH': generates an \strong{undirected} network with no degree heterogeneity}
@@ -33,12 +35,43 @@ sim_A(
 \item{'RSR': generates a \strong{directed} network with degree heterogeneity, specifically by including actor specific random sender and receiver effects}
 }}
 
-\item{precision_R_effects}{Precision parameters for random degree heterogeneity effects:
+\item{family}{A character vector specifying the distribution of the edge weights.
+\itemize{
+\item{'bernoulli': Expects an unweighted network; utilizes a logit link (default)}
+\item{'lognormal': Expects a weighted network with non-negative continuous weights; utilizes an identity link}
+\item{'poisson': Expects a weighted network with weights representing counts; utilizes an log link}
+}}
+
+\item{params_LR}{A list containing the parameters of the logistic regression model, including:
+\itemize{
+\item{'beta0': A numeric value specifying the intercept parameter for the logistic regression model}
+\item{'precision_R_effects': Precision parameters for random degree heterogeneity effects, specific to the logistic regression model:
 \itemize{
 \item{'NDH': does not apply, can leave as missing}
 \item{'RS': a numeric value specifying the precision parameter of the normal distribution of the random sociality effect, if missing will generate from a gamma(shape = 1, rate = 1)}
 \item{'RSR': a numeric matrix specifying the precision matrix of the multivariate normal distribution of the random sender and receiver effects, if missing will generate from a Wishart(df = 3, Sigma = \eqn{I_2})}
+}
+}
 }}
+
+\item{params_weights}{Only relevant if \code{family \%in\% c('lognormal', 'poisson')}. A list containing the parameters of the models for the edge weights, including:
+\itemize{
+\item{'beta0': A numeric value specifying the intercept parameter for the Poisson or Log-normal regression model}
+\item{'precision_R_effects': Precision parameters for random degree heterogeneity effects, specific to the Poisson or Log-normal regression model:
+\itemize{
+\item{'NDH': does not apply, can leave as missing}
+\item{'RS': a numeric value specifying the precision parameter of the normal distribution of the random sociality effect, if missing will generate from a gamma(shape = 1, rate = 1)}
+\item{'RSR': a numeric matrix specifying the precision matrix of the multivariate normal distribution of the random sender and receiver effects, if missing will generate from a Wishart(df = 3, Sigma = \eqn{I_2})}
+}
+}
+\item{'precision_weights': A positive, non-zero, numeric representing the precision (on the log scale) of the log-normal weight distribution. Only relevant for \code{family = 'lognormal'}}
+}}
+
+\item{noise_weights_prob}{A numeric in [0,1] representing the proportion of edges that are noise edge (default is 0.0). ADD DETAILS}
+
+\item{mean_noise_weights}{A numeric representing the mean of the noise weight distribution. Only relevant for \code{family \%in\% c('lognormal', 'poisson')} and \code{noise_weights_prob>0.0}. For family = 'poisson' value has to be > 0.0, for family = "lognormal" the mean is on the log scale.}
+
+\item{precision_noise_weights}{A positive, non-zero, numeric representing the precision of the log-normal noise weight distribution. Only relevant for \code{family = 'lognormal'} and \code{noise_weights_prob>0.0}.}
 
 \item{remove_isolates}{A logical; if \code{TRUE} then isolates from the network are removed (default is \code{TRUE}).}
 }
@@ -52,7 +85,7 @@ A list containing the following components:
 \item{\code{model}}{ A character string representing the specific \code{model} used to simulate the network.}
 }
 \description{
-Simulate an unweighted network from a \eqn{D}-dimensional latent space cluster model with \eqn{K} clusters and \eqn{N} actors. The \emph{squared} euclidean distance is used (i.e., \eqn{dist(U_i,U_j)^2}), where \eqn{U_i} and \eqn{U_j} are the respective actor's positions in an unobserved social space.
+Simulate an unweighted or weighted network, with or without noise edges, from a \eqn{D}-dimensional latent space cluster model with \eqn{K} clusters and \eqn{N} actors. The \emph{squared} euclidean distance is used (i.e., \eqn{dist(U_i,U_j)^2}), where \eqn{U_i} and \eqn{U_j} are the respective actor's positions in an unobserved social space.
 }
 \examples{
 \donttest{
@@ -71,7 +104,7 @@ JANE::sim_A(N = 100L,
             mus = mus, 
             omegas = omegas, 
             p = p, 
-            beta0 = beta0, 
+            params_LR = list(beta0 = beta0),
             remove_isolates = TRUE)
 }
 }

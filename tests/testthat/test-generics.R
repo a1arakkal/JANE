@@ -19,7 +19,7 @@ test_that("plot.JANE works", {
                           mus = mus, 
                           omegas = omegas, 
                           p = p, 
-                          beta0 = beta0, 
+                          params_LR = list(beta0 = beta0),
                           remove_isolates = TRUE)
                           
   # Run JANE on simulated data
@@ -38,7 +38,7 @@ test_that("plot.JANE works", {
   expect_no_error( plot(res) )
   
   # plot network - misclassified
-  expect_no_error( plot(res, type = "misclassified", true_labels = apply(sim_data$Z, 1, which.max)) )
+  expect_no_error( plot(res, type = "misclassified", true_labels = apply(sim_data$Z_U, 1, which.max)) )
   
   # plot network - uncertainty and swap axes
   expect_no_error( plot(res, type = "uncertainty", swap_axes = TRUE) )
@@ -71,7 +71,7 @@ test_that("summary.JANE works", {
                           mus = mus, 
                           omegas = omegas, 
                           p = p, 
-                          beta0 = beta0, 
+                          params_LR = list(beta0 = beta0),
                           remove_isolates = TRUE)
                           
   # Run JANE on simulated data
@@ -87,7 +87,7 @@ test_that("summary.JANE works", {
   expect_no_error( summary(res) )
   
   # Summarize fit and compare to true cluster labels
-  expect_no_error( summary(res, true_labels = apply(sim_data$Z, 1, which.max)) )
+  expect_no_error( summary(res, true_labels = apply(sim_data$Z_U, 1, which.max)) )
   
   # Summarize fit using starting values of EM algorithm
   expect_no_error( summary(res, initial_values = TRUE) )

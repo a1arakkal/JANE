@@ -93,7 +93,7 @@ sim_data <- JANE::sim_A(N = 100L,
                         mus = mus, 
                         omegas = omegas, 
                         p = p, 
-                        beta0 = beta0, 
+                        params_LR = list(beta0 = beta0), 
                         remove_isolates = TRUE)
                         
 # Run JANE on simulated data
@@ -112,7 +112,7 @@ plot(res, type = "trace_plot")
 plot(res)
 
 # plot network - misclassified
-plot(res, type = "misclassified", true_labels = apply(sim_data$Z, 1, which.max))
+plot(res, type = "misclassified", true_labels = apply(sim_data$Z_U, 1, which.max))
 
 # plot network - uncertainty and swap axes
 plot(res, type = "uncertainty", swap_axes = TRUE)

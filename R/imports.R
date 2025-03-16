@@ -1,16 +1,15 @@
 #' @rawNamespace import(Matrix, except = image)
 #' @import extraDistr
-#' @import splines 
-#' @import mclust 
-#' @import aricode
-#' @import rlang
+#' @import Rcpp
+#' @import graphics 
+#' @importFrom splines ns 
+#' @importFrom mclust adjustedRandIndex classError surfacePlot
+#' @importFrom aricode NMI
+#' @importFrom progressr handlers handler_progress with_progress progressor
+#' @importFrom rlang new_environment duplicate
 #' @importFrom future.apply future_lapply
 #' @importFrom future plan multisession sequential
-#' @import Rcpp
-#' @importFrom progressr handlers handler_progress progressor with_progress
-#' @import progress
-#' @import graphics
-#' @import grDevices
+#' @importFrom grDevices gray rainbow heat.colors
 #' @importFrom methods as
 #' @importFrom utils menu packageVersion
 #' @importFrom stringdist amatch

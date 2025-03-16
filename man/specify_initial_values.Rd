@@ -9,13 +9,18 @@ specify_initial_values(
   D,
   K,
   model,
+  family = "bernoulli",
+  noise_weights = FALSE,
   n_interior_knots = NULL,
   U,
   omegas,
   mus,
   p,
   Z,
-  beta
+  beta,
+  beta2,
+  precision_weights,
+  precision_noise_weights
 )
 }
 \arguments{
@@ -32,6 +37,10 @@ specify_initial_values(
 \item{'RSR': \strong{directed} network with degree heterogeneity}
 }}
 
+\item{family}{A character string specifying the model:}
+
+\item{noise_weights}{A character string specifying the model:}
+
 \item{n_interior_knots}{An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only; default is \code{NULL}).}
 
 \item{U}{A numeric \eqn{N \times D} matrix with rows specifying an actor's position in a \eqn{D}-dimensional social space.}
@@ -45,6 +54,12 @@ specify_initial_values(
 \item{Z}{A numeric \eqn{N \times K} matrix with rows representing the conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
 
 \item{beta}{A numeric vector specifying the regression coefficients for the logistic regression model. Specifically, a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.}
+
+\item{beta2}{A numeric vector specifying the regression coefficients for the logistic regression model. Specifically, a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.}
+
+\item{precision_weights}{A numeric vector specifying the regression coefficients for the logistic regression model. Specifically, a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.}
+
+\item{precision_noise_weights}{A numeric vector specifying the regression coefficients for the logistic regression model. Specifically, a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.}
 }
 \value{
 A list of starting values for the EM algorithm generated from the input values in a structure accepted by \code{JANE}.
@@ -75,7 +90,7 @@ sim_data <- JANE::sim_A(N = 100L,
                         mus = mus, 
                         omegas = omegas, 
                         p = p, 
-                        beta0 = beta0, 
+                        params_LR = list(beta0 = beta0),
                         remove_isolates = TRUE)
 
 # Specify starting values

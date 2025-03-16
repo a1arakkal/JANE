@@ -5,17 +5,18 @@
 #' @param initial_values A logical; if \code{TRUE} then summarize fit using the starting parameters used in the EM algorithm (default is \code{FALSE}, i.e., the results after the EM algorithm is run are summarized).
 #' @param ... Unused.
 #' @return A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following components (Note: \eqn{N} is the number of actors in the network, \eqn{K} is the number of clusters, and \eqn{D} is the dimension of the latent space):
-#' \item{\code{coefficients}}{ A numeric vector representing the estimated coefficients from the logistic regression model.}
+#' \item{\code{coefficients}}{ A LIST vector representing the estimated coefficients from the logistic regression model.}
 #' \item{\code{p}}{ A numeric vector of length \eqn{K} representing the estimated mixture weights of the finite multivariate normal mixture distribution for the latent positions.}
 #' \item{\code{U}}{ A numeric \eqn{N \times D} matrix with rows representing an actor's estimated latent position in a \eqn{D}-dimensional social space.}
 #' \item{\code{mus}}{ A numeric \eqn{K \times D} matrix representing the estimated mean vectors of the multivariate normal distributions for the latent positions of the \eqn{K} clusters.}
 #' \item{\code{omegas}}{ A numeric \eqn{D \times D \times K} array representing the estimated precision matrices of the multivariate normal distributions for the latent positions of the \eqn{K} clusters.}
-#' \item{\code{Z}}{ A numeric \eqn{N \times K} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
+#' \item{\code{Z_U}}{ A numeric \eqn{N \times K} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
+#' \item{\code{Z_W}}{ A numeric \eqn{|E| \times 5} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
 #' \item{\code{uncertainty}}{ A numeric vector of length \eqn{N} representing the uncertainty of the \eqn{i^{th}} actor's classification, derived as 1 - \eqn{max_k Z_{ik}}.}
 #' \item{\code{cluster_labels}}{ A numeric vector of length \eqn{N} representing the cluster assignment of each actor based on a hard clustering rule of \eqn{\{h | Z_{ih} = max_k Z_{ik}\}}.}
 #' \item{\code{input_params}}{ A list with the following components: \itemize{
 #'                           \item{\code{model}: A character string representing the specific \code{model} used (i.e., 'NDH', 'RS', or 'RSR')}
-#'                           \item{\code{IC_selection}: A character string representing the specific information criteria used to select the optimal fit (i.e., 'BIC_logit', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL')}
+#'                           \item{\code{IC_selection}: A character string representing the specific information criteria used to select the optimal fit (i.e., 'BIC_model', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL')}
 #'                           \item{\code{case_control}: A logical; if \code{TRUE} then the case/control approach was utilized}
 #'                           \item{\code{DA_type}: A character string representing the specific deterministic annealing approach utilized (i.e., 'none', 'cooling', 'heating', or 'hybrid')}
 #'                           \item{\code{priors}: A list of the prior hyperparameters used. See \code{\link[JANE]{specify_priors}} for definitions.}
@@ -44,7 +45,7 @@
 #'                         mus = mus, 
 #'                         omegas = omegas, 
 #'                         p = p, 
-#'                         beta0 = beta0, 
+#'                         params_LR = list(beta0 = beta0), 
 #'                         remove_isolates = TRUE)
 #'                         
 #' # Run JANE on simulated data
@@ -60,7 +61,7 @@
 #' summary(res)
 #' 
 #' # Summarize fit and compare to true cluster labels
-#' summary(res, true_labels = apply(sim_data$Z, 1, which.max))
+#' summary(res, true_labels = apply(sim_data$Z_U, 1, which.max))
 #' 
 #' # Summarize fit using starting values of EM algorithm
 #' summary(res, initial_values = TRUE)
@@ -84,7 +85,10 @@ summary.JANE <- function(object, true_labels = NULL, initial_values = FALSE, ...
   IC_selection <- object$input_params$IC_selection
   case_control <- object$input_params$case_control
   DA_type <- object$input_params$DA_type
-
+  model <- object$input_params$model
+  family <- object$input_params$family
+  noise_weights <- object$input_params$noise_weights
+  
   priors <- object$optimal_res$priors
   priors$a <- priors$a[1,]
   priors$c <- unname(priors$c)
@@ -95,8 +99,6 @@ summary.JANE <- function(object, true_labels = NULL, initial_values = FALSE, ...
     summary_data <- object$optimal_starting
   }
 
-  model <- summary_data$model
-  
   if(!is.null(true_labels)){
     if(length(true_labels) != length(summary_data$cluster_labels)){
       stop("The length of the vector of true labels supplied does not match the number of actors in the fitted network")
@@ -107,20 +109,27 @@ summary.JANE <- function(object, true_labels = NULL, initial_values = FALSE, ...
   }
   
   # return list
-  out <- list(coefficients = summary_data$beta,
+  out <- list(coefficients = list(beta = summary_data$beta),
               p = summary_data$p,
               U = summary_data$U,
               mus = summary_data$mus,
               omegas = summary_data$omegas,
-              Z = summary_data$prob_matrix,
+              Z_U = summary_data$prob_matrix,
               uncertainty = 1-apply(summary_data$prob_matrix, 1, max),
               cluster_labels = summary_data$cluster_labels)
+  
+  if(noise_weights){
+    out$Z_W <- summary_data$prob_matrix_W
+    out$coefficients$beta2 <- summary_data$beta2
+  }
   
   if(!initial_values){
     out$IC <- summary_data$IC
   }
   
   out$input_params <- list(model = model,
+                           family = family,
+                           noise_weights = noise_weights,
                            IC_selection = IC_selection,
                            case_control = case_control,
                            DA_type = DA_type,
@@ -155,6 +164,8 @@ print.summary.JANE <- function(x, ...){
 
   cat("Input parameters:\n")
   cat("Model =", x$input_params$model, "\n")
+  cat("Family =", x$input_params$family, "\n")
+  cat("Noise weights =", x$input_params$noise_weights, "\n")
   cat("Information criteria used to select optimal model =", x$input_params$IC_selection, "\n")
   cat("Case-control approximation utilized =", x$input_params$case_control, "\n")
   cat("Type of deterministic annealing =", x$input_params$DA_type, "\n")
@@ -198,17 +209,25 @@ print.summary.JANE <- function(x, ...){
 #' @exportS3Method print JANE
 print.JANE <- function(x, ...){
   
-  model <- x$optimal_res$model
+  if(!inherits(x, "JANE")){
+    stop("Object is not of class JANE")
+  }
+  
+  if(!(length(x$IC_out[, "selected"]) == 1) && all(x$IC_out[, "selected"] == 1)){
+    stop("Unable to select the best K, D, and n_start using infomation criteria. See output matrix IC_out for infomation criteria values. Try different initialization approaches or only specify one K, D, and n_start.")
+  }
+  
+  if(is.null(x$optimal_res) | is.null(x$optimal_starting)){
+    stop("Unable to fit the model")
+  }
+  
+  model <- x$input_params$model
   p <- x$optimal_res$p
   K <- length(p)
   D <- ncol(x$optimal_res$U)
   n_k <- rep(0, K)
   names(n_k) <- 1:K
   n_k[names(table(x$optimal_res$cluster_labels))] <- table(x$optimal_res$cluster_labels)
-  
-  if(!inherits(x, "JANE")){
-    stop("Object is not of class JANE")
-  }
   
   cat(model, "latent space network clustering with", D, "dimensions and", K, "clusters of sizes", paste0(n_k, collapse = ", "))
   
@@ -276,7 +295,7 @@ print.JANE <- function(x, ...){
 #'                         mus = mus, 
 #'                         omegas = omegas, 
 #'                         p = p, 
-#'                         beta0 = beta0, 
+#'                         params_LR = list(beta0 = beta0), 
 #'                         remove_isolates = TRUE)
 #'                         
 #' # Run JANE on simulated data
@@ -295,7 +314,7 @@ print.JANE <- function(x, ...){
 #' plot(res)
 #' 
 #' # plot network - misclassified
-#' plot(res, type = "misclassified", true_labels = apply(sim_data$Z, 1, which.max))
+#' plot(res, type = "misclassified", true_labels = apply(sim_data$Z_U, 1, which.max))
 #' 
 #' # plot network - uncertainty and swap axes
 #' plot(res, type = "uncertainty", swap_axes = TRUE)
@@ -315,6 +334,14 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
   
   if(!inherits(x, "JANE")){
     stop("Object is not of class JANE")
+  }
+  
+  if(!(length(x$IC_out[, "selected"]) == 1) && all(x$IC_out[, "selected"] == 1)){
+    stop("Unable to select the best K, D, and n_start using infomation criteria. See output matrix IC_out for infomation criteria values. Try different initialization approaches or only specify one K, D, and n_start.")
+  }
+  
+  if(is.null(x$optimal_res) | is.null(x$optimal_starting)){
+    stop("Unable to fit the model")
   }
   
   if(!type %in% c("lsnc", "trace_plot", "misclassified", "uncertainty")){
@@ -339,6 +366,8 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
     }
   }
   
+  plot_data$model <- x$input_params$model
+    
   if(!missing(cluster_cols)){
     if(length(unique(cluster_cols)) < length(plot_data$p)){
       stop("The number of unique cluster colors supplied is less than the number of clusters")
