@@ -4,10 +4,10 @@
 #' @import mclust 
 #' @import aricode
 #' @import rlang
-#' @import future.apply
-#' @import future
+#' @importFrom future.apply future_lapply
+#' @importFrom future plan multisession sequential
 #' @import Rcpp
-#' @import progressr
+#' @importFrom progressr handlers handler_progress progressor with_progress
 #' @import progress
 #' @import graphics
 #' @import grDevices
