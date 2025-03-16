@@ -20,7 +20,7 @@ arma::colvec gradient_C(arma::colvec par, arma::mat X, arma::colvec y){
   arma::colvec eta = arma::zeros<arma::colvec>(X.n_rows);
   arma::colvec out = arma::zeros<arma::colvec>(X.n_cols);
   eta = X*par;
-  arma::colvec p = arma::exp(eta) / ( 1 + arma::exp(eta));
+  arma::colvec p = 1.0 / ( 1.0 + arma::exp(-1.0*eta));
   out = X.t()*(y - p); 
   
   return(-out);

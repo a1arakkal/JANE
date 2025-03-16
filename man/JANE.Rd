@@ -8,6 +8,9 @@ JANE(
   A,
   D = 2,
   K = 2,
+  family = "bernoulli",
+  noise_weights = FALSE,
+  guess_noise_weights = NULL,
   model,
   initialization = "GNN",
   case_control = FALSE,
@@ -22,6 +25,17 @@ JANE(
 \item{D}{Integer (scalar or vector) specifying the dimension of the latent space (default is 2).}
 
 \item{K}{Integer (scalar or vector) specifying the number of clusters to consider (default is 2).}
+
+\item{family}{A character vector specifying the distribution of the edge weights.
+\itemize{
+\item{'bernoulli': Expects an unweighted network; utilizes a logit link (default)}
+\item{'lognormal': Expects a weighted network with non-negative continuous weights; utilizes an identity link}
+\item{'poisson': Expects a weighted network with weights representing counts; utilizes an log link}
+}}
+
+\item{noise_weights}{A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to a unweighted binary network if a weighted network is supplied, i.e., (A > 0.0)*1.0) and fits a latent space cluster model (default is \code{FALSE}).}
+
+\item{guess_noise_weights}{Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'poisson')} (mean is on the log-scale for lognormal) or proportion (i.e. in (0,1)) of all edges that are noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'poisson')} and 1\% will be used for \code{family = 'bernoulli'}.}
 
 \item{model}{A character string specifying the model to fit:
 \itemize{
@@ -95,11 +109,11 @@ The \code{control} argument is a named list that the user can supply containing 
 \item{\code{n_start}}{An integer specifying the maximum number of starts for the EM algorithm (default is \code{5}).}
 \item{\code{max_retry}}{An integer specifying the maximum number of re-attempts if starting values cause issues with EM algorithm (default is \code{5}).}
 \item{\code{IC_selection}}{A character string to specify the information criteria used to select the optimal fit based on the combinations of \code{K}, \code{D}, and \code{n_start} considered: \itemize{
-\item{\code{'BIC_logit'}: BIC computed from logistic regression component}
+\item{\code{'BIC_model'}: BIC computed from logistic regression or Hurdle model component}
 \item{\code{'BIC_mbc'}: BIC computed from model based clustering component}
 \item{\code{'ICL_mbc'}: ICL computed from model based clustering component}
-\item{\code{'Total_BIC'}: sum of \code{'BIC_logit'} and \code{'BIC_mbc'}}
-\item{\code{'Total_ICL'}: sum of \code{'BIC_logit'} and \code{'ICL_mbc'} (default)}
+\item{\code{'Total_BIC'}: sum of \code{'BIC_model'} and \code{'BIC_mbc'}}
+\item{\code{'Total_ICL'}: sum of \code{'BIC_model'} and \code{'ICL_mbc'} (default)}
 }}
 \item{\code{sd_random_U_GNN}}{(only relevant when \code{initialization = 'GNN'}) A positive numeric value specifying the standard deviation for the random draws from a normal distribution to initialize \eqn{U} (default is \code{1}).}
 \item{\code{max_retry_GNN}}{(only relevant when \code{initialization = 'GNN'}) An integer specifying the maximum number of re-attempts for the \code{GNN} approach before switching to random starting values (default is \code{10}).}
@@ -115,11 +129,11 @@ The \code{control} argument is a named list that the user can supply containing 
 
 \code{JANE} allows for the following model selection criteria to choose the number of clusters:
 \itemize{
-\item{\code{'BIC_logit'}: BIC computed from logistic regression component}
+\item{\code{'BIC_model'}: BIC computed from logistic regression or Hurdle model component}
 \item{\code{'BIC_mbc'}: BIC computed from model based clustering component}
 \item{\code{'ICL_mbc'}: ICL (Biernacki et al. (2000)) computed from model based clustering component}
-\item{\code{'Total_BIC'}: Sum of \code{'BIC_logit'} and \code{'BIC_mbc'}, this is the model selection criterion proposed by Handcock et al. (2007)}
-\item{\code{'Total_ICL'}: (default) sum of \code{'BIC_logit'} and \code{'ICL_mbc'}, this criterion is similar to \code{'Total_BIC'}, but uses ICL for the model based clustering component which tends to favor more well-separated clusters.}
+\item{\code{'Total_BIC'}: Sum of \code{'BIC_model'} and \code{'BIC_mbc'}, this is the model selection criterion proposed by Handcock et al. (2007)}
+\item{\code{'Total_ICL'}: (default) sum of \code{'BIC_model'} and \code{'ICL_mbc'}, this criterion is similar to \code{'Total_BIC'}, but uses ICL for the model based clustering component which tends to favor more well-separated clusters.}
 }
 
 \emph{Warning}: It is not certain whether it is appropriate to use the model selection criterion above to select \code{D}.
@@ -142,7 +156,7 @@ sim_data <- JANE::sim_A(N = 100L,
                         mus = mus, 
                         omegas = omegas, 
                         p = p, 
-                        beta0 = beta0, 
+                        params_LR = list(beta0 = beta0),
                         remove_isolates = TRUE)
                         
 # Run JANE on simulated data

@@ -5,6 +5,11 @@ initialize_starting_values <- function(A,
                                        model,
                                        random_start,
                                        control,
+                                       family,
+                                       noise_weights,
+                                       guess_noise_weights,
+                                       q_prob,
+                                       prob_matrix_W,
                                        ...){
   
   N <- nrow(A)
@@ -211,7 +216,7 @@ initialize_starting_values <- function(A,
           } else if (model == "RS"){
             
             # generate NS basis matrix for degree
-            X_basis <- splines::ns(x = rowSums(A), df = control$n_interior_knots + 1, intercept = F)
+            X_basis <- splines::ns(x = (1.0/(nrow(A)-1.0))*rowSums(A), df = control$n_interior_knots + 1, intercept = F)
             
             if (control$downsampling_GNN){
               
@@ -307,8 +312,8 @@ initialize_starting_values <- function(A,
           } else {
             
             # generate NS basis matrix for in and out degree
-            X_basis <- cbind(splines::ns(x = rowSums(A), df = control$n_interior_knots + 1, intercept = F),
-                             splines::ns(x = colSums(A), df = control$n_interior_knots + 1, intercept = F))
+            X_basis <- cbind(splines::ns(x = (1.0/(nrow(A)-1.0))*rowSums(A), df = control$n_interior_knots + 1, intercept = F),
+                             splines::ns(x = (1.0/(nrow(A)-1.0))*colSums(A), df = control$n_interior_knots + 1, intercept = F))
             
             if (control$downsampling_GNN){
               
@@ -407,6 +412,11 @@ initialize_starting_values <- function(A,
             
           }
           
+          # Check for NAs in beta
+          if(any(is.na(starting_beta))){
+            stop()
+          }
+          
           # Run K-means algo for GMM based on starting U
           starting_params <- stats::kmeans(x = starting_U,
                                            centers = K,
@@ -487,7 +497,7 @@ initialize_starting_values <- function(A,
     
     if(retry & !random_start){
       if(control$verbose){
-        message("Reached max GNN re-attempts, switching to random values.\n")
+        message("Reached max GNN reattempts, switching to random values.\n")
       }
     } 
     
@@ -514,6 +524,23 @@ initialize_starting_values <- function(A,
       starting_params$beta <- stats::rnorm(n = 1 + 2*(1 + control$n_interior_knots))
       
     }
+    
+  }
+  
+  
+  if(noise_weights){
+    
+    starting_params2 <- initialize_starting_values_weighted_network(A = A,
+                                                                    model = model,
+                                                                    random_start = random_start,
+                                                                    control = control,
+                                                                    family = family,
+                                                                    prob_matrix_W = prob_matrix_W,
+                                                                    noise_weights = noise_weights,
+                                                                    guess_noise_weights = guess_noise_weights,
+                                                                    q_prob = q_prob)
+    
+    starting_params <- do.call(c, list(starting_params, starting_params2))
     
   }
   

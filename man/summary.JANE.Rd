@@ -17,17 +17,18 @@
 }
 \value{
 A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following components (Note: \eqn{N} is the number of actors in the network, \eqn{K} is the number of clusters, and \eqn{D} is the dimension of the latent space):
-\item{\code{coefficients}}{ A numeric vector representing the estimated coefficients from the logistic regression model.}
+\item{\code{coefficients}}{ A LIST vector representing the estimated coefficients from the logistic regression model.}
 \item{\code{p}}{ A numeric vector of length \eqn{K} representing the estimated mixture weights of the finite multivariate normal mixture distribution for the latent positions.}
 \item{\code{U}}{ A numeric \eqn{N \times D} matrix with rows representing an actor's estimated latent position in a \eqn{D}-dimensional social space.}
 \item{\code{mus}}{ A numeric \eqn{K \times D} matrix representing the estimated mean vectors of the multivariate normal distributions for the latent positions of the \eqn{K} clusters.}
 \item{\code{omegas}}{ A numeric \eqn{D \times D \times K} array representing the estimated precision matrices of the multivariate normal distributions for the latent positions of the \eqn{K} clusters.}
-\item{\code{Z}}{ A numeric \eqn{N \times K} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
+\item{\code{Z_U}}{ A numeric \eqn{N \times K} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
+\item{\code{Z_W}}{ A numeric \eqn{|E| \times 5} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
 \item{\code{uncertainty}}{ A numeric vector of length \eqn{N} representing the uncertainty of the \eqn{i^{th}} actor's classification, derived as 1 - \eqn{max_k Z_{ik}}.}
 \item{\code{cluster_labels}}{ A numeric vector of length \eqn{N} representing the cluster assignment of each actor based on a hard clustering rule of \eqn{\{h | Z_{ih} = max_k Z_{ik}\}}.}
 \item{\code{input_params}}{ A list with the following components: \itemize{
 \item{\code{model}: A character string representing the specific \code{model} used (i.e., 'NDH', 'RS', or 'RSR')}
-\item{\code{IC_selection}: A character string representing the specific information criteria used to select the optimal fit (i.e., 'BIC_logit', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL')}
+\item{\code{IC_selection}: A character string representing the specific information criteria used to select the optimal fit (i.e., 'BIC_model', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL')}
 \item{\code{case_control}: A logical; if \code{TRUE} then the case/control approach was utilized}
 \item{\code{DA_type}: A character string representing the specific deterministic annealing approach utilized (i.e., 'none', 'cooling', 'heating', or 'hybrid')}
 \item{\code{priors}: A list of the prior hyperparameters used. See \code{\link[JANE]{specify_priors}} for definitions.}
@@ -60,7 +61,7 @@ sim_data <- JANE::sim_A(N = 100L,
                         mus = mus, 
                         omegas = omegas, 
                         p = p, 
-                        beta0 = beta0, 
+                        params_LR = list(beta0 = beta0), 
                         remove_isolates = TRUE)
                         
 # Run JANE on simulated data
@@ -76,7 +77,7 @@ res <- JANE::JANE(A = sim_data$A,
 summary(res)
 
 # Summarize fit and compare to true cluster labels
-summary(res, true_labels = apply(sim_data$Z, 1, which.max))
+summary(res, true_labels = apply(sim_data$Z_U, 1, which.max))
 
 # Summarize fit using starting values of EM algorithm
 summary(res, initial_values = TRUE)

@@ -4,7 +4,29 @@
 \alias{specify_priors}
 \title{Specify prior hyperparameters for EM algorithm}
 \usage{
-specify_priors(D, K, model, n_interior_knots = NULL, a, b, c, G, nu, e, f)
+specify_priors(
+  D,
+  K,
+  model,
+  family = "bernoulli",
+  noise_weights = FALSE,
+  n_interior_knots = NULL,
+  a,
+  b,
+  c,
+  G,
+  nu,
+  e,
+  f,
+  h,
+  l,
+  e_2,
+  f_2,
+  m_1,
+  o_1,
+  m_2,
+  o_2
+)
 }
 \arguments{
 \item{D}{An integer specifying the dimension of the latent positions.}
@@ -17,6 +39,10 @@ specify_priors(D, K, model, n_interior_knots = NULL, a, b, c, G, nu, e, f)
 \item{'RS': \strong{undirected} network with degree heterogeneity}
 \item{'RSR': \strong{directed} network with degree heterogeneity}
 }}
+
+\item{family}{A character string specifying the model:}
+
+\item{noise_weights}{A character string specifying the model:}
 
 \item{n_interior_knots}{An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only; default is \code{NULL}).}
 
@@ -33,6 +59,22 @@ specify_priors(D, K, model, n_interior_knots = NULL, a, b, c, G, nu, e, f)
 \item{e}{A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.}
 
 \item{f}{A numeric square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.}
+
+\item{h}{A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.}
+
+\item{l}{A numeric square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.}
+
+\item{e_2}{A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.}
+
+\item{f_2}{A numeric square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.}
+
+\item{m_1}{A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.}
+
+\item{o_1}{A numeric square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.}
+
+\item{m_2}{A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.}
+
+\item{o_2}{A numeric square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta}, where \eqn{\beta} represents the coefficients of the logistic regression model.}
 }
 \value{
 A list of prior hyperparameters for the EM algorithm generated from the input values in a structure accepted by \code{JANE}.
@@ -73,7 +115,7 @@ sim_data <- JANE::sim_A(N = 100L,
                         mus = mus, 
                         omegas = omegas, 
                         p = p, 
-                        beta0 = beta0, 
+                        params_LR = list(beta0 = beta0), 
                         remove_isolates = TRUE)
                         
                         
