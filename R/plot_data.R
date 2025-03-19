@@ -110,10 +110,10 @@ plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour
         }
         
         graphics::points(U, pch = 16, cex = 0.8, col = scales::alpha(colors[Z], alpha_node)) 
-        legend("topright", legend = paste0("Cluster ", sort(unique(Z))), pch = 16,
-               col = colors[sort(unique(Z))],
-               pt.bg = colors[sort(unique(Z))],
-               cex = 0.8)
+        graphics::legend("topright", legend = paste0("Cluster ", sort(unique(Z))), pch = 16,
+                         col = colors[sort(unique(Z))],
+                         pt.bg = colors[sort(unique(Z))],
+                         cex = 0.8)
         
       } else {
         
@@ -146,8 +146,8 @@ plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour
       graphics::points(U, pch = 16, cex = 0.8, 
                        col = scales::alpha(ifelse(1:nrow(A) %in% misclassified == T, "black", "white"),
                                            alpha_node))
-      legend("topright", legend = "Misclassified actor", pch = 16,
-             cex = 0.8)
+      graphics::legend("topright", legend = "Misclassified actor", pch = 16,
+                       cex = 0.8)
     }
   }
 }

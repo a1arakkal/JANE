@@ -1,7 +1,6 @@
 #' @rawNamespace import(Matrix, except = image)
-#' @import extraDistr
 #' @import Rcpp
-#' @import graphics 
+#' @importFrom extraDistr rdirichlet rtpois
 #' @importFrom splines ns 
 #' @importFrom mclust adjustedRandIndex classError surfacePlot
 #' @importFrom aricode NMI

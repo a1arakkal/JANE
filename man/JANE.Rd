@@ -20,22 +20,22 @@ JANE(
 )
 }
 \arguments{
-\item{A}{A square matrix or sparse matrix of class 'dgCMatrix' representing the adjacency matrix of the \strong{unweighted} network of interest.}
+\item{A}{A square matrix or sparse matrix of class 'dgCMatrix' representing the adjacency matrix of the network of interest.}
 
 \item{D}{Integer (scalar or vector) specifying the dimension of the latent space (default is 2).}
 
 \item{K}{Integer (scalar or vector) specifying the number of clusters to consider (default is 2).}
 
-\item{family}{A character vector specifying the distribution of the edge weights.
+\item{family}{A character string specifying the distribution of the edge weights.
 \itemize{
-\item{'bernoulli': Expects an unweighted network; utilizes a logit link (default)}
-\item{'lognormal': Expects a weighted network with non-negative continuous weights; utilizes an identity link}
-\item{'poisson': Expects a weighted network with weights representing counts; utilizes an log link}
+\item{'bernoulli': Expects an \strong{unweighted} network; utilizes a Bernoulli distribution with a logit link (default)}
+\item{'lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link}
+\item{'poisson': Expects a \strong{weighted} network with edge weights representing non-zero counts; utilizes a zero-truncated Poisson distribution with a log link}
 }}
 
-\item{noise_weights}{A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to a unweighted binary network if a weighted network is supplied, i.e., (A > 0.0)*1.0) and fits a latent space cluster model (default is \code{FALSE}).}
+\item{noise_weights}{A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to an unweighted binary network if a weighted network is supplied, i.e., (A > 0.0)*1.0) and fits a latent space cluster model (default is \code{FALSE}).}
 
-\item{guess_noise_weights}{Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'poisson')} (mean is on the log-scale for lognormal) or proportion (i.e. in (0,1)) of all edges that are noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'poisson')} and 1\% will be used for \code{family = 'bernoulli'}.}
+\item{guess_noise_weights}{Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for the mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'poisson')} (mean is on the log-scale for lognormal) \strong{OR} proportion (i.e. in (0,1)) of all edges that are noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'poisson')} and 1\% will be used for \code{family = 'bernoulli'}.}
 
 \item{model}{A character string specifying the model to fit:
 \itemize{
@@ -67,18 +67,18 @@ JANE(
 }
 \value{
 A list of S3 \code{\link{class}} "\code{JANE}" containing the following components:
-\item{\code{input_params}}{ A list containing the input parameters for \code{IC_selection}, \code{case_control}, and \code{DA_type} used in the function call.}
+\item{\code{input_params}}{ A list containing the input parameters for \code{IC_selection}, \code{case_control}, \code{DA_type}, \code{model}, \code{family}, and \code{noise_weights} used in the function call.}
 \item{\code{A}}{ The square sparse adjacency matrix of class 'dgCMatrix' used in fitting the latent space cluster model. This matrix can be different than the input A matrix as isolates are removed.}
-\item{\code{IC_out}}{ A matrix containing the relevant information criteria for all combinations of \code{K}, \code{D}, and \code{n_start} considered. The 'selected' column indicates the optimal fit chosen.}
+\item{\code{IC_out}}{ A matrix containing the relevant information criteria for all combinations of \code{K}, \code{D}, and \code{n_start} considered. The 'selected' column indicates the chosen optimal fit.}
 \item{\code{all_convergence_ind}}{ A matrix containing the convergence information (i.e., 1 = converged, 0 = did not converge) and number of iterations for all combinations of \code{K}, \code{D}, \code{n_start}, and \code{beta_temperature} considered.}
 \item{\code{optimal_res}}{ A list containing the estimated parameters of interest based on the optimal fit selected. It is recommended to use \code{summary()} to extract the parameters of interest. See \code{\link[JANE]{summary.JANE}} for more details.}
 \item{\code{optimal_starting}}{ A list containing the starting parameters used in the EM algorithm that resulted in the optimal fit selected. It is recommended to use \code{summary()} to extract the parameters of interest. See \code{\link[JANE]{summary.JANE}} for more details.}
 }
 \description{
-Fit the latent space cluster model using an EM algorithm.
+Fit a latent space cluster model, with or without noise edges, using an EM algorithm.
 }
 \details{
-If an unsymmetric adjacency matrix A is supplied for \code{model \%in\% c('NDH', 'RS')} the user will be asked if they would like to proceed with converting A to a symmetric matrix (i.e., \code{A <- 1.0 * ( (A + t(A)) > 0.0 )}).
+Isolates are removed from the adjacency matrix A. If an unsymmetric adjacency matrix A is supplied for \code{model \%in\% c('NDH', 'RS')} the user will be asked if they would like to proceed with converting A to a symmetric matrix (i.e., \code{A <- 1.0 * ( (A + t(A)) > 0.0 )}). Additionally, if a weighted network is supplied and \code{noise_weights = FALSE}, then the network will be converted to an unweighted binary network (i.e., (A > 0.0)*1.0) and a latent space cluster model is fit.
 
 \strong{\code{control}:}
 
@@ -90,7 +90,7 @@ The \code{control} argument is a named list that the user can supply containing 
 \item{\code{priors}}{A list of prior hyperparameters (default is \code{NULL}). See \code{\link[JANE]{specify_priors}} on how to specify the hyperparameters.}
 \item{\code{n_interior_knots}}{(only relevant for \code{model \%in\% c('RS', 'RSR')}) An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (default is \code{5}).}
 \item{\code{termination_rule}}{A character string to specify the termination rule to determine the convergence of the EM algorithm: \itemize{
-\item{\code{'prob_mat'}: uses change in the absolute difference in \eqn{\hat{Z}} (i.e., the \eqn{N \times K} cluster membership probability matrix) between subsequent iterations (default)}
+\item{\code{'prob_mat'}: uses change in the absolute difference in \eqn{\hat{Z}^{U}} (i.e., the \eqn{N \times K} cluster membership probability matrix) between subsequent iterations (default)}
 \item{\code{'Q'}: uses change in the absolute difference in the objective function of the E-step evaluated using parameters from subsequent iterations}
 \item{\code{'ARI'}: comparing the classifications between subsequent iterations using adjusted Rand index}
 \item{\code{'NMI'}: comparing the classifications between subsequent iterations using normalized mutual information}
@@ -100,10 +100,10 @@ The \code{control} argument is a named list that the user can supply containing 
 \item{\code{tolerance_ARI}}{A numeric specifying the tolerance used for \code{termination_rule = 'ARI'} (default is \code{0.999}).}
 \item{\code{tolerance_NMI}}{A numeric specifying the tolerance used for \code{termination_rule = 'NMI'} (default is \code{0.999}).}
 \item{\code{tolerance_CER}}{A numeric specifying the tolerance used for \code{termination_rule = 'CER'} (default is \code{0.01}).}
-\item{\code{n_its_start_CA}}{An integer specifying what iteration to start computing cumulative averages (note: cumulative average of \eqn{U}, the latent position matrix, is not tracked when \code{termination_rule = 'Q'}) (default is \code{20}).}
-\item{\code{tolerance_diff_CA}}{A numeric specifying the tolerance used for the change in cumulative average of \code{termination_rule} metric and \eqn{U} (note: cumulative average of \eqn{U} is not tracked when \code{termination_rule = 'Q'}) (default is \code{1e-3}).}
-\item{\code{consecutive_diff_CA}}{An integer specifying the tolerance for the number of consecutive instances where change in cumulative average is less than \code{tolerance_diff_CA} (default is \code{5}).}
-\item{\code{quantile_diff}}{A numeric in \code{[0,1]} specifying the quantile used in computing the change in the absolute difference of \eqn{Z} and \eqn{U} between subsequent iterations (default is \code{1}, i.e., max).}
+\item{\code{n_its_start_CA}}{An integer specifying what iteration to start computing the change in cumulative averages (note: the change in the cumulative average of \eqn{\hat{U}}, the latent position matrix, is not tracked when \code{termination_rule = 'Q'}) (default is \code{20}).}
+\item{\code{tolerance_diff_CA}}{A numeric specifying the tolerance used for the change in cumulative average of \code{termination_rule} metric and \eqn{\hat{U}} (note: the change in the cumulative average of \eqn{\hat{U}} is not tracked when \code{termination_rule = 'Q'}) (default is \code{1e-3}).}
+\item{\code{consecutive_diff_CA}}{An integer specifying the tolerance for the number of consecutive instances where the change in cumulative average is less than \code{tolerance_diff_CA} (default is \code{5}).}
+\item{\code{quantile_diff}}{A numeric in \code{[0,1]} specifying the quantile used in computing the change in the absolute difference of \eqn{\hat{Z}^{U}} and \eqn{\hat{U}} between subsequent iterations (default is \code{1}, i.e., max).}
 \item{\code{beta_temp_schedule}}{A numeric vector specifying the temperature schedule for deterministic annealing (default is \code{1}, i.e., deterministic annealing not utilized).}
 \item{\code{n_control}}{An integer specifying the fixed number of controls (i.e., non-links) sampled for each actor; only relevant when \code{case_control = TRUE} (default is \code{100} when \code{case_control = TRUE} and \code{NULL} when \code{case_control = FALSE}).}
 \item{\code{n_start}}{An integer specifying the maximum number of starts for the EM algorithm (default is \code{5}).}
@@ -127,13 +127,13 @@ The \code{control} argument is a named list that the user can supply containing 
 
 \strong{Choosing the number of clusters:}
 
-\code{JANE} allows for the following model selection criteria to choose the number of clusters:
+\code{JANE} allows for the following model selection criteria to choose the number of clusters (smaller values are favored):
 \itemize{
 \item{\code{'BIC_model'}: BIC computed from logistic regression or Hurdle model component}
 \item{\code{'BIC_mbc'}: BIC computed from model based clustering component}
 \item{\code{'ICL_mbc'}: ICL (Biernacki et al. (2000)) computed from model based clustering component}
 \item{\code{'Total_BIC'}: Sum of \code{'BIC_model'} and \code{'BIC_mbc'}, this is the model selection criterion proposed by Handcock et al. (2007)}
-\item{\code{'Total_ICL'}: (default) sum of \code{'BIC_model'} and \code{'ICL_mbc'}, this criterion is similar to \code{'Total_BIC'}, but uses ICL for the model based clustering component which tends to favor more well-separated clusters.}
+\item{\code{'Total_ICL'}: (default) sum of \code{'BIC_model'} and \code{'ICL_mbc'}, this criterion is similar to \code{'Total_BIC'}, but uses ICL for the model based clustering component, which tends to favor more well-separated clusters.}
 }
 
 \emph{Warning}: It is not certain whether it is appropriate to use the model selection criterion above to select \code{D}.

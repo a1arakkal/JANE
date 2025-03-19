@@ -1,31 +1,36 @@
 #' Specify starting values for EM algorithm
-#' @description A function that allows the user to specify starting values for the EM algorithm in a structure accepted by \code{JANE}. 
-#' @param A A square matrix or sparse matrix of class 'dgCMatrix' representing the adjacency matrix of the unweighted network of interest.
+#' @description A function that allows the user to specify starting values for the EM algorithm in a structure accepted by \code{\link[JANE]{JANE}}. 
+#' @param A A square matrix or sparse matrix of class 'dgCMatrix' representing the adjacency matrix of the network of interest.
 #' @param D An integer specifying the dimension of the latent positions.
 #' @param K An integer specifying the total number of clusters.
-#' @param family A character string specifying the model:
+#' @param family A character string specifying the distribution of the edge weights.
+#'  \itemize{
+#'   \item{'bernoulli': for \strong{unweighted} networks; utilizes a Bernoulli distribution with a logit link (default)}
+#'   \item{'lognormal': for \strong{weighted} networks with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link}
+#'   \item{'poisson': for \strong{weighted} networks with edge weights representing non-zero counts; utilizes a zero-truncated Poisson distribution with a log link}
+#'   }
 #' @param model A character string specifying the model:
 #'  \itemize{
 #'   \item{'NDH': \strong{undirected} network with no degree heterogeneity}
 #'   \item{'RS': \strong{undirected} network with degree heterogeneity}
 #'   \item{'RSR': \strong{directed} network with degree heterogeneity}
 #'   }
-#' @param noise_weights A character string specifying the model:
+#' @param noise_weights A logical; if TRUE then a Hurdle model is used to account for noise weights, if FALSE simply utilizes the supplied network (converted to an unweighted binary network if a weighted network is supplied, i.e., (A > 0.0)*1.0) and fits a latent space cluster model (default is FALSE).
 #' @param n_interior_knots An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only; default is \code{NULL}).   
-#' @param mus A numeric \eqn{K \times D} matrix specifying the mean vectors of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.
-#' @param omegas A numeric \eqn{D \times D \times K} array specifying the precision matrices of the multivariate normal distribution for the latent positions of the \eqn{K} clusters.
+#' @param mus A numeric \eqn{K \times D} matrix specifying the mean vectors of the \eqn{K} \eqn{D}-variate normal distributions for the latent positions.
+#' @param omegas A numeric \eqn{D \times D \times K} array specifying the precision matrices of the \eqn{K} \eqn{D}-variate normal distributions for the latent positions.
 #' @param p A numeric vector of length \eqn{K} specifying the mixture weights of the finite multivariate normal mixture distribution for the latent positions.
-#' @param beta A numeric vector specifying the regression coefficients for the logistic regression model. Specifically, a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.
-#' @param beta2 A numeric vector specifying the regression coefficients for the logistic regression model. Specifically, a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.
-#' @param precision_weights A numeric vector specifying the regression coefficients for the logistic regression model. Specifically, a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.
-#' @param precision_noise_weights A numeric vector specifying the regression coefficients for the logistic regression model. Specifically, a vector of length \code{1 + (model =="RS")*(n_interior_knots + 1) +  (model =="RSR")*2*(n_interior_knots + 1)}.
+#' @param beta A numeric vector specifying the regression coefficients for the logistic regression model. Specifically, a vector of length \cr \code{1 + (model =="RS")*(n_interior_knots + 1) +} \cr \code{(model =="RSR")*2*(n_interior_knots + 1)}.
+#' @param beta2 A numeric vector specifying the regression coefficients for the zero-truncated Poisson or log-normal GLM. Specifically, a vector of length \cr \code{1 + (model =="RS")*(n_interior_knots + 1) +} \cr \code{(model =="RSR")*2*(n_interior_knots + 1)}. \cr Only relevant when \code{noise_weights = TRUE & family != 'bernoulli'}.
+#' @param precision_weights A positive numeric scalar specifying the precision (on the log scale) of the log-normal weight distribution. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.
+#' @param precision_noise_weights A positive numeric scalar specifying the precision (on the log scale) of the log-normal noise weight distribution. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.
 #' @param U A numeric \eqn{N \times D} matrix with rows specifying an actor's position in a \eqn{D}-dimensional social space.
 #' @param Z A numeric \eqn{N \times K} matrix with rows representing the conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.
 #' @details
 #' To match \code{\link[JANE]{JANE}}, this function will remove isolates from the adjacency matrix A and determine the total number of actors after excluding isolates. If this is not done, errors with respect to incorrect dimensions in the starting values will be generated when executing \code{\link[JANE]{JANE}}.
 #' 
-#' Similarly to match \code{\link[JANE]{JANE}}, if an unsymmetric adjacency matrix A is supplied for \code{model %in% c('NDH', 'RS')} the user will be asked if they would like to proceed with converting A to a symmetric matrix (i.e., \code{A <- 1.0 * ( (A + t(A)) > 0.0 )}).
-#' @return A list of starting values for the EM algorithm generated from the input values in a structure accepted by \code{JANE}.
+#' Similarly to match \code{\link[JANE]{JANE}}, if an unsymmetric adjacency matrix A is supplied for \code{model %in% c('NDH', 'RS')} the user will be asked if they would like to proceed with converting A to a symmetric matrix (i.e., \code{A <- 1.0 * ( (A + t(A)) > 0.0 )}). Additionally, if a weighted network is supplied and \code{noise_weights = FALSE}, then the network will be converted to an unweighted binary network (i.e., (A > 0.0)*1.0).
+#' @return A list of starting values for the EM algorithm generated from the input values in a structure accepted by \code{\link[JANE]{JANE}}.
 #' @examples
 #' \donttest{
 #' # Simulate network

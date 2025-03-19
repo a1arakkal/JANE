@@ -7,9 +7,9 @@
 \method{summary}{JANE}(object, true_labels = NULL, initial_values = FALSE, ...)
 }
 \arguments{
-\item{object}{An object of S3 \code{\link{class}} "\code{JANE}", a result of a call to \code{JANE}.}
+\item{object}{An object of S3 \code{\link{class}} "\code{JANE}", a result of a call to \code{\link[JANE]{JANE}}.}
 
-\item{true_labels}{(optional) A numeric, character, or factor vector of known true cluster labels. Must have the same length as number of actors in the fitted network (default is \code{NULL}).}
+\item{true_labels}{(optional) A numeric, character, or factor vector of known true cluster labels. Must have the same length as number of actors in the fitted network. Need to account for potential isolates removed (default is \code{NULL}).}
 
 \item{initial_values}{A logical; if \code{TRUE} then summarize fit using the starting parameters used in the EM algorithm (default is \code{FALSE}, i.e., the results after the EM algorithm is run are summarized).}
 
@@ -17,27 +17,39 @@
 }
 \value{
 A list of S3 \code{\link{class}} "\code{summary.JANE}" containing the following components (Note: \eqn{N} is the number of actors in the network, \eqn{K} is the number of clusters, and \eqn{D} is the dimension of the latent space):
-\item{\code{coefficients}}{ A LIST vector representing the estimated coefficients from the logistic regression model.}
-\item{\code{p}}{ A numeric vector of length \eqn{K} representing the estimated mixture weights of the finite multivariate normal mixture distribution for the latent positions.}
-\item{\code{U}}{ A numeric \eqn{N \times D} matrix with rows representing an actor's estimated latent position in a \eqn{D}-dimensional social space.}
-\item{\code{mus}}{ A numeric \eqn{K \times D} matrix representing the estimated mean vectors of the multivariate normal distributions for the latent positions of the \eqn{K} clusters.}
-\item{\code{omegas}}{ A numeric \eqn{D \times D \times K} array representing the estimated precision matrices of the multivariate normal distributions for the latent positions of the \eqn{K} clusters.}
-\item{\code{Z_U}}{ A numeric \eqn{N \times K} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
-\item{\code{Z_W}}{ A numeric \eqn{|E| \times 5} matrix with rows representing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
-\item{\code{uncertainty}}{ A numeric vector of length \eqn{N} representing the uncertainty of the \eqn{i^{th}} actor's classification, derived as 1 - \eqn{max_k Z_{ik}}.}
-\item{\code{cluster_labels}}{ A numeric vector of length \eqn{N} representing the cluster assignment of each actor based on a hard clustering rule of \eqn{\{h | Z_{ih} = max_k Z_{ik}\}}.}
+\item{\code{coefficients}}{ A list containing the estimated coefficients from the logistic regression model (i.e., 'beta_LR') and, if relevant, the estimated coefficients from the zero- truncated Poisson or log-normal GLM (i.e., 'beta_GLM').}
+\item{\code{U}}{ A numeric \eqn{N \times D} matrix with rows containing an actor's estimated latent position in a \eqn{D}-dimensional social space.}
+\item{\code{p}}{ A numeric vector of length \eqn{K} containing the estimated mixture weights of the finite multivariate normal mixture distribution for the latent positions.}
+\item{\code{mus}}{ A numeric \eqn{K \times D} matrix containing the estimated mean vectors of the \eqn{K} \eqn{D}-variate normal distributions for the latent positions.}
+\item{\code{omegas}}{ A numeric \eqn{D \times D \times K} array containing the estimated precision matrices of the \eqn{K} \eqn{D}-variate normal distributions for the latent positions.}
+\item{\code{Z_U}}{ A numeric \eqn{N \times K} matrix with rows containing the estimated conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.}
+\item{\code{uncertainty}}{ A numeric vector of length \eqn{N} containing the uncertainty of the \eqn{i^{th}} actor's classification, derived as 1 - \eqn{max_k \hat{Z}^{U}_{ik}}.}
+\item{\code{cluster_labels}}{ A numeric vector of length \eqn{N} containing the cluster assignment of each actor based on a hard clustering rule of \eqn{\{h | \hat{Z}^{U}_{ih} = max_k \hat{Z}^{U}_{ik}\}}.}
+\item{\code{Z_W}}{ A numeric \eqn{|E| \times 6} matrix, with \eqn{|E|} representing the total number of edges in the network (for undirected networks, only the upper diagonal edges are retained). The first two columns (i.e., 'i' and 'j') contains the specific indices of the edge between the \eqn{i^{th}} and \eqn{j^{th}} actors, the third column (i.e., 'weight') contains the specific edge weight, the fourth column (i.e., 'hat_zij1') contains the estimated conditional probability that the specific edge is a non-noise edge, the fifth column (i.e., 'hat_zij2') contains the estimated conditional probability that the specific edge is a noise edge, and the sixth column (i.e., 'noise_edge_cluster_labels') contains the noise-edge cluster assignment of each edge based on a hard clustering rule of \eqn{\{h | \hat{Z}^{W}_{eh} = max(\hat{Z}^{W}_{e1}, \hat{Z}^{W}_{e2})\}} for \eqn{e = 1,\ldots,|E|}, where \eqn{\hat{Z}^{W}_{e1}} and \eqn{\hat{Z}^{W}_{e2}} are the estimated conditional probabilities that the \eqn{e^{th}} edge is a non-noise and noise edge, respectively (labels defined as, 1: non-noise edge and 2: noise edge). Will be \code{NULL} if \code{noise_weights = FALSE} or \code{initial_values = TRUE}. }
+\item{\code{q_prob}}{ A numeric scalar representing the estimated proportion of non-edges in the "true" unobserved network that were converted to noise edges.}
+\item{\code{precision_weights}}{ A numeric scalar representing the estimated precision (on the log scale) of the log-normal weight distribution. Only relevant for \code{family = 'lognormal' & noise_weights = TRUE}. }
+\item{\code{precision_noise_weights}}{ A numeric scalar representing the estimated precision (on the log scale) of the log-normal noise weight distribution. Only relevant for \code{family = 'lognormal' & noise_weights = TRUE}. }
+\item{\code{IC}}{ Information criteria values of the optimal fit selected, including \itemize{
+\item{\code{'BIC_model'}: BIC computed from logistic regression or Hurdle model component}
+\item{\code{'BIC_mbc'}: BIC computed from model based clustering component}
+\item{\code{'ICL_mbc'}: ICL computed from model based clustering component}
+\item{\code{'Total_BIC'}: sum of \code{'BIC_model'} and \code{'BIC_mbc'}}
+\item{\code{'Total_ICL'}: sum of \code{'BIC_model'} and \code{'ICL_mbc'}}
+}}
 \item{\code{input_params}}{ A list with the following components: \itemize{
-\item{\code{model}: A character string representing the specific \code{model} used (i.e., 'NDH', 'RS', or 'RSR')}
-\item{\code{IC_selection}: A character string representing the specific information criteria used to select the optimal fit (i.e., 'BIC_model', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL')}
+\item{\code{model}: A character string containing the specific \code{model} used (i.e., 'NDH', 'RS', or 'RSR')}
+\item{\code{family}: A character string containing the specific \code{family} used (i.e., 'bernoulli', 'poisson', or 'lognormal')}
+\item{\code{noise_weights}: A logical; if \code{TRUE} then the approach utilizing a Hurdle model accounting for noise edges was utilized}
+\item{\code{IC_selection}: A character string containing the specific information criteria used to select the optimal fit (i.e., 'BIC_model', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL')}
 \item{\code{case_control}: A logical; if \code{TRUE} then the case/control approach was utilized}
-\item{\code{DA_type}: A character string representing the specific deterministic annealing approach utilized (i.e., 'none', 'cooling', 'heating', or 'hybrid')}
+\item{\code{DA_type}: A character string containing the specific deterministic annealing approach utilized (i.e., 'none', 'cooling', 'heating', or 'hybrid')}
 \item{\code{priors}: A list of the prior hyperparameters used. See \code{\link[JANE]{specify_priors}} for definitions.}
 }}
 \item{\code{clustering_performance}}{ (only if \code{true_labels} is \code{!NULL}) A list with the following components: \itemize{
-\item{\code{CER}: A list with two components: (i) \code{misclassified}: The indexes of the misclassified data points in a minimum error mapping between the cluster labels and the known true cluster labels (i.e., \code{true_labels}) and (ii) \code{errorRate}: The error rate corresponding to a minimum error mapping between the cluster labels and the known true cluster labels (see \code{\link[mclust]{classError}} for details)}
-\item{\code{ARI}: A numeric value representing the adjusted Rand index comparing the cluster labels and the known true cluster labels (see \code{\link[mclust]{adjustedRandIndex}} for details)}
-\item{\code{NMI}: A numeric value representing the normalized mutual information comparing the cluster labels and the known true cluster labels (see \code{\link[aricode]{NMI}} for details)}
-\item{\code{confusion_matrix}: A numeric table representing the confusion matrix comparing the cluster labels and the known true cluster labels.}
+\item{\code{CER}: A list with two components: (i) \code{misclassified}: The indices of the misclassified actors in a minimum error mapping between the cluster labels and the known true cluster labels (i.e., \code{true_labels}) and (ii) \code{errorRate}: The error rate corresponding to a minimum error mapping between the cluster labels and the known true cluster labels (see \code{\link[mclust]{classError}} for details)}
+\item{\code{ARI}: A numeric value containing the adjusted Rand index comparing the cluster labels and the known true cluster labels (see \code{\link[mclust]{adjustedRandIndex}} for details)}
+\item{\code{NMI}: A numeric value containing the normalized mutual information comparing the cluster labels and the known true cluster labels (see \code{\link[aricode]{NMI}} for details)}
+\item{\code{confusion_matrix}: A numeric table containing the confusion matrix comparing the cluster labels and the known true cluster labels.}
 }}
 }
 \description{
