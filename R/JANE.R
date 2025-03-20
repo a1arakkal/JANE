@@ -24,12 +24,12 @@
 #'   \item{A user supplied list of initial values. See \code{\link[JANE]{specify_initial_values}} on how to specify initial values}
 #'   }
 #' @param case_control A logical; if \code{TRUE} then uses a case-control approximation approach (default is \code{FALSE}).
-#' @param DA_type A character string to specify the type of deterministic annealing approach to use
+#' @param DA_type (Experimental) A character string to specify the type of deterministic annealing approach to use
 #'  \itemize{
 #'   \item{'none': does not employ a deterministic annealing approach (default)}
-#'   \item{'cooling': employes a traditional deterministic annealing approach where temperature decreases}
-#'   \item{'heating': employes a deterministic anti-annealing approach where temperature increases}
-#'   \item{'hybrid': employes a combination of the 'cooling' and 'heating' approach}
+#'   \item{'cooling': (Experimental) employes a traditional deterministic annealing approach where temperature decreases}
+#'   \item{'heating': (Experimental) employes a deterministic anti-annealing approach where temperature increases}
+#'   \item{'hybrid': (Experimental) employes a combination of the 'cooling' and 'heating' approach}
 #'   }
 #' @param seed (optional) An integer value to specify the seed for reproducibility.
 #' @param control A list of control parameters. See 'Details'.
@@ -68,7 +68,7 @@
 #' \item{\code{tolerance_diff_CA}}{A numeric specifying the tolerance used for the change in cumulative average of \code{termination_rule} metric and \eqn{\hat{U}} (note: the change in the cumulative average of \eqn{\hat{U}} is not tracked when \code{termination_rule = 'Q'}) (default is \code{1e-3}).}
 #' \item{\code{consecutive_diff_CA}}{An integer specifying the tolerance for the number of consecutive instances where the change in cumulative average is less than \code{tolerance_diff_CA} (default is \code{5}).}    
 #' \item{\code{quantile_diff}}{A numeric in \code{[0,1]} specifying the quantile used in computing the change in the absolute difference of \eqn{\hat{Z}^{U}} and \eqn{\hat{U}} between subsequent iterations (default is \code{1}, i.e., max).}
-#' \item{\code{beta_temp_schedule}}{A numeric vector specifying the temperature schedule for deterministic annealing (default is \code{1}, i.e., deterministic annealing not utilized).}       
+#' \item{\code{beta_temp_schedule}}{(Experimental) A numeric vector specifying the temperature schedule for deterministic annealing (default is \code{1}, i.e., deterministic annealing not utilized).}       
 #' \item{\code{n_control}}{An integer specifying the fixed number of controls (i.e., non-links) sampled for each actor; only relevant when \code{case_control = TRUE} (default is \code{100} when \code{case_control = TRUE} and \code{NULL} when \code{case_control = FALSE}).}  
 #' \item{\code{n_start}}{An integer specifying the maximum number of starts for the EM algorithm (default is \code{5}).}    
 #' \item{\code{max_retry}}{An integer specifying the maximum number of re-attempts if starting values cause issues with EM algorithm (default is \code{5}).}    
