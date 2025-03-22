@@ -20,3 +20,6 @@
   
 ## 0.2.1
 * summary.JANE now returns actor-specific uncertainty  
+
+## 1.0.0
+* JANE is now able to handle weighted networks, specifically for applications that involve the presence of noise edges in the network
