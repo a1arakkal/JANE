@@ -4,6 +4,7 @@
 #' @importFrom splines ns 
 #' @importFrom mclust adjustedRandIndex classError surfacePlot
 #' @importFrom aricode NMI
+#' @importFrom progress progress_bar
 #' @importFrom progressr handlers handler_progress with_progress progressor
 #' @importFrom rlang new_environment duplicate
 #' @importFrom future.apply future_lapply
