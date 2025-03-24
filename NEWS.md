@@ -23,3 +23,6 @@
 
 ## 1.0.0
 * JANE is now able to handle weighted networks, specifically for applications that involve the presence of noise edges in the network
+
+## 1.0.1
+* Remove "progress" from Imports field to address NAMESPACE note in checks
