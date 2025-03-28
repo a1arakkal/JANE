@@ -6,9 +6,15 @@
 // [[Rcpp::export]]
 double log_like_C(arma::colvec par, arma::mat X, arma::colvec y){
   
-  arma::colvec eta = arma::zeros<arma::colvec>(X.n_rows);
-  eta = X*par;
-  double log_like = sum(y%(eta) - arma::log(1.0 + arma::exp(eta)));
+  int N = X.n_rows;
+  arma::colvec eta = X*par;
+  double log_like = 0.0;
+
+  for(int i = 0; i < N; i++){
+
+    log_like = log_like + (y(i)*eta(i) - std::log(1.0 + std::exp(eta(i))));
+
+  }
 
   return(-log_like);
   
@@ -17,11 +23,9 @@ double log_like_C(arma::colvec par, arma::mat X, arma::colvec y){
 // [[Rcpp::export]]
 arma::colvec gradient_C(arma::colvec par, arma::mat X, arma::colvec y){
 
-  arma::colvec eta = arma::zeros<arma::colvec>(X.n_rows);
-  arma::colvec out = arma::zeros<arma::colvec>(X.n_cols);
-  eta = X*par;
+  arma::colvec eta = X*par;
   arma::colvec p = 1.0 / ( 1.0 + arma::exp(-1.0*eta));
-  out = X.t()*(y - p); 
+  arma::colvec out = X.t()*(y - p); 
   
   return(-out);
   
