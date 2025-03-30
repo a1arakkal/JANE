@@ -136,6 +136,8 @@ The \code{control} argument is a named list that the user can supply containing 
 \item{\code{'Total_ICL'}: (default) sum of \code{'BIC_model'} and \code{'ICL_mbc'}, this criterion is similar to \code{'Total_BIC'}, but uses ICL for the model based clustering component, which tends to favor more well-separated clusters.}
 }
 
+Based on simulation studies, Biernacki et al. (2000) recommends that when the interest in mixture modeling is cluster analysis, instead of density estimation, the \eqn{ICL_{mbc}} criterion should be favored over the \eqn{BIC_{mbc}} criterion, as the \eqn{BIC_{mbc}} criterion tends to overestimate the number of clusters. The \eqn{BIC_{mbc}} criterion is designed to choose the number of components in a mixture model rather than the number of clusters.
+
 \emph{Warning}: It is not certain whether it is appropriate to use the model selection criterion above to select \code{D}.
 }
 \examples{
