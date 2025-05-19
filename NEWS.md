@@ -24,6 +24,6 @@
 ## 1.0.0
 * JANE is now able to handle weighted networks, specifically for applications that involve the presence of noise edges in the network
 
-## 1.0.1
+## 1.1.0
 * Add importFrom progress progress_bar to NAMESPACE to address note in checks
 * Add option to plotting function to remove noise edges if JANE was run with noise_weights = TRUE
