@@ -286,7 +286,7 @@ print.JANE <- function(x, ...){
 #' @param xlab An optional title for the x axis.
 #' @param ylab An optional title for the y axis.
 #' @param cluster_cols An optional vector of colors for the clusters. Must have a length of at least \eqn{K}.
-#' @param remove_noise_edges (only applicable if \code{JANE} was run with \code{noise_weights = TRUE}) A logical; if \code{TRUE} will remove noise edges based on \eqn{\{h | \hat{Z}^{W}_{eh} = max(\hat{Z}^{W}_{e1}, \hat{Z}^{W}_{e2})\}} for \eqn{e = 1,\ldots,|E|}, where \eqn{\hat{Z}^{W}_{e1}} and \eqn{\hat{Z}^{W}_{e2}} are the estimated conditional probabilities that the \eqn{e^{th}} edge is a non-noise and noise edge, respectively (default is \code{FALSE}).
+#' @param remove_noise_edges (only applicable if \code{JANE} was run with \code{noise_weights = TRUE}) A logical; if \code{TRUE} will remove noise edges based on hard clustering rule of \eqn{\{h | \hat{Z}^{W}_{eh} = max(\hat{Z}^{W}_{e1}, \hat{Z}^{W}_{e2})\}} for \eqn{e = 1,\ldots,|E|}, where \eqn{\hat{Z}^{W}_{e1}} and \eqn{\hat{Z}^{W}_{e2}} are the estimated conditional probabilities that the \eqn{e^{th}} edge is a non-noise and noise edge, respectively (default is \code{FALSE}).
 #' @param ... Unused.
 #' @details
 #'The classification of actors into specific clusters is based on a hard clustering rule of \eqn{\{h | \hat{Z}^{U}_{ih} = max_k \hat{Z}^{U}_{ik}\}}. Additionally, the actor-specific classification uncertainty is derived as 1 - \eqn{max_k \hat{Z}^{U}_{ik}}.
