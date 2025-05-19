@@ -19,6 +19,7 @@
   xlab,
   ylab,
   cluster_cols,
+  remove_noise_edges = FALSE,
   ...
 )
 }
@@ -56,6 +57,8 @@
 \item{ylab}{An optional title for the y axis.}
 
 \item{cluster_cols}{An optional vector of colors for the clusters. Must have a length of at least \eqn{K}.}
+
+\item{remove_noise_edges}{(only applicable if \code{JANE} was run with \code{noise_weights = TRUE}) A logical; if \code{TRUE} will remove noise edges based on \eqn{\{h | \hat{Z}^{W}_{eh} = max(\hat{Z}^{W}_{e1}, \hat{Z}^{W}_{e2})\}} for \eqn{e = 1,\ldots,|E|}, where \eqn{\hat{Z}^{W}_{e1}} and \eqn{\hat{Z}^{W}_{e2}} are the estimated conditional probabilities that the \eqn{e^{th}} edge is a non-noise and noise edge, respectively (default is \code{FALSE}).}
 
 \item{...}{Unused.}
 }

@@ -286,6 +286,7 @@ print.JANE <- function(x, ...){
 #' @param xlab An optional title for the x axis.
 #' @param ylab An optional title for the y axis.
 #' @param cluster_cols An optional vector of colors for the clusters. Must have a length of at least \eqn{K}.
+#' @param remove_noise_edges (only applicable if \code{JANE} was run with \code{noise_weights = TRUE}) A logical; if \code{TRUE} will remove noise edges based on \eqn{\{h | \hat{Z}^{W}_{eh} = max(\hat{Z}^{W}_{e1}, \hat{Z}^{W}_{e2})\}} for \eqn{e = 1,\ldots,|E|}, where \eqn{\hat{Z}^{W}_{e1}} and \eqn{\hat{Z}^{W}_{e2}} are the estimated conditional probabilities that the \eqn{e^{th}} edge is a non-noise and noise edge, respectively (default is \code{FALSE}).
 #' @param ... Unused.
 #' @details
 #'The classification of actors into specific clusters is based on a hard clustering rule of \eqn{\{h | \hat{Z}^{U}_{ih} = max_k \hat{Z}^{U}_{ik}\}}. Additionally, the actor-specific classification uncertainty is derived as 1 - \eqn{max_k \hat{Z}^{U}_{ik}}.
@@ -354,7 +355,7 @@ print.JANE <- function(x, ...){
 plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
                       zoom = 100, density_type = "contour", rotation_angle = 0,
                       alpha_edge = 0.1, alpha_node = 1, swap_axes = FALSE,
-                      main, xlab, ylab, cluster_cols, ...){
+                      main, xlab, ylab, cluster_cols, remove_noise_edges = FALSE, ...){
   
   if(!inherits(x, "JANE")){
     stop("Object is not of class JANE")
@@ -371,7 +372,7 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
   if(!type %in% c("lsnc", "trace_plot", "misclassified", "uncertainty")){
     stop("Please provide one of the following for type: 'lsnc', 'trace_plot', 'misclassified', or 'uncertainty'")
   }
-  
+
   opar <- graphics::par(no.readonly = TRUE)
   on.exit(graphics::par(opar))
   
@@ -385,7 +386,25 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
   } else {
     if(!initial_values){
       plot_data <- x$optimal_res
+      
+      if(remove_noise_edges){
+        if(!x$input_params$noise_weights){
+          stop("Can only remove noise edges if JANE was run with noise_weights = TRUE")
+        } else {
+          temp_A <- x$A
+          Z_W <- plot_data$prob_matrix_W
+          Z_W_labels <- apply(Z_W[, 4:5], 1, which.max)
+          noise <- Z_W[Z_W_labels == 2, 1:2]
+          temp_A[noise] <- 0L
+          x$A <- methods::as(temp_A, "dgCMatrix")
+        }
+      }
+      
     } else {
+      if(remove_noise_edges){
+        message("All edges are assumed to be non-noise when initializing model parameters")
+      }
+      
       plot_data <- x$optimal_starting
     }
   }
