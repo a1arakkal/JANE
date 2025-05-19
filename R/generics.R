@@ -381,32 +381,39 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
   misclassified <- NULL
   
   if(type == "trace_plot"){
+    
     trace_plot <- TRUE
     plot_data <- x$optimal_res
+    
   } else {
+    
+    temp_A <- x$A
+    
     if(!initial_values){
+      
       plot_data <- x$optimal_res
       
       if(remove_noise_edges){
         if(!x$input_params$noise_weights){
           stop("Can only remove noise edges if JANE was run with noise_weights = TRUE")
         } else {
-          temp_A <- x$A
           Z_W <- plot_data$prob_matrix_W
           Z_W_labels <- apply(Z_W[, 4:5], 1, which.max)
           noise <- Z_W[Z_W_labels == 2, 1:2]
           temp_A[noise] <- 0L
-          x$A <- methods::as(temp_A, "dgCMatrix")
+          temp_A <- methods::as(temp_A, "dgCMatrix")
         }
       }
       
     } else {
+      
       if(remove_noise_edges){
         message("All edges are assumed to be non-noise when initializing model parameters")
       }
       
       plot_data <- x$optimal_starting
     }
+    
   }
   
   plot_data$model <- x$input_params$model
@@ -609,7 +616,7 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
         cluster_cols
       }
       
-      plot_data(A = x$A,
+      plot_data(A = temp_A,
                 data = plot_data, 
                 misclassified = misclassified,
                 zoom = zoom, 
@@ -670,7 +677,7 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
           cluster_cols
         }
         
-        plot_data(A = x$A,
+        plot_data(A = temp_A,
                   data = plot_data_temp, 
                   misclassified = misclassified,
                   zoom = zoom, 
