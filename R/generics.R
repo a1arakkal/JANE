@@ -397,11 +397,20 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
         if(!x$input_params$noise_weights){
           stop("Can only remove noise edges if JANE was run with noise_weights = TRUE")
         } else {
+          
           Z_W <- plot_data$prob_matrix_W
           Z_W_labels <- apply(Z_W[, 4:5], 1, which.max)
           noise <- Z_W[Z_W_labels == 2, 1:2]
           temp_A[noise] <- 0L
+          
+          if(x$input_params$model %in% c("NDH", "RS")){
+            
+            temp_A[lower.tri(temp_A)] <- t(temp_A)[lower.tri(t(temp_A))]
+            
+          }
+          
           temp_A <- methods::as(temp_A, "dgCMatrix")
+          
         }
       }
       
