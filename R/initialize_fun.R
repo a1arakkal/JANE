@@ -201,14 +201,18 @@ initialize_fun <- function(A, family, noise_weights, prob_matrix_W, priors, list
       
     }
     
-    if(family == "lognormal"){
+    
+    if(family %in% c("lognormal", "exp_lognormal")){
       
       if(is.null(priors)){
         
         current$priors$m_1 <- 2 # prior parameter 1 for precision_weights
         current$priors$o_1 <- 2 # prior parameter 2 for precision_weights
-        current$priors$m_2 <- 2 # prior parameter 1 for precision_noise_weights
-        current$priors$o_2 <- 2 # prior parameter 2 for precision_noise_weights
+        
+        if(family == "lognormal"){
+          current$priors$m_2 <- 2 # prior parameter 1 for precision_noise_weights
+          current$priors$o_2 <- 2 # prior parameter 2 for precision_noise_weights
+        }
         
       } 
       

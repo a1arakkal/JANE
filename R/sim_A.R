@@ -14,6 +14,7 @@
 #'  \itemize{
 #'   \item{'bernoulli': generates an \strong{unweighted} network from a latent space cluster model}
 #'   \item{'lognormal': generates a \strong{weighted} network by first simulating an unweighted network using a latent space cluster model, and then assigning edge weights based on a log-normal GLM utilizing an identity link}
+#'   \item{'exp_lognormal': generates a \strong{weighted} network in an identical manner as \code{family = 'lognormal'}, except that if \code{noise_weights_prob>0.0}, the noise weights are drawn from an exponential distribution}
 #'   \item{'poisson': generates a \strong{weighted} network by first simulating an unweighted network using a latent space cluster model, and then assigning edge weights based on a zero-truncated Poisson GLM utilizing a log link}
 #'   }
 #' @param params_LR A list containing the parameters of the logistic regression model to simulate the unweighted network, including:
@@ -27,7 +28,7 @@
 #'     } 
 #'    }
 #'   }
-#' @param params_weights Only relevant when \code{family \%in\% c('lognormal', 'poisson')}. A list containing the parameters of the GLMs for the edge weights, including:
+#' @param params_weights Only relevant when \code{family \%in\% c('lognormal', 'exp_lognormal', 'poisson')}. A list containing the parameters of the GLMs for the edge weights, including:
 #'  \itemize{
 #'   \item{'beta0': a numeric value specifying the intercept parameter for the zero-truncated Poisson or log-normal GLM}
 #'   \item{'precision_R_effects': precision parameters for random degree heterogeneity effects, specific to the zero-truncated Poisson or log-normal GLM:
@@ -37,10 +38,10 @@
 #'       \item{'RSR': a numeric matrix specifying the precision matrix of the multivariate normal distribution of the random sender and receiver effects, if missing will generate from a Wishart(df = 3, Sigma = \eqn{I_2})}
 #'     } 
 #'    }
-#'   \item{'precision_weights': a positive, non-zero, numeric representing the precision (on the log scale) of the log-normal weight distribution. Only relevant when \code{family = 'lognormal'}}
+#'   \item{'precision_weights': a positive, non-zero, numeric representing the precision (on the log scale) of the log-normal weight distribution. Only relevant when \code{family \%in\% c('lognormal', 'exp_lognormal')}}
 #'   }
 #' @param noise_weights_prob A numeric in \[0,1\] representing the proportion of all edges in the simulated network that are noise edges (default is 0.0). 
-#' @param mean_noise_weights A numeric representing the mean of the noise weight distribution. Only relevant when \code{family \%in\% c('lognormal', 'poisson')} and \code{noise_weights_prob>0.0}. For family = 'poisson' value has to be > 0.0, for family = "lognormal" the mean is on the log scale.
+#' @param mean_noise_weights A numeric representing the mean of the noise weight distribution. Only relevant when \code{family \%in\% c('lognormal', 'exp_lognormal', 'poisson')} and \code{noise_weights_prob>0.0}. For \code{family \%in\% c('poisson', 'exp_lognormal')} value has to be > 0.0, for \code{family = "lognormal"} the mean is on the log scale.
 #' @param precision_noise_weights A positive, non-zero, numeric representing the precision (on the log scale) of the log-normal noise weight distribution. Only relevant when \code{family = 'lognormal'} and \code{noise_weights_prob>0.0}.
 #' @param remove_isolates A logical; if \code{TRUE} then isolates from the network are removed (default is \code{TRUE}).
 #' @return A list containing the following components:
@@ -129,8 +130,8 @@ sim_A <- function(N,
     stop("Model needs to be one of the following: NDH, RS, or RSR")
   }
   
-  if(!family %in% c("bernoulli", "lognormal", "poisson")){
-    stop("family needs to be one of the following: 'bernoulli', 'lognormal', 'poisson'")
+  if(!family %in% c("bernoulli", "lognormal", "exp_lognormal", "poisson")){
+    stop("family needs to be one of the following: 'bernoulli', 'lognormal', 'exp_lognormal', 'poisson'")
   }
   
   if(missing(params_LR) || is.null(params_LR$beta0)){
@@ -142,7 +143,7 @@ sim_A <- function(N,
   }
   
   if( ( is.null(params_weights) & (family != "bernoulli"))  || ( (family != "bernoulli") && is.null(params_weights$beta0) ) ){
-    stop("Please supply a named list for params_weights. At minimum, for family = 'poisson' a params_weights$beta0 needs to be specified and for family = 'lognromal' params_weights$beta0 and params_weights$precision_weights needs to be suppied")
+    stop("Please supply a named list for params_weights. At minimum, for family = 'poisson' a params_weights$beta0 needs to be specified and for family %in% c('lognormal', 'exp_lognormal') params_weights$beta0 and params_weights$precision_weights needs to be suppied")
   }
   
   if(missing(mean_noise_weights) & (family != "bernoulli") & (noise_weights_prob > 0.0)){
@@ -153,15 +154,15 @@ sim_A <- function(N,
     stop("Please supply a numeric >0 for precision_noise_weights")
   }
   
-  if(is.null(params_weights$precision_weights) & (family == "lognormal")){
+  if(is.null(params_weights$precision_weights) & (family %in% c("exp_lognormal", "lognormal"))){
     stop("Please supply a numeric >0 for params_weights$precision_weights")
   }
   
-  if( (!is.null(params_weights$precision_weights) & (family == "lognormal")) && params_weights$precision_weights <= 0.0){
+  if( (!is.null(params_weights$precision_weights) & (family %in% c("exp_lognormal", "lognormal"))) && params_weights$precision_weights <= 0.0){
     stop("Please supply a numeric >0 for params_weights$precision_weights")
   }
   
-  if( (!missing(mean_noise_weights) & (family == "poisson")) && mean_noise_weights <= 0.0){
+  if( (!missing(mean_noise_weights) & (family %in% c("exp_lognormal", "poisson"))) && mean_noise_weights <= 0.0){
     stop("Please supply a numeric >0 for mean_noise_weights")
   }
   
@@ -312,7 +313,7 @@ sim_A <- function(N,
     
     params_weights$RE <- RE_W
     
-    if(family == "lognormal"){
+    if(family %in% c("lognormal", "exp_lognormal")){
       
       true_weights <- unname(exp(mean_edges + stats::rnorm(n = nrow(edge_indices), mean = 0.0, sd = sqrt(1/params_weights$precision_weights))))
       edge_indices[, 3] <- true_weights
@@ -373,6 +374,17 @@ sim_A <- function(N,
       noise_weights <- extraDistr::rtpois(n = length(Z_W_noise_weights), lambda = mean_noise_weights, a = 0.0)
       precision_noise_weights <- NULL
       
+    } else if(family == "exp_lognormal"){
+
+      noise_weights <- numeric(length = length(Z_W_noise_weights))
+      
+      while(any(noise_weights == 0)){
+        temp_noise_weights <- stats::rexp(n = sum(noise_weights == 0), rate = 1/mean_noise_weights)
+        noise_weights[noise_weights == 0][1:sum(temp_noise_weights>0)] <- temp_noise_weights[temp_noise_weights>0]
+      }
+      
+      precision_noise_weights <- NULL
+       
     } else {
       
       noise_weights <- unname(exp(mean_noise_weights + stats::rnorm(n = length(Z_W_noise_weights), mean = 0.0, sd = sqrt(1/precision_noise_weights))))

@@ -4,9 +4,10 @@
 #' @param K An integer specifying the total number of clusters.
 #' @param family A character string specifying the distribution of the edge weights.
 #'  \itemize{
-#'   \item{'bernoulli': for \strong{unweighted} networks; utilizes a Bernoulli distribution with a logit link (default)}
-#'   \item{'lognormal': for \strong{weighted} networks with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link}
-#'   \item{'poisson': for \strong{weighted} networks with edge weights representing non-zero counts; utilizes a zero-truncated Poisson distribution with a log link}
+#'   \item{'bernoulli': Expects an \strong{unweighted} network; utilizes a Bernoulli distribution with a logit link (default)}
+#'   \item{'lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link to model the \emph{non-noise weights} and log-normal distribution with mean (on log-scale) specified as \code{guess_noise_weights} to model the \emph{noise weights}}
+#'   \item{'exp_lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link to model the \emph{non-noise weights} and exponential distribution with mean specified as \code{guess_noise_weights} to model the \emph{noise weights}}
+#'   \item{'poisson': Expects a \strong{weighted} network with edge weights representing non-zero counts; utilizes a zero-truncated Poisson distribution with a log link to model the \emph{non-noise weights} and zero-truncated Poisson distribution with mean specified as \code{guess_noise_weights} to model the \emph{noise weights}}
 #'   }
 #' @param model A character string specifying the model:
 #' @param model A character string specifying the model:
@@ -28,8 +29,8 @@
 #' @param l A positive numeric scalar specifying the second shape parameter for the Beta prior on \eqn{q}, where \eqn{q} is the proportion of non-edges in the "true" underlying network converted to noise edges. Only relevant when \code{noise_weights = TRUE}.
 #' @param e_2 A numeric vector of length \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the mean of the multivariate normal prior on \eqn{\beta_{GLM}}, where \eqn{\beta_{GLM}} represents the coefficients of the zero-truncated Poisson or log-normal GLM. Only relevant when \code{noise_weights = TRUE & family != 'bernoulli'}.
 #' @param f_2 A numeric p.s.d square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta_{GLM}}, where \eqn{\beta_{GLM}} represents the coefficients of the zero-truncated Poisson or log-normal GLM. Only relevant when \code{noise_weights = TRUE & family != 'bernoulli'}.
-#' @param m_1 A positive numeric scalar specifying the shape parameter for the Gamma prior on \eqn{\tau^2_{weights}}, where \eqn{\tau^2_{weights}} is the precision (on the log scale) of the log-normal weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.
-#' @param o_1 A positive numeric scalar specifying the rate parameter for the Gamma prior on \eqn{\tau^2_{weights}}, where \eqn{\tau^2_{weights}} is the precision (on the log scale) of the log-normal weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.
+#' @param m_1 A positive numeric scalar specifying the shape parameter for the Gamma prior on \eqn{\tau^2_{weights}}, where \eqn{\tau^2_{weights}} is the precision (on the log scale) of the log-normal weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when \code{noise_weights = TRUE & family \%in\% c('lognormal', 'exp_lognormal')}.
+#' @param o_1 A positive numeric scalar specifying the rate parameter for the Gamma prior on \eqn{\tau^2_{weights}}, where \eqn{\tau^2_{weights}} is the precision (on the log scale) of the log-normal weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when \code{noise_weights = TRUE & family \%in\% c('lognormal', 'exp_lognormal')}.
 #' @param m_2 A positive numeric scalar specifying the shape parameter for the Gamma prior on \eqn{\tau^2_{noise \ weights}}, where \eqn{\tau^2_{noise \ weights}} is the precision (on the log scale) of the log-normal noise weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.
 #' @param o_2 A positive numeric scalar specifying the rate parameter for the Gamma prior on \eqn{\tau^2_{noise \ weights}}, where \eqn{\tau^2_{noise \ weights}} is the precision (on the log scale) of the log-normal noise weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.
 #' @details
@@ -153,6 +154,8 @@ specify_priors <- function(D,
       required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "e_2", "f_2", "m_1", "o_1", "m_2", "o_2")]
     } else if(family == "poisson"){
       required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "m_1", "o_1", "m_2", "o_2")]
+    } else if(family == "exp_lognormal"){
+      required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "m_2", "o_2")]
     } else {
       required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots")]
     }
@@ -169,12 +172,12 @@ specify_priors <- function(D,
 
   # Stop if family length > 1
   if(!(length(family) == 1 & is.character(family))){
-    stop("Argument 'family' is not a character vector of length 1, please supply a family (i.e., 'bernoulli', 'poisson', or 'lognormal')")
+    stop("Argument 'family' is not a character vector of length 1, please supply a family (i.e., 'bernoulli', 'poisson', 'exp_lognormal', or 'lognormal')")
   }
 
   # Check family 
-  if(!family %in% c("bernoulli", "poisson", "lognormal")){
-    stop("family needs to be one of the following: 'bernoulli', 'poisson', or 'lognormal")
+  if(!family %in% c("bernoulli", "poisson", "exp_lognormal", "lognormal")){
+    stop("family needs to be one of the following: 'bernoulli', 'poisson', 'exp_lognormal', or 'lognormal")
   }
   
   # Check model 
@@ -241,6 +244,22 @@ specify_priors <- function(D,
         l = l,
         e_2 = e_2,
         f_2 = f_2
+      )
+    } else if(family == "exp_lognormal"){
+      priors <- list(
+        a = t(a),
+        b = b,
+        c = c,
+        G = G,
+        nu = nu,
+        e = e,
+        f = f,
+        h = h, 
+        l = l,
+        e_2 = e_2,
+        f_2 = f_2,
+        m_1 = m_1,
+        o_1 = o_1
       )
     } else {
       priors <- list(

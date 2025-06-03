@@ -125,20 +125,24 @@ check_initial_values <- function(list_name,
       
     }
     
-    if (family == "lognormal"){
+    if(family %in% c("lognormal", "exp_lognormal")){
       
        check_dim_precision_weights <- length(list_name[["precision_weights"]]) == 1 & list_name[["precision_weights"]] > 0
       
       if(!check_dim_precision_weights){
         stop(paste0("precision_weights needs to be a postive scalar"))
       } 
-      
-      check_dim_precision_noise_weights <- length(list_name[["precision_noise_weights"]]) == 1 & list_name[["precision_noise_weights"]] > 0
-      
-      if(!check_dim_precision_noise_weights){
-        stop(paste0("precision_noise_weights needs to be a postive scalar"))
-      } 
-      
+       
+       if (family == "lognormal"){
+         
+         check_dim_precision_noise_weights <- length(list_name[["precision_noise_weights"]]) == 1 & list_name[["precision_noise_weights"]] > 0
+         
+         if(!check_dim_precision_noise_weights){
+           stop(paste0("precision_noise_weights needs to be a postive scalar"))
+         } 
+         
+       }
+       
     }
     
   }

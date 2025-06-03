@@ -45,6 +45,27 @@ double lognormal_density_BIC(double w, double precision, double mean, double log
 
 }
 
+// [[Rcpp::export]]
+double exp_density_BIC(double w, double mean, double log){
+  
+  double temp = -1.0*arma::datum::inf;
+
+  if (w > 0.0){
+
+    temp = (-1.0*std::log(mean)) + (-1.0*w*(1.0/mean));
+
+    if(log <= 0.0){
+
+      temp = std::exp(temp);
+
+    } 
+    
+  }
+
+  return temp;
+
+}
+
 
 // [[Rcpp::export]]
 double BIC_logit_NDH(arma::sp_mat A, Rcpp::List object){
@@ -252,6 +273,12 @@ double BIC_hurdle(arma::sp_mat W, Rcpp::List object){
                   log_density = lognormal_density_BIC(w, precision_weights, eta_w, 1.0);
                   log_density_noise = lognormal_density_BIC(w, precision_noise_weights, guess_noise_weights, 1.0);
 
+                } else if (family == "exp_lognormal"){
+
+                  double precision_weights = object["precision_weights"];
+                  log_density = lognormal_density_BIC(w, precision_weights, eta_w, 1.0);
+                  log_density_noise = exp_density_BIC(w, guess_noise_weights, 1.0);
+
                 } else {
 
                   log_density = trunc_poisson_density_BIC(w, std::exp(eta_w), 1.0);
@@ -312,6 +339,12 @@ double BIC_hurdle(arma::sp_mat W, Rcpp::List object){
                   log_density = lognormal_density_BIC(w, precision_weights, eta_w, 1.0);
                   log_density_noise = lognormal_density_BIC(w, precision_noise_weights, guess_noise_weights, 1.0);
 
+                } else if (family == "exp_lognormal"){
+
+                  double precision_weights = object["precision_weights"];
+                  log_density = lognormal_density_BIC(w, precision_weights, eta_w, 1.0);
+                  log_density_noise = exp_density_BIC(w, guess_noise_weights, 1.0);
+
                 } else {
 
                   log_density = trunc_poisson_density_BIC(w, std::exp(eta_w), 1.0);
@@ -371,6 +404,12 @@ double BIC_hurdle(arma::sp_mat W, Rcpp::List object){
                   log_density = lognormal_density_BIC(w, precision_weights, eta_w, 1.0);
                   log_density_noise = lognormal_density_BIC(w, precision_noise_weights, guess_noise_weights, 1.0);
 
+                } else if (family == "exp_lognormal"){
+
+                  double precision_weights = object["precision_weights"];
+                  log_density = lognormal_density_BIC(w, precision_weights, eta_w, 1.0);
+                  log_density_noise = exp_density_BIC(w, guess_noise_weights, 1.0);
+
                 } else {
 
                   log_density = trunc_poisson_density_BIC(w, std::exp(eta_w), 1.0);
@@ -410,6 +449,11 @@ double BIC_hurdle(arma::sp_mat W, Rcpp::List object){
 
       arma::colvec beta2 = object["beta2"];
       n_params = beta.n_elem + beta2.n_elem + 1.0;
+
+   } else if (family == "exp_lognormal"){
+
+      arma::colvec beta2 = object["beta2"];
+      n_params = beta.n_elem + beta2.n_elem + 1.0 + 1.0;
 
    } else {
 

@@ -6,11 +6,12 @@
 #' @param family A character string specifying the distribution of the edge weights.
 #'  \itemize{
 #'   \item{'bernoulli': Expects an \strong{unweighted} network; utilizes a Bernoulli distribution with a logit link (default)}
-#'   \item{'lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link}
-#'   \item{'poisson': Expects a \strong{weighted} network with edge weights representing non-zero counts; utilizes a zero-truncated Poisson distribution with a log link}
+#'   \item{'lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link to model the \emph{non-noise weights} and log-normal distribution with mean (on log-scale) specified as \code{guess_noise_weights} to model the \emph{noise weights}}
+#'   \item{'exp_lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link to model the \emph{non-noise weights} and exponential distribution with mean specified as \code{guess_noise_weights} to model the \emph{noise weights}}
+#'   \item{'poisson': Expects a \strong{weighted} network with edge weights representing non-zero counts; utilizes a zero-truncated Poisson distribution with a log link to model the \emph{non-noise weights} and zero-truncated Poisson distribution with mean specified as \code{guess_noise_weights} to model the \emph{noise weights}}
 #'   }
 #' @param noise_weights A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to an unweighted binary network if a weighted network is supplied, i.e., (A > 0.0)*1.0) and fits a latent space cluster model (default is \code{FALSE}). 
-#' @param guess_noise_weights Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for the mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'poisson')} (mean is on the log-scale for lognormal) \strong{OR} proportion (i.e. in (0,1)) of all edges that are noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'poisson')} and 1% will be used for \code{family = 'bernoulli'}.
+#' @param guess_noise_weights Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for the mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'exp_lognormal', 'poisson')} (mean is on the log-scale for \code{'lognormal'}) \strong{OR} proportion (i.e. in (0,1)) of all edges that are noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'exp_lognormal', 'poisson')} (non-zero weights on the log-scale for \code{'lognormal'}) and 1% will be used for \code{family = 'bernoulli'}.
 #' @param model A character string specifying the model to fit:
 #'  \itemize{
 #'   \item{'NDH': \strong{undirected} network with no degree heterogeneity}
@@ -333,8 +334,8 @@ JANE <- function(A,
   }
   
   # Check family input
-  if(!family %in% c("bernoulli", "lognormal", "poisson")){
-    stop("family needs to be one of the following: 'bernoulli', 'lognormal', 'poisson'")
+  if(!family %in% c("bernoulli", "lognormal", "exp_lognormal", "poisson")){
+    stop("family needs to be one of the following: 'bernoulli', 'lognormal', 'exp_lognormal', 'poisson'")
   }
   
   # Check if edges weights are >0
@@ -358,8 +359,8 @@ JANE <- function(A,
   }
   
   # Check if unweighted network supplied for family %in% c("lognormal", "poisson")
-  if(family %in% c("lognormal", "poisson") & all(A@x == 1.0)){
-    stop(paste0("Edges in the A matrix are unweighted with family = ", family, ". Please supply an A matrix with weighted edges for family %in% c('lognormal', 'poisson')"))
+  if(family %in% c("lognormal", "exp_lognormal", "poisson") & all(A@x == 1.0)){
+    stop(paste0("Edges in the A matrix are unweighted with family = ", family, ". Please supply an A matrix with weighted edges for family %in% c('lognormal', 'exp_lognormal', 'poisson')"))
   }
   
   # Check if discrete data not supplied for family = "poisson"
@@ -368,10 +369,10 @@ JANE <- function(A,
   }
   
   # Check noise_weights input convert to unweighted network if noise_weights == FALSE & family %in% c("lognormal", "poisson")
-  if(!noise_weights & family %in% c("lognormal", "poisson")){
+  if(!noise_weights & family %in% c("lognormal", "exp_lognormal", "poisson")){
     A <- 1.0 * ( A > 0.0 )
     family <- "bernoulli"
-    message("noise_weights == FALSE & family %in% c('lognormal', 'poisson'), converting A to unweighted matrix and fitting latent space cluster model assuming no noise weights and family = 'bernoulli'")
+    message("noise_weights == FALSE & family %in% c('lognormal', 'exp_lognormal', 'poisson'), converting A to unweighted matrix and fitting latent space cluster model assuming no noise weights and family = 'bernoulli'")
   }
   
   # Check guess_noise_weights
@@ -388,7 +389,7 @@ JANE <- function(A,
         
         prob_noise <- 0.01
         
-        if(family == "poisson"){
+        if(family %in% c("exp_lognormal", "poisson")){
           guess_noise_weights <- unname(stats::quantile(x = A@x, 
                                                         probs = prob_noise))
           density_A <- sum(A@x > guess_noise_weights)/(nrow(A) * (nrow(A)-1.0))
@@ -412,11 +413,11 @@ JANE <- function(A,
       
       if(family != 'bernoulli'){
         
-        if (guess_noise_weights <= 0 & family == "poisson"){
-          stop("Please supply a postive non-zero numeric value for guess_noise_weights with family = 'poisson'.")
+        if (guess_noise_weights <= 0 & family %in% c("exp_lognormal", "poisson")){
+          stop("Please supply a postive non-zero numeric value for guess_noise_weights with family %in% c('exp_lognormal', 'poisson').")
         }
        
-        if (family == "poisson"){
+        if (family %in% c("exp_lognormal", "poisson")){
           prob_noise <- mean(A@x <= guess_noise_weights)
           density_A <- sum(A@x > guess_noise_weights)/(nrow(A) * (nrow(A)-1.0))
           q_prob <- (prob_noise*density_A)/((1.0-density_A)*(1.0-prob_noise))
@@ -805,7 +806,7 @@ EM_inner <- function(A,
                                               family = current$family,
                                               beta = current$beta,
                                               beta2 = if(current$family == "bernoulli"){matrix(0.0, 1, 1)}else{current$beta2},
-                                              precision_weights = ifelse(current$family != "lognormal", 0.0, current$precision_weights),
+                                              precision_weights = ifelse(!current$family %in% c("lognormal", "exp_lognormal"), 0.0, current$precision_weights),
                                               precision_noise_weights = ifelse(current$family != "lognormal", 0.0, current$precision_noise_weights),
                                               guess_noise_weights = current$guess_noise_weights,
                                               U = current$U,
@@ -843,7 +844,7 @@ EM_inner <- function(A,
           
         }
         
-        if (family == "lognormal"){
+        if (family %in% c("lognormal", "exp_lognormal")){
           
           # update precision_weights
           update_precision_weights(precision_weights = current$precision_weights,
@@ -857,11 +858,15 @@ EM_inner <- function(A,
                                    o_1 = current$priors$o_1)
           
           # update precision_noise_weights
-          update_precision_noise_weights(precision_noise_weights = current$precision_noise_weights,
-                                         prob_matrix_W = current$prob_matrix_W,
-                                         guess_noise_weights = current$guess_noise_weights,
-                                         m_2 = current$priors$m_2,
-                                         o_2 = current$priors$o_2)
+          if(family == "lognormal"){
+            
+            update_precision_noise_weights(precision_noise_weights = current$precision_noise_weights,
+                                           prob_matrix_W = current$prob_matrix_W,
+                                           guess_noise_weights = current$guess_noise_weights,
+                                           m_2 = current$priors$m_2,
+                                           o_2 = current$priors$o_2)
+            
+          }
           
         }
         
@@ -1203,6 +1208,11 @@ trunc_poisson_density <- function(w, mean, log) {
 #' @useDynLib JANE  
 lognormal_density <- function(w, precision, mean, log) {
   .Call('_JANE_lognormal_density', PACKAGE = 'JANE', w, precision, mean, log)
+}
+
+#' @useDynLib JANE  
+exp_density <- function(w, mean, log) {
+  .Call('_JANE_exp_density', PACKAGE = 'JANE', w, mean, log)
 }
 
 #' @useDynLib JANE  

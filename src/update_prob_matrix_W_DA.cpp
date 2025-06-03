@@ -46,6 +46,27 @@ double lognormal_density(double w, double precision, double mean, double log){
 }
 
 // [[Rcpp::export]]
+double exp_density(double w, double mean, double log){
+  
+  double temp = -1.0*arma::datum::inf;
+
+  if (w > 0.0){
+
+    temp = (-1.0*std::log(mean)) + (-1.0*w*(1.0/mean));
+
+    if(log <= 0.0){
+
+      temp = std::exp(temp);
+
+    } 
+    
+  }
+
+  return temp;
+
+}
+
+// [[Rcpp::export]]
 void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, Rcpp::String family, arma::colvec beta, arma::colvec beta2, double precision_weights, double precision_noise_weights, double guess_noise_weights, arma::mat U, arma::mat X, arma::mat X2, double q, double temp_beta){
 
   int M = prob_matrix_W.n_rows;
@@ -130,6 +151,17 @@ void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, Rcpp:
 
         z_hat = std::exp( temp1 - max_val - std::log( std::exp(temp1 - max_val) + std::exp(temp2 - max_val) ) );
      
+     } else if (family == "exp_lognormal"){
+
+        double w = prob_matrix_W(m, 2);
+        double log_density = lognormal_density(w, precision_weights, eta_w, 1.0);
+        double log_density_noise = exp_density(w, guess_noise_weights, 1.0);
+        double temp1 = temp_beta*(std::log(pij) + log_density);
+        double temp2 = temp_beta*(std::log(q*(1.0-pij)) + log_density_noise);
+        double max_val = std::max(temp1, temp2);
+
+        z_hat = std::exp( temp1 - max_val - std::log( std::exp(temp1 - max_val) + std::exp(temp2 - max_val) ) );
+        
      } else {
         
         double w = prob_matrix_W(m, 2);

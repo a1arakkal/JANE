@@ -18,13 +18,23 @@ initialize_starting_values_weighted_network <- function(A,
       
       {
         
-        if(family == "lognormal"){
-          
-          prob_matrix_W_temp <- prob_matrix_W[log(prob_matrix_W[, 3]) > guess_noise_weights, , drop = FALSE]
-          w <- prob_matrix_W_temp[,3]
-          precision_noise_weights <- 1.0/stats::var(log(prob_matrix_W[, 3])[log(prob_matrix_W[, 3]) <= guess_noise_weights])
-          precision_noise_weights <- ifelse(is.infinite(precision_noise_weights) | is.nan(precision_noise_weights) | is.na(precision_noise_weights),
-                                            stats::rgamma(n = 1, 1, 1), precision_noise_weights)
+        if(family %in% c("lognormal", "exp_lognormal")){
+        
+          if(family == "lognormal"){
+            
+            prob_matrix_W_temp <- prob_matrix_W[log(prob_matrix_W[, 3]) > guess_noise_weights, , drop = FALSE]
+            w <- prob_matrix_W_temp[,3]
+            
+            precision_noise_weights <- 1.0/stats::var(log(prob_matrix_W[, 3])[log(prob_matrix_W[, 3]) <= guess_noise_weights])
+            precision_noise_weights <- ifelse(is.infinite(precision_noise_weights) | is.nan(precision_noise_weights) | is.na(precision_noise_weights),
+                                              stats::rgamma(n = 1, 1, 1), precision_noise_weights)
+            
+          } else {
+            
+            prob_matrix_W_temp <- prob_matrix_W[prob_matrix_W[, 3] > guess_noise_weights, , drop = FALSE]
+            w <- prob_matrix_W_temp[,3]
+            
+          }
           
           if(model == "NDH"){
             
@@ -103,13 +113,26 @@ initialize_starting_values_weighted_network <- function(A,
             stop()
           }
           
-          list(
-            q_prob = q_prob,
-            guess_noise_weights = guess_noise_weights,
-            beta2 = beta2,
-            precision_weights = precision_weights,
-            precision_noise_weights = precision_noise_weights
-          )
+          if(family == "lognormal"){
+            
+            list(
+              q_prob = q_prob,
+              guess_noise_weights = guess_noise_weights,
+              beta2 = beta2,
+              precision_weights = precision_weights,
+              precision_noise_weights = precision_noise_weights
+            )
+            
+          } else {
+            
+            list(
+              q_prob = q_prob,
+              guess_noise_weights = guess_noise_weights,
+              beta2 = beta2,
+              precision_weights = precision_weights
+            )
+            
+          }
           
         } else if(family == "poisson"){
           
@@ -254,11 +277,16 @@ initialize_starting_values_weighted_network <- function(A,
       }
     }
     
-    if(family == "lognormal"){
+    if(family %in% c("lognormal", "exp_lognormal")){
+      
       starting_params$precision_weights <- stats::rgamma(n = 1, 1, 1)
-      starting_params$precision_noise_weights <- stats::rgamma(n = 1, 1, 1)
+      
+      if(family == "lognormal"){
+        
+        starting_params$precision_noise_weights <- stats::rgamma(n = 1, 1, 1)
+        
+      }
     }
-    
   }
   
   return(starting_params)

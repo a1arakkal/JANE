@@ -68,3 +68,9 @@ trunc_poisson_density_BIC <- function(w, mean, log) {
 lognormal_density_BIC <- function(w, precision, mean, log) {
   .Call('_JANE_lognormal_density_BIC', PACKAGE = 'JANE', w, precision, mean, log)
 }
+
+#' @useDynLib JANE  
+exp_density_BIC <- function(w, mean, log) {
+  .Call('_JANE_exp_density_BIC', PACKAGE = 'JANE', w, mean, log)
+}
+

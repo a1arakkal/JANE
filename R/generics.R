@@ -15,7 +15,7 @@
 #' \item{\code{cluster_labels}}{ A numeric vector of length \eqn{N} containing the cluster assignment of each actor based on a hard clustering rule of \eqn{\{h | \hat{Z}^{U}_{ih} = max_k \hat{Z}^{U}_{ik}\}}.}
 #' \item{\code{Z_W}}{ A numeric \eqn{|E| \times 6} matrix, with \eqn{|E|} representing the total number of edges in the network (for undirected networks, only the upper diagonal edges are retained). The first two columns (i.e., 'i' and 'j') contains the specific indices of the edge between the \eqn{i^{th}} and \eqn{j^{th}} actors, the third column (i.e., 'weight') contains the specific edge weight, the fourth column (i.e., 'hat_zij1') contains the estimated conditional probability that the specific edge is a non-noise edge, the fifth column (i.e., 'hat_zij2') contains the estimated conditional probability that the specific edge is a noise edge, and the sixth column (i.e., 'noise_edge_cluster_labels') contains the noise-edge cluster assignment of each edge based on a hard clustering rule of \eqn{\{h | \hat{Z}^{W}_{eh} = max(\hat{Z}^{W}_{e1}, \hat{Z}^{W}_{e2})\}} for \eqn{e = 1,\ldots,|E|}, where \eqn{\hat{Z}^{W}_{e1}} and \eqn{\hat{Z}^{W}_{e2}} are the estimated conditional probabilities that the \eqn{e^{th}} edge is a non-noise and noise edge, respectively (labels defined as, 1: non-noise edge and 2: noise edge). Will be \code{NULL} if \code{noise_weights = FALSE} or \code{initial_values = TRUE}. }
 #' \item{\code{q_prob}}{ A numeric scalar representing the estimated proportion of non-edges in the "true" unobserved network that were converted to noise edges.}
-#' \item{\code{precision_weights}}{ A numeric scalar representing the estimated precision (on the log scale) of the log-normal weight distribution. Only relevant for \code{family = 'lognormal' & noise_weights = TRUE}. }
+#' \item{\code{precision_weights}}{ A numeric scalar representing the estimated precision (on the log scale) of the log-normal weight distribution. Only relevant for \code{family %in% c('lognormal', 'exp_lognormal') & noise_weights = TRUE}. }
 #' \item{\code{precision_noise_weights}}{ A numeric scalar representing the estimated precision (on the log scale) of the log-normal noise weight distribution. Only relevant for \code{family = 'lognormal' & noise_weights = TRUE}. }
 #' \item{\code{IC}}{ Information criteria values of the optimal fit selected, including \itemize{
 #'                                 \item{\code{'BIC_model'}: BIC computed from logistic regression or Hurdle model component}
@@ -26,7 +26,7 @@
 #'                                 }}
 #' \item{\code{input_params}}{ A list with the following components: \itemize{
 #'                           \item{\code{model}: A character string containing the specific \code{model} used (i.e., 'NDH', 'RS', or 'RSR')}
-#'                           \item{\code{family}: A character string containing the specific \code{family} used (i.e., 'bernoulli', 'poisson', or 'lognormal')}
+#'                           \item{\code{family}: A character string containing the specific \code{family} used (i.e., 'bernoulli', 'poisson', 'lognormal', or 'exp_lognormal')}
 #'                           \item{\code{noise_weights}: A logical; if \code{TRUE} then the approach utilizing a Hurdle model accounting for noise edges was utilized}
 #'                           \item{\code{IC_selection}: A character string containing the specific information criteria used to select the optimal fit (i.e., 'BIC_model', 'BIC_mbc', 'ICL_mbc', 'Total_BIC', or 'Total_ICL')}
 #'                           \item{\code{case_control}: A logical; if \code{TRUE} then the case/control approach was utilized}
@@ -140,9 +140,14 @@ summary.JANE <- function(object, true_labels = NULL, initial_values = FALSE, ...
     out$coefficients$beta_GLM <- summary_data$beta2
     out$q_prob <- summary_data$q_prob
     
-    if(family == "lognormal"){
+    if(family %in% c("lognormal", "exp_lognormal")){
+      
       out$precision_weights <- summary_data$precision_weights
-      out$precision_noise_weights <- summary_data$precision_noise_weights
+      
+      if(family == "lognormal"){
+        out$precision_noise_weights <- summary_data$precision_noise_weights
+      }
+      
     }
     
   }

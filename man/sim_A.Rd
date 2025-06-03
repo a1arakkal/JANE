@@ -39,6 +39,7 @@ sim_A(
 \itemize{
 \item{'bernoulli': generates an \strong{unweighted} network from a latent space cluster model}
 \item{'lognormal': generates a \strong{weighted} network by first simulating an unweighted network using a latent space cluster model, and then assigning edge weights based on a log-normal GLM utilizing an identity link}
+\item{'exp_lognormal': generates a \strong{weighted} network in an identical manner as \code{family = 'lognormal'}, except that if \code{noise_weights_prob>0.0}, the noise weights are drawn from an exponential distribution}
 \item{'poisson': generates a \strong{weighted} network by first simulating an unweighted network using a latent space cluster model, and then assigning edge weights based on a zero-truncated Poisson GLM utilizing a log link}
 }}
 
@@ -54,7 +55,7 @@ sim_A(
 }
 }}
 
-\item{params_weights}{Only relevant when \code{family \%in\% c('lognormal', 'poisson')}. A list containing the parameters of the GLMs for the edge weights, including:
+\item{params_weights}{Only relevant when \code{family \%in\% c('lognormal', 'exp_lognormal', 'poisson')}. A list containing the parameters of the GLMs for the edge weights, including:
 \itemize{
 \item{'beta0': a numeric value specifying the intercept parameter for the zero-truncated Poisson or log-normal GLM}
 \item{'precision_R_effects': precision parameters for random degree heterogeneity effects, specific to the zero-truncated Poisson or log-normal GLM:
@@ -64,12 +65,12 @@ sim_A(
 \item{'RSR': a numeric matrix specifying the precision matrix of the multivariate normal distribution of the random sender and receiver effects, if missing will generate from a Wishart(df = 3, Sigma = \eqn{I_2})}
 }
 }
-\item{'precision_weights': a positive, non-zero, numeric representing the precision (on the log scale) of the log-normal weight distribution. Only relevant when \code{family = 'lognormal'}}
+\item{'precision_weights': a positive, non-zero, numeric representing the precision (on the log scale) of the log-normal weight distribution. Only relevant when \code{family \%in\% c('lognormal', 'exp_lognormal')}}
 }}
 
 \item{noise_weights_prob}{A numeric in [0,1] representing the proportion of all edges in the simulated network that are noise edges (default is 0.0).}
 
-\item{mean_noise_weights}{A numeric representing the mean of the noise weight distribution. Only relevant when \code{family \%in\% c('lognormal', 'poisson')} and \code{noise_weights_prob>0.0}. For family = 'poisson' value has to be > 0.0, for family = "lognormal" the mean is on the log scale.}
+\item{mean_noise_weights}{A numeric representing the mean of the noise weight distribution. Only relevant when \code{family \%in\% c('lognormal', 'exp_lognormal', 'poisson')} and \code{noise_weights_prob>0.0}. For \code{family \%in\% c('poisson', 'exp_lognormal')} value has to be > 0.0, for \code{family = "lognormal"} the mean is on the log scale.}
 
 \item{precision_noise_weights}{A positive, non-zero, numeric representing the precision (on the log scale) of the log-normal noise weight distribution. Only relevant when \code{family = 'lognormal'} and \code{noise_weights_prob>0.0}.}
 

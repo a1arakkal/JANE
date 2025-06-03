@@ -29,13 +29,14 @@ JANE(
 \item{family}{A character string specifying the distribution of the edge weights.
 \itemize{
 \item{'bernoulli': Expects an \strong{unweighted} network; utilizes a Bernoulli distribution with a logit link (default)}
-\item{'lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link}
-\item{'poisson': Expects a \strong{weighted} network with edge weights representing non-zero counts; utilizes a zero-truncated Poisson distribution with a log link}
+\item{'lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link to model the \emph{non-noise weights} and log-normal distribution with mean (on log-scale) specified as \code{guess_noise_weights} to model the \emph{noise weights}}
+\item{'exp_lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link to model the \emph{non-noise weights} and exponential distribution with mean specified as \code{guess_noise_weights} to model the \emph{noise weights}}
+\item{'poisson': Expects a \strong{weighted} network with edge weights representing non-zero counts; utilizes a zero-truncated Poisson distribution with a log link to model the \emph{non-noise weights} and zero-truncated Poisson distribution with mean specified as \code{guess_noise_weights} to model the \emph{noise weights}}
 }}
 
 \item{noise_weights}{A logical; if \code{TRUE} then a Hurdle model is used to account for noise weights, if \code{FALSE} simply utilizes the supplied network (converted to an unweighted binary network if a weighted network is supplied, i.e., (A > 0.0)*1.0) and fits a latent space cluster model (default is \code{FALSE}).}
 
-\item{guess_noise_weights}{Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for the mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'poisson')} (mean is on the log-scale for lognormal) \strong{OR} proportion (i.e. in (0,1)) of all edges that are noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'poisson')} and 1\% will be used for \code{family = 'bernoulli'}.}
+\item{guess_noise_weights}{Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for the mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'exp_lognormal', 'poisson')} (mean is on the log-scale for \code{'lognormal'}) \strong{OR} proportion (i.e. in (0,1)) of all edges that are noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'exp_lognormal', 'poisson')} (non-zero weights on the log-scale for \code{'lognormal'}) and 1\% will be used for \code{family = 'bernoulli'}.}
 
 \item{model}{A character string specifying the model to fit:
 \itemize{

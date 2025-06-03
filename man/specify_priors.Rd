@@ -42,9 +42,10 @@ specify_priors(
 
 \item{family}{A character string specifying the distribution of the edge weights.
 \itemize{
-\item{'bernoulli': for \strong{unweighted} networks; utilizes a Bernoulli distribution with a logit link (default)}
-\item{'lognormal': for \strong{weighted} networks with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link}
-\item{'poisson': for \strong{weighted} networks with edge weights representing non-zero counts; utilizes a zero-truncated Poisson distribution with a log link}
+\item{'bernoulli': Expects an \strong{unweighted} network; utilizes a Bernoulli distribution with a logit link (default)}
+\item{'lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link to model the \emph{non-noise weights} and log-normal distribution with mean (on log-scale) specified as \code{guess_noise_weights} to model the \emph{noise weights}}
+\item{'exp_lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link to model the \emph{non-noise weights} and exponential distribution with mean specified as \code{guess_noise_weights} to model the \emph{noise weights}}
+\item{'poisson': Expects a \strong{weighted} network with edge weights representing non-zero counts; utilizes a zero-truncated Poisson distribution with a log link to model the \emph{non-noise weights} and zero-truncated Poisson distribution with mean specified as \code{guess_noise_weights} to model the \emph{noise weights}}
 }}
 
 \item{noise_weights}{A logical; if TRUE then a Hurdle model is used to account for noise weights, if FALSE simply utilizes the supplied network (converted to an unweighted binary network if a weighted network is supplied, i.e., (A > 0.0)*1.0) and fits a latent space cluster model (default is FALSE).}
@@ -73,9 +74,9 @@ specify_priors(
 
 \item{f_2}{A numeric p.s.d square matrix of dimension \code{1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)} specifying the precision of the multivariate normal prior on \eqn{\beta_{GLM}}, where \eqn{\beta_{GLM}} represents the coefficients of the zero-truncated Poisson or log-normal GLM. Only relevant when \code{noise_weights = TRUE & family != 'bernoulli'}.}
 
-\item{m_1}{A positive numeric scalar specifying the shape parameter for the Gamma prior on \eqn{\tau^2_{weights}}, where \eqn{\tau^2_{weights}} is the precision (on the log scale) of the log-normal weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.}
+\item{m_1}{A positive numeric scalar specifying the shape parameter for the Gamma prior on \eqn{\tau^2_{weights}}, where \eqn{\tau^2_{weights}} is the precision (on the log scale) of the log-normal weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when \code{noise_weights = TRUE & family \%in\% c('lognormal', 'exp_lognormal')}.}
 
-\item{o_1}{A positive numeric scalar specifying the rate parameter for the Gamma prior on \eqn{\tau^2_{weights}}, where \eqn{\tau^2_{weights}} is the precision (on the log scale) of the log-normal weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.}
+\item{o_1}{A positive numeric scalar specifying the rate parameter for the Gamma prior on \eqn{\tau^2_{weights}}, where \eqn{\tau^2_{weights}} is the precision (on the log scale) of the log-normal weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when \code{noise_weights = TRUE & family \%in\% c('lognormal', 'exp_lognormal')}.}
 
 \item{m_2}{A positive numeric scalar specifying the shape parameter for the Gamma prior on \eqn{\tau^2_{noise \ weights}}, where \eqn{\tau^2_{noise \ weights}} is the precision (on the log scale) of the log-normal noise weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.}
 

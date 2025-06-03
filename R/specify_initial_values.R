@@ -5,9 +5,10 @@
 #' @param K An integer specifying the total number of clusters.
 #' @param family A character string specifying the distribution of the edge weights.
 #'  \itemize{
-#'   \item{'bernoulli': for \strong{unweighted} networks; utilizes a Bernoulli distribution with a logit link (default)}
-#'   \item{'lognormal': for \strong{weighted} networks with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link}
-#'   \item{'poisson': for \strong{weighted} networks with edge weights representing non-zero counts; utilizes a zero-truncated Poisson distribution with a log link}
+#'   \item{'bernoulli': Expects an \strong{unweighted} network; utilizes a Bernoulli distribution with a logit link (default)}
+#'   \item{'lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link to model the \emph{non-noise weights} and log-normal distribution with mean (on log-scale) specified as \code{guess_noise_weights} to model the \emph{noise weights}}
+#'   \item{'exp_lognormal': Expects a \strong{weighted} network with positive, non-zero, continuous edge weights; utilizes a log-normal distribution with an identity link to model the \emph{non-noise weights} and exponential distribution with mean specified as \code{guess_noise_weights} to model the \emph{noise weights}}
+#'   \item{'poisson': Expects a \strong{weighted} network with edge weights representing non-zero counts; utilizes a zero-truncated Poisson distribution with a log link to model the \emph{non-noise weights} and zero-truncated Poisson distribution with mean specified as \code{guess_noise_weights} to model the \emph{noise weights}}
 #'   }
 #' @param model A character string specifying the model:
 #'  \itemize{
@@ -22,7 +23,7 @@
 #' @param p A numeric vector of length \eqn{K} specifying the mixture weights of the finite multivariate normal mixture distribution for the latent positions.
 #' @param beta A numeric vector specifying the regression coefficients for the logistic regression model. Specifically, a vector of length \cr \code{1 + (model =="RS")*(n_interior_knots + 1) +} \cr \code{(model =="RSR")*2*(n_interior_knots + 1)}.
 #' @param beta2 A numeric vector specifying the regression coefficients for the zero-truncated Poisson or log-normal GLM. Specifically, a vector of length \cr \code{1 + (model =="RS")*(n_interior_knots + 1) +} \cr \code{(model =="RSR")*2*(n_interior_knots + 1)}. \cr Only relevant when \code{noise_weights = TRUE & family != 'bernoulli'}.
-#' @param precision_weights A positive numeric scalar specifying the precision (on the log scale) of the log-normal weight distribution. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.
+#' @param precision_weights A positive numeric scalar specifying the precision (on the log scale) of the log-normal weight distribution. Only relevant when \code{noise_weights = TRUE & family \%in\% c('lognormal', 'exp_lognormal')}.
 #' @param precision_noise_weights A positive numeric scalar specifying the precision (on the log scale) of the log-normal noise weight distribution. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.
 #' @param U A numeric \eqn{N \times D} matrix with rows specifying an actor's position in a \eqn{D}-dimensional social space.
 #' @param Z A numeric \eqn{N \times K} matrix with rows representing the conditional probability that an actor belongs to the cluster \eqn{K = k} for \eqn{k = 1,\ldots,K}.
@@ -112,6 +113,8 @@ specify_initial_values <- function(A,
       required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "beta2", "precision_weights", "precision_noise_weights")]
     } else if(family == "poisson"){
       required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "precision_weights", "precision_noise_weights")]
+    } else if(family == "exp_lognormal"){
+      required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "precision_noise_weights")]
     } else {
       required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots")]
     }
@@ -136,12 +139,12 @@ specify_initial_values <- function(A,
   
   # Stop if family length > 1
   if(!(length(family) == 1 & is.character(family))){
-    stop("Argument 'family' is not a character vector of length 1, please supply a family (i.e., 'bernoulli', 'poisson', or 'lognormal')")
+    stop("Argument 'family' is not a character vector of length 1, please supply a family (i.e., 'bernoulli', 'poisson', 'exp_lognormal', or 'lognormal')")
   }
   
   # Check family 
-  if(!family %in% c("bernoulli", "poisson", "lognormal")){
-    stop("family needs to be one of the following: 'bernoulli', 'poisson', or 'lognormal")
+  if(!family %in% c("bernoulli", "poisson", "exp_lognormal", "lognormal")){
+    stop("family needs to be one of the following: 'bernoulli', 'poisson', 'exp_lognormal', or 'lognormal")
   }
   
   # Check model 
@@ -216,7 +219,7 @@ specify_initial_values <- function(A,
   
   # Check if edges weights are >0
   if(!all(A@x > 0.0)){
-    stop("Negative edge weights detected, edge weights need to be > 0")
+    stop("Negative edge weights detected, edge weights need to be >0. This error can also be generated if a sparse adjacency matrix is supplied containing values of 0 for its 'non-zero' values (e.g., if a 'non-zero' element in the sparse matrix is replaced by a 0).")
   }
   
   # Check if weighted network supplied for family = "bernoulli" and ask user if they want to convert to an unweighted network
@@ -235,8 +238,8 @@ specify_initial_values <- function(A,
   }
   
   # Check if unweighted network supplied for family %in% c("lognormal", "poisson")
-  if(family %in% c("lognormal", "poisson") & all(A@x == 1.0)){
-    stop(paste0("Edges in the A matrix are unweighted with family = ", family, ". Please supply an A matrix with weighted edges for family %in% c('lognormal', 'poisson')"))
+  if(family %in% c("lognormal", "exp_lognormal", "poisson") & all(A@x == 1.0)){
+    stop(paste0("Edges in the A matrix are unweighted with family = ", family, ". Please supply an A matrix with weighted edges for family %in% c('lognormal', 'exp_lognormal', 'poisson')"))
   }
   
   # Check if discrete data not supplied for family = "poisson"
@@ -244,11 +247,11 @@ specify_initial_values <- function(A,
     stop(paste0("Non-discrete edge weights detected with family = ", family, ". Please supply an A matrix with discrete edge weights for family == 'poisson'"))
   }
   
-  # Check noise_weights input convert to unweighted network if noise_weights == FALSE & family %in% c("lognormal", "poisson")
-  if(!noise_weights & family %in% c("lognormal", "poisson")){
+  # Check noise_weights input convert to unweighted network if noise_weights == FALSE & family %in% c("lognormal", 'exp_lognormal', "poisson")
+  if(!noise_weights & family %in% c("lognormal", "exp_lognormal", "poisson")){
     A <- 1.0 * ( A > 0.0 )
     family <- "bernoulli"
-    message("noise_weights == FALSE & family %in% c('lognormal', 'poisson'), converting A to unweighted matrix and fitting latent space cluster model assuming no noise weights and family = 'bernoulli'")
+    message("noise_weights == FALSE & family %in% c('lognormal', 'exp_lognormal', 'poisson'), converting A to unweighted matrix and fitting latent space cluster model assuming no noise weights and family = 'bernoulli'")
   }
   
   list_name <- list(U = U, 
@@ -264,9 +267,14 @@ specify_initial_values <- function(A,
       list_name$beta2 <- beta2
     }
     
-    if(family == "lognormal"){
+    if(family %in% c("lognormal", "exp_lognormal")){
+      
       list_name$precision_weights <- precision_weights
-      list_name$precision_noise_weights <- precision_noise_weights
+      
+      if(family == "lognormal"){
+        list_name$precision_noise_weights <- precision_noise_weights
+      }
+      
     }
     
   }

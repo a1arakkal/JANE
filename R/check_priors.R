@@ -16,6 +16,8 @@ check_priors <- function(priors,
       hyperparms <- c("a", "b", "c", "G", "nu", "e", "f", "h", "l")
     } else if(family == "poisson"){
       hyperparms <- c("a", "b", "c", "G", "nu", "e", "f", "h", "l", "e_2", "f_2")
+    } else if(family == "exp_lognormal"){
+      hyperparms <- c("a", "b", "c", "G", "nu", "e", "f", "h", "l", "e_2", "f_2", "m_1", "o_1")
     } else {
       hyperparms <- c("a", "b", "c", "G", "nu", "e", "f", "h", "l", "e_2", "f_2", "m_1", "o_1", "m_2", "o_2")
     }
@@ -62,6 +64,20 @@ check_priors <- function(priors,
                             l = 1,
                             e_2 = 1,
                             f_2 = 1)
+      } else if(family == "exp_lognormal"){
+        correct_dim <- list(a = D,
+                            b = 1,
+                            c = 1,
+                            G = c(D, D),
+                            nu = K,
+                            e = 1,
+                            f = 1,
+                            h = 1,
+                            l = 1,
+                            e_2 = 1,
+                            f_2 = 1,
+                            m_1 = 1,
+                            o_1 = 1)
       } else {
         correct_dim <- list(a = D,
                             b = 1,
@@ -130,6 +146,20 @@ check_priors <- function(priors,
                             l = 1,
                             e_2 = 1 + n_interior_knots + 1,
                             f_2 = c(1 + n_interior_knots + 1, 1 + n_interior_knots + 1))
+      } else if(family == "exp_lognormal"){
+        correct_dim <- list(a = D,
+                            b = 1,
+                            c = 1,
+                            G = c(D, D),
+                            nu = K,
+                            e = 1 + n_interior_knots + 1,
+                            f = c(1 + n_interior_knots + 1, 1 + n_interior_knots + 1),
+                            h = 1,
+                            l = 1,
+                            e_2 = 1 + n_interior_knots + 1,
+                            f_2 = c(1 + n_interior_knots + 1, 1 + n_interior_knots + 1),
+                            m_1 = 1,
+                            o_1 = 1)
       } else {
         correct_dim <- list(a = D,
                             b = 1,
@@ -200,6 +230,20 @@ check_priors <- function(priors,
                             l = 1,
                             e_2 = 1 + 2*(n_interior_knots + 1),
                             f_2 = c(1 + 2*(n_interior_knots + 1), 1 + 2*(n_interior_knots + 1)))
+      } else if(family == "exp_lognormal"){
+        correct_dim <- list(a = D,
+                            b = 1,
+                            c = 1,
+                            G = c(D, D),
+                            nu = K,
+                            e = 1 + 2*(n_interior_knots + 1),
+                            f = c(1 + 2*(n_interior_knots + 1), 1 + 2*(n_interior_knots + 1)),
+                            h = 1,
+                            l = 1,
+                            e_2 = 1 + 2*(n_interior_knots + 1),
+                            f_2 = c(1 + 2*(n_interior_knots + 1), 1 + 2*(n_interior_knots + 1)),
+                            m_1 = 1,
+                            o_1 = 1)
       } else {
         correct_dim <- list(a = D,
                             b = 1,

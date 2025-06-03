@@ -9,6 +9,10 @@ lognormal_density_BIC <- function(w, precision, mean, log) {
     .Call('_JANE_lognormal_density_BIC', PACKAGE = 'JANE', w, precision, mean, log)
 }
 
+exp_density_BIC <- function(w, mean, log) {
+    .Call('_JANE_exp_density_BIC', PACKAGE = 'JANE', w, mean, log)
+}
+
 BIC_logit_NDH <- function(A, object) {
     .Call('_JANE_BIC_logit_NDH', PACKAGE = 'JANE', A, object)
 }
@@ -119,6 +123,10 @@ trunc_poisson_density <- function(w, mean, log) {
 
 lognormal_density <- function(w, precision, mean, log) {
     .Call('_JANE_lognormal_density', PACKAGE = 'JANE', w, precision, mean, log)
+}
+
+exp_density <- function(w, mean, log) {
+    .Call('_JANE_exp_density', PACKAGE = 'JANE', w, mean, log)
 }
 
 update_prob_matrix_W_DA <- function(prob_matrix_W, model, family, beta, beta2, precision_weights, precision_noise_weights, guess_noise_weights, U, X, X2, q, temp_beta) {
