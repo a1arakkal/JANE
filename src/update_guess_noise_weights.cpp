@@ -5,7 +5,7 @@
 
 
 // [[Rcpp::export]]
-void update_guess_noise_weights(arma::colvec& guess_noise_weights, arma::mat prob_matrix_W, double precision_noise_weights, double prior_mean_noise, double prior_var_noise, Rcpp::String family){
+void update_guess_noise_weights(arma::colvec& guess_noise_weights, arma::mat prob_matrix_W, double precision_noise_weights, double prior_mean_mean_noise, double prior_var_mean_noise, Rcpp::String family){
 
   int M = prob_matrix_W.n_rows;
  
@@ -17,13 +17,13 @@ void update_guess_noise_weights(arma::colvec& guess_noise_weights, arma::mat pro
    
     } else if (family == "exp_lognormal"){
 
-      double p1 = ()
+      double o_4 = prior_mean_noise
 
  
     } else {
       
-      double p1 = (precision_noise_weights * arma::sum(prob_matrix_W.col(4) % arma::log(prob_matrix_W.col(2)))) + ((1.0/prior_var_noise) * prior_mean_noise);
-      double p2 = (precision_noise_weights * arma::sum(prob_matrix_W.col(4))) + (1.0/prior_var_noise));
+      double p1 = (precision_noise_weights * arma::sum(prob_matrix_W.col(4) % arma::log(prob_matrix_W.col(2)))) + ((1.0/prior_var_mean_noise) * prior_mean_mean_noise);
+      double p2 = (precision_noise_weights * arma::sum(prob_matrix_W.col(4))) + (1.0/prior_var_mean_noise));
       guess_noise_weights(0) = p1/p2;
    
     }
