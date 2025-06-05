@@ -179,16 +179,16 @@ res <- JANE::JANE(A = sim_data$A,
                   case_control = FALSE,
                   DA_type = "none")
                   
-# Run JANE on simulated data - parallel with 2 cores
-future::plan(future::multisession, workers = 2)
-res <- JANE::JANE(A = sim_data$A,
-                  D = 2L,
-                  K = 3L,
-                  initialization = "GNN", 
-                  model = "NDH",
-                  case_control = FALSE,
-                  DA_type = "none")
-future::plan(future::sequential)
+# Run JANE on simulated data - parallel with 5 cores
+# future::plan(future::multisession, workers = 5)
+# res <- JANE::JANE(A = sim_data$A,
+#                   D = 2L,
+#                   K = 3L,
+#                   initialization = "GNN", 
+#                   model = "NDH",
+#                   case_control = FALSE,
+#                   DA_type = "none")
+# future::plan(future::sequential)
 
 # Run JANE on simulated data - case/control approach with 20 controls sampled for each actor
 res <- JANE::JANE(A = sim_data$A,
