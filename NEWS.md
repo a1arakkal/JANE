@@ -27,3 +27,4 @@
 ## 1.1.0
 * Add importFrom progress progress_bar to NAMESPACE to address note in checks
 * Add option to plotting function to remove noise edges if JANE was run with noise_weights = TRUE
+* Add citation information
