@@ -40,17 +40,17 @@ test_that("JANE works", {
                      DA_type = "none") )
                      
    # Run JANE on simulated data - parallel with 2 cores
-   # expect_no_error({
-   #   future::plan(future::multisession, workers = 2)
-   #   JANE::JANE(A = sim_data$A,
-   #                   D = 2L,
-   #                   K = 3L,
-   #                   initialization = "GNN", 
-   #                   model = "NDH",
-   #                   case_control = FALSE,
-   #                   DA_type = "none")
-   #  future::plan(future::sequential)
-   # })
+   expect_no_error({
+     future::plan(future::multisession, workers = 2)
+     JANE::JANE(A = sim_data$A,
+                     D = 2L,
+                     K = 3L,
+                     initialization = "GNN",
+                     model = "NDH",
+                     case_control = FALSE,
+                     DA_type = "none")
+    future::plan(future::sequential)
+   })
    
    # Run JANE on simulated data - case/control approach with 20 controls sampled for each actor
    expect_no_error( JANE::JANE(A = sim_data$A,
