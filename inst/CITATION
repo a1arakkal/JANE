@@ -8,5 +8,6 @@ bibentry(
              person(given=c("Daniel", "K."), family="Sewell")),
   journal = "Computational Statistics & Data Analysis",
   year = 2025,
+  volume = 211,
   doi = "10.1016/j.csda.2025.108228"
 )

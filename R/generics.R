@@ -297,6 +297,8 @@ print.JANE <- function(x, ...){
 #'   \item{\code{termination_rule = 'Q'}: Plots generated are similar to those described in the previous bullet point. However, instead of tracking the change in \eqn{{\hat{Z}^U}} (and potentially \eqn{{\hat{Z}^W}}) over iterations, here the absolute difference in the objective function of the E-step evaluated using parameters from subsequent iterations is tracked. Furthermore, the cumulative average of the absolute change in \eqn{\hat{U}} is no longer tracked.}
 #'  \item{\code{termination_rule \%in\% c('ARI', 'NMI', 'CER')}: Four plots will be presented. Specifically, the top left panel presents a plot of the absolute difference in the cumulative average of the absolute change in the specific \code{termination_rule} employed and \eqn{\hat{U}} across iterations. As previously mentioned, if the EM algorithm converges before the \code{n_its_start_CA}-th iteration then this will be an empty plot. Furthermore, the other three plots present ARI, NMI, and CER values comparing the classifications between subsequent iterations, respectively.}
 #'   }
+#' 
+#' @note If an error interrupts the plotting process, the graphics device may be left in a state where par("new") = TRUE. This can cause subsequent plots to be overlaid. To reset the graphics state, call plot.new() or close and reopen the device with dev.off(); dev.new().
 #'   
 #' @seealso \code{\link[mclust]{surfacePlot}}, \code{\link[mclust]{adjustedRandIndex}}, \code{\link[mclust]{classError}},  \code{\link[aricode]{NMI}}  
 #' 
@@ -374,7 +376,20 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
   }
 
   opar <- graphics::par(no.readonly = TRUE)
-  on.exit(graphics::par(opar), add = TRUE)
+  on.exit({
+    
+    graphics::par(opar)
+    
+    # Warn if the device may be left in an inconsistent state
+    if (graphics::par("new") != opar$new){
+      
+      warning(
+        "Graphics device may be in an inconsistent state (i.e., par(\"new\") = TRUE).\n  To reset it, call `plot.new()` or close and reopen the device with `dev.off(); dev.new().`\n  See Notes section in ?plot.JANE for additional details."
+      )
+      
+    }
+    
+  }, add = TRUE)
   
   trace_plot <- FALSE
   uncertainty <- FALSE
@@ -395,7 +410,7 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
       
       if(remove_noise_edges){
         if(!x$input_params$noise_weights){
-          stop("Can only remove noise edges if JANE was run with noise_weights = TRUE")
+          warning("Can only remove noise edges if JANE was run with noise_weights = TRUE")
         } else {
           
           Z_W <- plot_data$prob_matrix_W

@@ -78,6 +78,9 @@ The trace plot contains up to five unique plots tracking various metrics across 
 \item{\code{termination_rule \%in\% c('ARI', 'NMI', 'CER')}: Four plots will be presented. Specifically, the top left panel presents a plot of the absolute difference in the cumulative average of the absolute change in the specific \code{termination_rule} employed and \eqn{\hat{U}} across iterations. As previously mentioned, if the EM algorithm converges before the \code{n_its_start_CA}-th iteration then this will be an empty plot. Furthermore, the other three plots present ARI, NMI, and CER values comparing the classifications between subsequent iterations, respectively.}
 }
 }
+\note{
+If an error interrupts the plotting process, the graphics device may be left in a state where par("new") = TRUE. This can cause subsequent plots to be overlaid. To reset the graphics state, call plot.new() or close and reopen the device with dev.off(); dev.new().
+}
 \examples{
 \donttest{
 # Simulate network
