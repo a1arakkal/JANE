@@ -78,7 +78,7 @@ A list of S3 \code{\link{class}} "\code{JANE}" containing the following componen
 Fit a latent space cluster model, with or without noise edges, using an EM algorithm.
 }
 \details{
-Isolates are removed from the adjacency matrix A. If an unsymmetric adjacency matrix A is supplied for \code{model \%in\% c('NDH', 'RS')} the user will be asked if they would like to proceed with converting A to a symmetric matrix (i.e., \code{A <- 1.0 * ( (A + t(A)) > 0.0 )}). Additionally, if a weighted network is supplied and \code{noise_weights = FALSE}, then the network will be converted to an unweighted binary network (i.e., (A > 0.0)*1.0) and a latent space cluster model is fit.
+Isolates are removed from the adjacency matrix A. If an unsymmetric adjacency matrix A is supplied for \code{model \%in\% c('NDH', 'RS')} the user will be asked if they would like to proceed with converting A to a symmetric matrix (i.e., \code{A <- 1.0 * ( (A + t(A)) > 0.0 )}); only able to do so if \code{family = 'bernoulli'}. Additionally, if a weighted network is supplied and \code{noise_weights = FALSE}, then the network will be converted to an unweighted binary network (i.e., (A > 0.0)*1.0) and a latent space cluster model is fit.
 
 \strong{\code{control}:}
 
