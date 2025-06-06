@@ -603,6 +603,7 @@ JANE <- function(A,
       p <- progressr::progressor(steps = nrow(combinations_2run))
       parallel_res <- future.apply::future_lapply(X = 1:nrow(combinations_2run), 
                                                   FUN = function(x){
+                                                    suppressWarnings(suppressPackageStartupMessages(library(JANE)))
                                                     out <- inner_parallel(x = x,
                                                                           call_def = cl,
                                                                           A = A)
@@ -610,7 +611,6 @@ JANE <- function(A,
                                                     return(out)
                                                   },
                                                   future.globals = FALSE,
-                                                  future.packages = "JANE",
                                                   future.seed = ifelse(is.null(seed), TRUE, seed))
     })
     
@@ -619,13 +619,13 @@ JANE <- function(A,
     progressr::with_progress({
       parallel_res <- future.apply::future_lapply(X = 1:nrow(combinations_2run), 
                                                   FUN = function(x){
+                                                    suppressWarnings(suppressPackageStartupMessages(library(JANE)))
                                                     out <- inner_parallel(x = x,
                                                                           call_def = cl,
                                                                           A = A)
                                                     return(out)
                                                   },
                                                   future.globals = FALSE,
-                                                  future.packages = "JANE",
                                                   future.seed = ifelse(is.null(seed), TRUE, seed))
     })
     
