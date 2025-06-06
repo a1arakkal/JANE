@@ -15,7 +15,7 @@ trace_plot <- function(model_object){
                                                   "Abs diff. Q current vs. previous iteration"))
   
   opar <- graphics::par(no.readonly = TRUE)
-  on.exit(graphics::par(opar))
+  on.exit(graphics::par(opar), add = TRUE)
   
   if(model_object$termination_rule == "prob_mat"){
     

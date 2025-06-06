@@ -374,7 +374,7 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
   }
 
   opar <- graphics::par(no.readonly = TRUE)
-  on.exit(graphics::par(opar))
+  on.exit(graphics::par(opar), add = TRUE)
   
   trace_plot <- FALSE
   uncertainty <- FALSE

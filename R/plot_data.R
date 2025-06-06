@@ -4,7 +4,7 @@ plot_data <- function(A, data, zoom = 100, misclassified = NULL, type = "contour
                       main = NULL, xlab = NULL, ylab = NULL){
   
   opar <- graphics::par(no.readonly = TRUE)
-  on.exit(graphics::par(opar))
+  on.exit(graphics::par(opar), add = TRUE)
   
   rotation_radians <- (pi/180)*rotation_angle
   rot_mat <- matrix(c(cos(rotation_radians),
