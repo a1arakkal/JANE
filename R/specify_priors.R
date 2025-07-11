@@ -11,12 +11,12 @@
 #' @param model A character string specifying the model:
 #' @param model A character string specifying the model:
 #'  \itemize{
-#'   \item{'NDH': \strong{undirected} network with no degree heterogeneity}
-#'   \item{'RS': \strong{undirected} network with degree heterogeneity}
-#'   \item{'RSR': \strong{directed} network with degree heterogeneity}
+#'   \item{'NDH': \strong{undirected} network with no degree heterogeneity (or connection strength heterogeneity if working with weighted network)}
+#'   \item{'RS': \strong{undirected} network with degree heterogeneity (and connection strength heterogeneity if working with weighted network)}
+#'   \item{'RSR': \strong{directed} network with degree heterogeneity (and connection strength heterogeneity if working with weighted network)}
 #'   }
 #' @param noise_weights A logical; if TRUE then a Hurdle model is used to account for noise weights, if FALSE simply utilizes the supplied network (converted to an unweighted binary network if a weighted network is supplied, i.e., (A > 0.0)*1.0) and fits a latent space cluster model (default is FALSE).
-#' @param n_interior_knots An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (i.e., 'RS' and 'RSR' only; default is \code{NULL}).   
+#' @param n_interior_knots An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity (and connection strength heterogeneity if working with weighted network) models (i.e., 'RS' and 'RSR' only; default is \code{NULL}).   
 #' @param a A numeric vector of length \eqn{D} specifying the mean of the multivariate normal prior on \eqn{\mu_k} for \eqn{k = 1,\ldots,K}, where \eqn{\mu_k} represents the mean of the multivariate normal distribution for the latent positions of the \eqn{k^{th}} cluster.
 #' @param b A positive numeric scalar specifying the scaling factor on the precision of the multivariate normal prior on \eqn{\mu_k} for \eqn{k = 1,\ldots,K}, where \eqn{\mu_k} represents the mean of the multivariate normal distribution for the latent positions of the \eqn{k^{th}} cluster.
 #' @param c A numeric scalar \eqn{\ge} \eqn{D} specifying the degrees of freedom of the Wishart prior on \eqn{\Omega_k} for \eqn{k = 1,\ldots,K}, where \eqn{\Omega_k} represents the precision of the multivariate normal distribution for the latent positions of the \eqn{k^{th}} cluster.

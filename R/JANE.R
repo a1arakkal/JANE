@@ -13,9 +13,9 @@
 #' @param guess_noise_weights Only applicable if \code{noise_weights = TRUE}. A numeric value specifying the best guess for the mean of the noise weight distribution for \code{family \%in\% c('lognormal', 'poisson')} (mean is on the log-scale for lognormal) \strong{OR} proportion (i.e. in (0,1)) of all edges that are noise edges for \code{family = 'bernoulli'}. If \code{NULL} (i.e., default) and \code{noise_weights = TRUE} then the 1st percentile of the non-zero weights will be used for \code{family \%in\% c('lognormal', 'poisson')} and 1% will be used for \code{family = 'bernoulli'}.
 #' @param model A character string specifying the model to fit:
 #'  \itemize{
-#'   \item{'NDH': \strong{undirected} network with no degree heterogeneity}
-#'   \item{'RS': \strong{undirected} network with degree heterogeneity}
-#'   \item{'RSR': \strong{directed} network with degree heterogeneity}
+#'   \item{'NDH': \strong{undirected} network with no degree heterogeneity (or connection strength heterogeneity if working with weighted network)}
+#'   \item{'RS': \strong{undirected} network with degree heterogeneity (and connection strength heterogeneity if working with weighted network)}
+#'   \item{'RSR': \strong{directed} network with degree heterogeneity (and connection strength heterogeneity if working with weighted network)}
 #'   }
 #' @param initialization A character string or a list to specify the initial values for the EM algorithm:
 #'  \itemize{
@@ -52,7 +52,7 @@
 #' \item{\code{max_its}}{An integer specifying the maximum number of iterations for the EM algorithm (default is \code{1e3}).}
 #' \item{\code{min_its}}{An integer specifying the minimum number of iterations for the EM algorithm (default is \code{10}).}
 #' \item{\code{priors}}{A list of prior hyperparameters (default is \code{NULL}). See \code{\link[JANE]{specify_priors}} on how to specify the hyperparameters.}
-#' \item{\code{n_interior_knots}}{(only relevant for \code{model \%in\% c('RS', 'RSR')}) An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity models (default is \code{5}).}
+#' \item{\code{n_interior_knots}}{(only relevant for \code{model \%in\% c('RS', 'RSR')}) An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity (and connection strength heterogeneity if working with weighted network) models (default is \code{5}).}
 #' \item{\code{termination_rule}}{A character string to specify the termination rule to determine the convergence of the EM algorithm: \itemize{
 #'                                 \item{\code{'prob_mat'}: uses change in the absolute difference in \eqn{\hat{Z}^{U}} (i.e., the \eqn{N \times K} cluster membership probability matrix) between subsequent iterations (default)}
 #'                                 \item{\code{'Q'}: uses change in the absolute difference in the objective function of the E-step evaluated using parameters from subsequent iterations}
