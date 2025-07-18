@@ -238,7 +238,7 @@ specify_priors <- function(D = 2,
   }
   
   # add check that nu >= 1
-  if (any(nu < 1)){
+  if (any(if(is.call(nu)){eval(nu) < 1} else {nu < 1})){
     stop("For the current implementation we require that all elements of the nu vector be >= 1 to prevent against negative mixture probabilities for empty clusters")
   }
   
