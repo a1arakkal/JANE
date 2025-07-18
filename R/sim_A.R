@@ -85,7 +85,7 @@
 #'             params_LR = list(beta0 = beta0),
 #'             remove_isolates = TRUE)
 #'
-#' # Simulate a directed, weighted network, with no noise and degree heterogeneity
+#' # Simulate a directed, weighted network, with degree and strength heterogeneity but no noise
 #' JANE::sim_A(N = 100L, 
 #'             model = "RSR",
 #'             family = "lognormal",
@@ -97,7 +97,7 @@
 #'                                   precision_weights = 1),
 #'             remove_isolates = TRUE)
 #'
-#' # Simulate an undirected, weighted network, with noise and degree heterogeneity
+#' # Simulate an undirected, weighted network, with noise and degree and strength heterogeneity
 #' JANE::sim_A(N = 100L, 
 #'             model = "RS",
 #'             family = "poisson",
@@ -142,7 +142,7 @@ sim_A <- function(N,
   }
   
   if( ( is.null(params_weights) & (family != "bernoulli"))  || ( (family != "bernoulli") && is.null(params_weights$beta0) ) ){
-    stop("Please supply a named list for params_weights. At minimum, for family = 'poisson' a params_weights$beta0 needs to be specified and for family = 'lognromal' params_weights$beta0 and params_weights$precision_weights needs to be suppied")
+    stop("Please supply a named list for params_weights. At minimum, for family = 'poisson' params_weights$beta0 needs to be specified and for family = 'lognromal' params_weights$beta0 and params_weights$precision_weights needs to be supplied")
   }
   
   if(missing(mean_noise_weights) & (family != "bernoulli") & (noise_weights_prob > 0.0)){

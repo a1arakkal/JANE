@@ -123,7 +123,7 @@ JANE::sim_A(N = 100L,
             params_LR = list(beta0 = beta0),
             remove_isolates = TRUE)
 
-# Simulate a directed, weighted network, with no noise and degree heterogeneity
+# Simulate a directed, weighted network, with degree and strength heterogeneity but no noise
 JANE::sim_A(N = 100L, 
             model = "RSR",
             family = "lognormal",
@@ -135,7 +135,7 @@ JANE::sim_A(N = 100L,
                                   precision_weights = 1),
             remove_isolates = TRUE)
 
-# Simulate an undirected, weighted network, with noise and degree heterogeneity
+# Simulate an undirected, weighted network, with noise and degree and strength heterogeneity
 JANE::sim_A(N = 100L, 
             model = "RS",
             family = "poisson",

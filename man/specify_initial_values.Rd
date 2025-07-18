@@ -67,7 +67,7 @@ specify_initial_values(
 \item{precision_noise_weights}{A positive numeric scalar specifying the precision (on the log scale) of the log-normal noise weight distribution. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.}
 }
 \value{
-A list of starting values for the EM algorithm generated from the input values in a structure accepted by \code{\link[JANE]{JANE}}.
+A list of S3 \code{\link{class}} "\code{JANE.initial_values}" representing starting values for the EM algorithm, in a structure accepted by \code{JANE}.
 }
 \description{
 A function that allows the user to specify starting values for the EM algorithm in a structure accepted by \code{\link[JANE]{JANE}}.

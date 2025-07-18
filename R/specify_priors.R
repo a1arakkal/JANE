@@ -1,7 +1,7 @@
 #' Specify prior hyperparameters for EM algorithm
 #' @description A function that allows the user to specify the prior hyperparameters for the EM algorithm in a structure accepted by \code{\link[JANE]{JANE}}. 
-#' @param D An integer specifying the dimension of the latent positions.
-#' @param K An integer specifying the total number of clusters.
+#' @param D An integer specifying the dimension of the latent positions (default is 2).
+#' @param K An integer specifying the total number of clusters (default is 2).
 #' @param family A character string specifying the distribution of the edge weights.
 #'  \itemize{
 #'   \item{'bernoulli': for \strong{unweighted} networks; utilizes a Bernoulli distribution with a logit link (default)}
@@ -34,33 +34,42 @@
 #' @param o_2 A positive numeric scalar specifying the rate parameter for the Gamma prior on \eqn{\tau^2_{noise \ weights}}, where \eqn{\tau^2_{noise \ weights}} is the precision (on the log scale) of the log-normal noise weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when \code{noise_weights = TRUE & family = 'lognormal'}.
 #' @details
 #' 
-#' \strong{Prior on \eqn{\mu_k} and \eqn{\Omega_k}} (note: the same prior is used for \eqn{k = 1,\ldots,K}) :
+#' \strong{Prior on \eqn{\boldsymbol{\mu}_k} and \eqn{\boldsymbol{\Omega}_k}} (note: the same prior is used for \eqn{k = 1,\ldots,K}) :
 #' 
-#' \eqn{\pi(\mu_k, \Omega_k) = \pi(\mu_k | \Omega_k) \pi(\Omega_k)}, thus
-#' \deqn{\mu_k | \Omega_k \sim MVN(a, (b\Omega_k)^{-1})}
-#' \deqn{\Omega_k \sim Wishart(c, G^{-1})}
+#' \eqn{\pi(\boldsymbol{\mu}_k, \boldsymbol{\Omega}_k) = \pi(\boldsymbol{\mu}_k | \boldsymbol{\Omega}_k) \pi(\boldsymbol{\Omega}_k)}, thus
+#' \deqn{\boldsymbol{\Omega}_k \sim Wishart(c, \boldsymbol{G}^{-1})}
+#' \deqn{\boldsymbol{\mu}_k | \boldsymbol{\Omega}_k \sim MVN(\boldsymbol{a}, (b\boldsymbol{\Omega}_k)^{-1})}
 #' 
-#' \strong{Prior on \eqn{p}}:
+#' \strong{Prior on \eqn{\boldsymbol{p}}}:
 #' 
 #' For the current implementation we require that all elements of the \code{nu} vector be \eqn{\ge 1} to prevent against negative mixture weights for empty clusters.
-#' \deqn{p \sim Dirichlet(\nu_1 ,\ldots,\nu_K)}
+#' \deqn{\boldsymbol{p} \sim Dirichlet(\nu_1 ,\ldots,\nu_K)}
 #' 
-#' \strong{Prior on \eqn{\beta_{LR}}}:
-#' \deqn{\beta_{LR} \sim MVN(e, f^{-1})}
-#' 
-#' \strong{Prior on \eqn{\beta_{GLM}}}:
-#' \deqn{\beta_{GLM} \sim MVN(e_{2}, f_{2}^{-1})}
-#' 
+#' \strong{Prior on \eqn{\boldsymbol{\beta}_{LR}}}:
+#' \deqn{\boldsymbol{\beta}_{LR} \sim MVN(\boldsymbol{e}, \boldsymbol{f}^{-1})}
+#'
 #' \strong{Prior on \eqn{q}}:
 #' \deqn{q \sim Beta(h, l)}
+#' 
+#' \strong{\emph{Zero-truncated Poisson}}
+#' 
+#' \strong{Prior on \eqn{\boldsymbol{\beta}_{GLM}}}:
+#' \deqn{\boldsymbol{\beta}_{GLM} \sim MVN(\boldsymbol{e}_{2}, \boldsymbol{f}_{2}^{-1})}
+#' 
+#' \strong{\emph{Log-normal}}
 #' 
 #' \strong{Prior on \eqn{\tau^2_{weights}}}:
 #' \deqn{\tau^2_{weights} \sim Gamma(\frac{m_1}{2}, \frac{o_1}{2})}
 #' 
+#' \strong{Prior on \eqn{\boldsymbol{\beta}_{GLM}}}:
+#' \deqn{\boldsymbol{\beta}_{GLM}|\tau^2_{weights} \sim MVN(\boldsymbol{e}_{2}, (\tau^2_{weights}\boldsymbol{f}_{2})^{-1})}
+#' 
 #' \strong{Prior on \eqn{\tau^2_{noise \ weights}}}:
 #' \deqn{\tau^2_{noise \ weights} \sim Gamma(\frac{m_2}{2}, \frac{o_2}{2})}
 #' 
-#' @return A list of prior hyperparameters for the EM algorithm generated from the input values in a structure accepted by \code{JANE}.
+#' Unevaluated calls can be supplied as values for specific hyperparameters. This is particularly useful when running \code{JANE} for multiple combinations of \code{K} and \code{D}. See 'examples' section below for implementation examples.
+#' 
+#' @return A list of S3 \code{\link{class}} "\code{JANE.priors}" representing prior hyperparameters for the EM algorithm, in a structure accepted by \code{JANE}.
 #' 
 #' @examples
 #' \donttest{
@@ -118,11 +127,39 @@
 #'                   case_control = FALSE,
 #'                   DA_type = "none",
 #'                   control = list(priors = my_prior_hyperparameters))
+#'
+#' # Specify prior hyperparameters as unevaluated calls
+#' n_interior_knots <- 5L
+#' e <- rep(0.5, 1 + (n_interior_knots + 1))
+#' f <- diag(c(0.1, rep(0.5, n_interior_knots + 1)))
+#' 
+#' my_prior_hyperparameters <- specify_priors(model = "RS",
+#'                                            n_interior_knots = n_interior_knots,
+#'                                            a = quote(rep(1, D)),
+#'                                            b = b,
+#'                                            c = quote(D + 1),
+#'                                            G = quote(10*diag(D)),
+#'                                            nu = quote(rep(2, K)),
+#'                                            e = e,
+#'                                            f = f)
+#'                                            
+#' # # Run JANE on simulated data using supplied prior hyperparameters (NOT RUN)
+#' # future::plan(future::multisession, workers = 5)
+#' # res <- JANE::JANE(A = sim_data$A,
+#' #                    D = 2:5,
+#' #                    K = 2:10,
+#' #                    initialization = "GNN",
+#' #                    model = "RS",
+#' #                    case_control = FALSE,
+#' #                    DA_type = "none",
+#' #                    control = list(priors = my_prior_hyperparameters))
+#' # future::plan(future::sequential)
+#'                 
 #'                                                          
 #' }
 #' @export
-specify_priors <- function(D, 
-                           K,
+specify_priors <- function(D = 2,
+                           K = 2,
                            model,
                            family = "bernoulli",
                            noise_weights = FALSE,
@@ -147,14 +184,14 @@ specify_priors <- function(D,
   defined <- ls()
   passed <- names(as.list(match.call())[-1])
   if(!noise_weights){
-    required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "h", "l", "e_2", "f_2", "m_1", "o_1", "m_2", "o_2")]
+    required <- defined[!defined %in% c("D", "K", "noise_weights", "family", "n_interior_knots", "h", "l", "e_2", "f_2", "m_1", "o_1", "m_2", "o_2")]
   } else {
     if(family == "bernoulli"){
-      required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "e_2", "f_2", "m_1", "o_1", "m_2", "o_2")]
+      required <- defined[!defined %in% c("D", "K", "noise_weights", "family", "n_interior_knots", "e_2", "f_2", "m_1", "o_1", "m_2", "o_2")]
     } else if(family == "poisson"){
-      required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots", "m_1", "o_1", "m_2", "o_2")]
+      required <- defined[!defined %in% c("D", "K", "noise_weights", "family", "n_interior_knots", "m_1", "o_1", "m_2", "o_2")]
     } else {
-      required <- defined[!defined %in% c("noise_weights", "family", "n_interior_knots")]
+      required <- defined[!defined %in% c("D", "K", "noise_weights", "family", "n_interior_knots")]
     }
   }
   
@@ -194,7 +231,7 @@ specify_priors <- function(D,
   
   # Stop if everything but model, family, noise_weights is not numeric
   check_numeric <- sapply(required[!(required %in% c("model", "family", "noise_weights"))],
-                          function(x){is.numeric(eval(parse(text = x)))})
+                          function(x){is.numeric(eval(parse(text = x))) | is.call(eval(parse(text = x)))})
   
   if(any(!check_numeric)){
     stop(paste0("Please supply numeric values in the correct structure for: ", paste0(names(check_numeric[!check_numeric]), collapse=", ")))
@@ -205,9 +242,34 @@ specify_priors <- function(D,
     stop("For the current implementation we require that all elements of the nu vector be >= 1 to prevent against negative mixture probabilities for empty clusters")
   }
   
+  if (xor(is.call(a), is.call(G))){
+    stop("If either 'a' or 'G' is specified as a call (i.e., depending on D), then both must be specified as calls")
+  }
+  
+  if (is.call(a) & is.call(G)){
+    if(length(grep("\\bD\\b", as.character(a))) == 0 | length(grep("\\bD\\b", as.character(G))) == 0){
+      stop("If 'a' and 'G' are specified as a call then both must be functions of 'D'")
+    }
+  }
+  
+  if (is.call(nu)){
+    if(length(grep("\\bK\\b", as.character(nu))) == 0){
+      stop("If 'nu' is specified as a call then it must be a function of 'K'")
+    }
+  }
+  
+  if(is.call(a)){
+    test_a <- eval(a)
+    if(is.null(dim(test_a)) || dim(test_a)[1] != 1){
+      a <- bquote(t(.(a)))
+    }
+  } else {
+    a <- t(a)
+  }
+  
   if (!noise_weights){
     priors <- list(
-      a = t(a),
+      a = a,
       b = b,
       c = c,
       G = G,
@@ -218,7 +280,7 @@ specify_priors <- function(D,
   } else {
     if(family == "bernoulli"){
       priors <- list(
-        a = t(a),
+        a = a,
         b = b,
         c = c,
         G = G,
@@ -230,7 +292,7 @@ specify_priors <- function(D,
       )
     } else if(family == "poisson"){
       priors <- list(
-        a = t(a),
+        a = a,
         b = b,
         c = c,
         G = G,
@@ -244,7 +306,7 @@ specify_priors <- function(D,
       )
     } else {
       priors <- list(
-        a = t(a),
+        a = a,
         b = b,
         c = c,
         G = G,
@@ -263,7 +325,9 @@ specify_priors <- function(D,
     }
   }
   
-  check_priors(priors = priors,
+  test_priors <- lapply(priors, eval, envir = environment())
+  
+  check_priors(priors = test_priors,
                D = D,
                K = K,
                n_interior_knots = n_interior_knots,
@@ -271,5 +335,5 @@ specify_priors <- function(D,
                family = family,
                noise_weights = noise_weights)
   
-  return(priors)
+  return(structure(priors, class = "JANE.priors"))
 }

@@ -11,7 +11,7 @@
 #' @importFrom future plan multisession sequential
 #' @importFrom grDevices gray rainbow heat.colors
 #' @importFrom methods as
-#' @importFrom utils menu packageVersion
+#' @importFrom utils menu packageVersion capture.output
 #' @importFrom stringdist amatch
 #' @importFrom igraph graph_from_adjacency_matrix as_edgelist
 #' @importFrom scales alpha

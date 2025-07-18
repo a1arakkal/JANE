@@ -8,6 +8,22 @@ check_initial_values <- function(list_name,
                                  family,
                                  noise_weights){
   
+  # Check if list contain necessary parameters
+  required <-  c("U", "omegas",  "mus", "p", "prob_matrix", "beta")
+  
+  if(noise_weights){
+    if(family != "bernoulli"){
+      required <-  c("U", "omegas",  "mus", "p", "prob_matrix", "beta", "beta2")
+      if(family == "lognormal"){
+        required <-  c("U", "omegas",  "mus", "p", "prob_matrix", "beta", "beta2", "precision_weights", "precision_noise_weights")
+      }
+    }
+  }
+  
+  if(any(!required %in% names(list_name))){
+    stop(paste0("Missing initial values for: ", paste(setdiff(required, names(list_name)), collapse=", ")))
+  }
+  
   # Initial parameters dimension input check -----------------------------------
   params <- c("U", "omegas",  "mus", "p", "prob_matrix", "beta")
   correct_dim <- list(U = c(nrow(A),D),
@@ -46,7 +62,7 @@ check_initial_values <- function(list_name,
     }
   ) 
   if(!all(check_omegas)){
-    stop(paste0("Intial omega(s) are not positive definite. Check the following entries of the array: ",
+    stop(paste0("Initial omega(s) are not positive definite. Check the following entries of the array: ",
                 paste0("[,,", which(!check_omegas), "]", collapse = ", ")))
   }
   
@@ -54,14 +70,14 @@ check_initial_values <- function(list_name,
   check_p <- abs(sum(list_name[["p"]]) - 1) < 1e-12
   
   if(!check_p){
-    stop("Intial vector p does not sum to 1")
+    stop("Initial vector p does not sum to 1")
   }
   
   # check prob_matrix
   check_prob_matrix <- abs(rowSums(list_name[["prob_matrix"]]) - 1) < 1e-12
   
   if(!all(check_prob_matrix)){
-    stop("Rows of intial prob_matix do not sum to 1")
+    stop("Rows of initial prob_matrix do not sum to 1")
   }
   
   
@@ -130,13 +146,13 @@ check_initial_values <- function(list_name,
        check_dim_precision_weights <- length(list_name[["precision_weights"]]) == 1 & list_name[["precision_weights"]] > 0
       
       if(!check_dim_precision_weights){
-        stop(paste0("precision_weights needs to be a postive scalar"))
+        stop(paste0("precision_weights needs to be a positive scalar"))
       } 
       
       check_dim_precision_noise_weights <- length(list_name[["precision_noise_weights"]]) == 1 & list_name[["precision_noise_weights"]] > 0
       
       if(!check_dim_precision_noise_weights){
-        stop(paste0("precision_noise_weights needs to be a postive scalar"))
+        stop(paste0("precision_noise_weights needs to be a positive scalar"))
       } 
       
     }
@@ -144,3 +160,4 @@ check_initial_values <- function(list_name,
   }
   
 }
+

@@ -87,7 +87,7 @@ summary.JANE <- function(object, true_labels = NULL, initial_values = FALSE, ...
   }
   
   if(!(length(object$IC_out[, "selected"]) == 1) && all(object$IC_out[, "selected"] == 1)){
-    stop("Unable to select the best K, D, and n_start using infomation criteria. See output matrix IC_out for infomation criteria values. Try different initialization approaches or only specify one K, D, and n_start.")
+    stop("Unable to select the best K, D, and n_start using information criteria. See output matrix IC_out for information criteria values. Try different initialization approaches or only specify one K, D, and n_start.")
   }
   
   if(is.null(object$optimal_res) | is.null(object$optimal_starting)){
@@ -103,8 +103,7 @@ summary.JANE <- function(object, true_labels = NULL, initial_values = FALSE, ...
   
   priors <- object$optimal_res$priors
   priors$a <- priors$a[1,]
-  priors$c <- unname(priors$c)
-  
+
   if(!initial_values){
     summary_data <- object$optimal_res
   } else {
@@ -238,7 +237,7 @@ print.JANE <- function(x, ...){
   }
   
   if(!(length(x$IC_out[, "selected"]) == 1) && all(x$IC_out[, "selected"] == 1)){
-    stop("Unable to select the best K, D, and n_start using infomation criteria. See output matrix IC_out for infomation criteria values. Try different initialization approaches or only specify one K, D, and n_start.")
+    stop("Unable to select the best K, D, and n_start using information criteria. See output matrix IC_out for information criteria values. Try different initialization approaches or only specify one K, D, and n_start.")
   }
   
   if(is.null(x$optimal_res) | is.null(x$optimal_starting)){
@@ -364,7 +363,7 @@ plot.JANE <- function(x, type = "lsnc", true_labels, initial_values = FALSE,
   }
   
   if(!(length(x$IC_out[, "selected"]) == 1) && all(x$IC_out[, "selected"] == 1)){
-    stop("Unable to select the best K, D, and n_start using infomation criteria. See output matrix IC_out for infomation criteria values. Try different initialization approaches or only specify one K, D, and n_start.")
+    stop("Unable to select the best K, D, and n_start using information criteria. See output matrix IC_out for information criteria values. Try different initialization approaches or only specify one K, D, and n_start.")
   }
   
   if(is.null(x$optimal_res) | is.null(x$optimal_starting)){

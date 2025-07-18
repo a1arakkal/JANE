@@ -48,7 +48,7 @@ JANE(
 \itemize{
 \item{'GNN': uses a type of graphical neural network approach to generate initial values (default)}
 \item{'random': uses random initial values}
-\item{A user supplied list of initial values. See \code{\link[JANE]{specify_initial_values}} on how to specify initial values}
+\item{A user-supplied list of S3 \code{\link{class}} "\code{JANE.initial_values}" representing initial values for the EM algorithm. See \code{\link[JANE]{specify_initial_values}} for details on how to specify initial values}
 }}
 
 \item{case_control}{A logical; if \code{TRUE} then uses a case-control approximation approach (default is \code{FALSE}).}
@@ -56,9 +56,9 @@ JANE(
 \item{DA_type}{(Experimental) A character string to specify the type of deterministic annealing approach to use
 \itemize{
 \item{'none': does not employ a deterministic annealing approach (default)}
-\item{'cooling': (Experimental) employes a traditional deterministic annealing approach where temperature decreases}
-\item{'heating': (Experimental) employes a deterministic anti-annealing approach where temperature increases}
-\item{'hybrid': (Experimental) employes a combination of the 'cooling' and 'heating' approach}
+\item{'cooling': (Experimental) employs a traditional deterministic annealing approach where temperature decreases}
+\item{'heating': (Experimental) employs a deterministic anti-annealing approach where temperature increases}
+\item{'hybrid': (Experimental) employs a combination of the 'cooling' and 'heating' approach}
 }}
 
 \item{seed}{(optional) An integer value to specify the seed for reproducibility.}
@@ -72,7 +72,7 @@ A list of S3 \code{\link{class}} "\code{JANE}" containing the following componen
 \item{\code{IC_out}}{ A matrix containing the relevant information criteria for all combinations of \code{K}, \code{D}, and \code{n_start} considered. The 'selected' column indicates the chosen optimal fit.}
 \item{\code{all_convergence_ind}}{ A matrix containing the convergence information (i.e., 1 = converged, 0 = did not converge) and number of iterations for all combinations of \code{K}, \code{D}, \code{n_start}, and \code{beta_temperature} considered.}
 \item{\code{optimal_res}}{ A list containing the estimated parameters of interest based on the optimal fit selected. It is recommended to use \code{summary()} to extract the parameters of interest. See \code{\link[JANE]{summary.JANE}} for more details.}
-\item{\code{optimal_starting}}{ A list containing the starting parameters used in the EM algorithm that resulted in the optimal fit selected. It is recommended to use \code{summary()} to extract the parameters of interest. See \code{\link[JANE]{summary.JANE}} for more details.}
+\item{\code{optimal_starting}}{ A list of S3 \code{\link{class}} "\code{JANE.initial_values}" containing the starting parameters used in the EM algorithm that resulted in the optimal fit selected. It is recommended to use \code{summary()} to extract the parameters of interest. See \code{\link[JANE]{summary.JANE}} for more details.}
 }
 \description{
 Fit a latent space cluster model, with or without noise edges, using an EM algorithm.
@@ -87,7 +87,7 @@ The \code{control} argument is a named list that the user can supply containing 
 \item{\code{verbose}}{A logical; if \code{TRUE} causes additional information to be printed out about the progress of the EM algorithm (default is \code{FALSE}).}
 \item{\code{max_its}}{An integer specifying the maximum number of iterations for the EM algorithm (default is \code{1e3}).}
 \item{\code{min_its}}{An integer specifying the minimum number of iterations for the EM algorithm (default is \code{10}).}
-\item{\code{priors}}{A list of prior hyperparameters (default is \code{NULL}). See \code{\link[JANE]{specify_priors}} on how to specify the hyperparameters.}
+\item{\code{priors}}{A list of S3 \code{\link{class}} "\code{JANE.priors}" representing prior hyperparameter specifications (default is \code{NULL}). See \code{\link[JANE]{specify_priors}} for details on how to specify the hyperparameters.}
 \item{\code{n_interior_knots}}{(only relevant for \code{model \%in\% c('RS', 'RSR')}) An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity (and connection strength heterogeneity if working with weighted network) models (default is \code{5}).}
 \item{\code{termination_rule}}{A character string to specify the termination rule to determine the convergence of the EM algorithm: \itemize{
 \item{\code{'prob_mat'}: uses change in the absolute difference in \eqn{\hat{Z}^{U}} (i.e., the \eqn{N \times K} cluster membership probability matrix) between subsequent iterations (default)}
@@ -179,7 +179,7 @@ res <- JANE::JANE(A = sim_data$A,
                   case_control = FALSE,
                   DA_type = "none")
                   
-# Run JANE on simulated data - parallel with 5 cores
+# Run JANE on simulated data - parallel with 5 cores (NOT RUN)
 # future::plan(future::multisession, workers = 5)
 # res <- JANE::JANE(A = sim_data$A,
 #                   D = 2L,
@@ -233,7 +233,7 @@ res3 <- JANE::JANE(A = sim_data$A,
                    case_control = FALSE,
                    DA_type = "none")
 ## Extract starting values                    
-start_vals <- res3$optimal_start  
+start_vals <- res3$optimal_start
 
 ## Run JANE using extracted starting values, no need to specify D and K 
 ## below as function will determine those values from start_vals

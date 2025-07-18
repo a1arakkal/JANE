@@ -91,8 +91,8 @@ test_that("JANE works", {
                       model = "NDH",
                       case_control = FALSE,
                       DA_type = "none")
-   ## Extract starting values                    
-   start_vals <- res3$optimal_start  
+   ## Extract starting values               
+   start_vals <- res3$optimal_start
    
    ## Run JANE using extracted starting values, no need to specify D and K 
    ## below as function will determine those values from start_vals

@@ -30,7 +30,7 @@
 #' To match \code{\link[JANE]{JANE}}, this function will remove isolates from the adjacency matrix A and determine the total number of actors after excluding isolates. If this is not done, errors with respect to incorrect dimensions in the starting values will be generated when executing \code{\link[JANE]{JANE}}.
 #' 
 #' Similarly to match \code{\link[JANE]{JANE}}, if an unsymmetric adjacency matrix A is supplied for \code{model %in% c('NDH', 'RS')} the user will be asked if they would like to proceed with converting A to a symmetric matrix (i.e., \code{A <- 1.0 * ( (A + t(A)) > 0.0 )}). Additionally, if a weighted network is supplied and \code{noise_weights = FALSE}, then the network will be converted to an unweighted binary network (i.e., (A > 0.0)*1.0).
-#' @return A list of starting values for the EM algorithm generated from the input values in a structure accepted by \code{\link[JANE]{JANE}}.
+#' @return A list of S3 \code{\link{class}} "\code{JANE.initial_values}" representing starting values for the EM algorithm, in a structure accepted by \code{JANE}.
 #' @examples
 #' \donttest{
 #' # Simulate network
@@ -118,7 +118,7 @@ specify_initial_values <- function(A,
   }
   
   if (any(!required %in% passed)) {
-    stop(paste("Please supply values for argument(s): ", paste(setdiff(required, passed), collapse=", ")))
+    stop(paste0("Please supply values for argument(s): ", paste(setdiff(required, passed), collapse=", ")))
   }
 
   # Stop if everything but model, family, noise_weights is not numeric
@@ -279,6 +279,7 @@ specify_initial_values <- function(A,
                        model = model,
                        family = family,
                        noise_weights = noise_weights)
-  return(list_name)
+  
+  return(structure(list_name, class = "JANE.initial_values"))
   
 }

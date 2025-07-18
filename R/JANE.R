@@ -21,15 +21,15 @@
 #'  \itemize{
 #'   \item{'GNN': uses a type of graphical neural network approach to generate initial values (default)}
 #'   \item{'random': uses random initial values}
-#'   \item{A user supplied list of initial values. See \code{\link[JANE]{specify_initial_values}} on how to specify initial values}
+#'   \item{A user-supplied list of S3 \code{\link{class}} "\code{JANE.initial_values}" representing initial values for the EM algorithm. See \code{\link[JANE]{specify_initial_values}} for details on how to specify initial values}
 #'   }
 #' @param case_control A logical; if \code{TRUE} then uses a case-control approximation approach (default is \code{FALSE}).
 #' @param DA_type (Experimental) A character string to specify the type of deterministic annealing approach to use
 #'  \itemize{
 #'   \item{'none': does not employ a deterministic annealing approach (default)}
-#'   \item{'cooling': (Experimental) employes a traditional deterministic annealing approach where temperature decreases}
-#'   \item{'heating': (Experimental) employes a deterministic anti-annealing approach where temperature increases}
-#'   \item{'hybrid': (Experimental) employes a combination of the 'cooling' and 'heating' approach}
+#'   \item{'cooling': (Experimental) employs a traditional deterministic annealing approach where temperature decreases}
+#'   \item{'heating': (Experimental) employs a deterministic anti-annealing approach where temperature increases}
+#'   \item{'hybrid': (Experimental) employs a combination of the 'cooling' and 'heating' approach}
 #'   }
 #' @param seed (optional) An integer value to specify the seed for reproducibility.
 #' @param control A list of control parameters. See 'Details'.
@@ -39,7 +39,7 @@
 #' \item{\code{IC_out}}{ A matrix containing the relevant information criteria for all combinations of \code{K}, \code{D}, and \code{n_start} considered. The 'selected' column indicates the chosen optimal fit.}
 #' \item{\code{all_convergence_ind}}{ A matrix containing the convergence information (i.e., 1 = converged, 0 = did not converge) and number of iterations for all combinations of \code{K}, \code{D}, \code{n_start}, and \code{beta_temperature} considered.} 
 #' \item{\code{optimal_res}}{ A list containing the estimated parameters of interest based on the optimal fit selected. It is recommended to use \code{summary()} to extract the parameters of interest. See \code{\link[JANE]{summary.JANE}} for more details.}
-#' \item{\code{optimal_starting}}{ A list containing the starting parameters used in the EM algorithm that resulted in the optimal fit selected. It is recommended to use \code{summary()} to extract the parameters of interest. See \code{\link[JANE]{summary.JANE}} for more details.}
+#' \item{\code{optimal_starting}}{ A list of S3 \code{\link{class}} "\code{JANE.initial_values}" containing the starting parameters used in the EM algorithm that resulted in the optimal fit selected. It is recommended to use \code{summary()} to extract the parameters of interest. See \code{\link[JANE]{summary.JANE}} for more details.}
 #' @details
 #' 
 #' Isolates are removed from the adjacency matrix A. If an unsymmetric adjacency matrix A is supplied for \code{model %in% c('NDH', 'RS')} the user will be asked if they would like to proceed with converting A to a symmetric matrix (i.e., \code{A <- 1.0 * ( (A + t(A)) > 0.0 )}); only able to do so if \code{family = 'bernoulli'}. Additionally, if a weighted network is supplied and \code{noise_weights = FALSE}, then the network will be converted to an unweighted binary network (i.e., (A > 0.0)*1.0) and a latent space cluster model is fit.
@@ -51,7 +51,7 @@
 #' \item{\code{verbose}}{A logical; if \code{TRUE} causes additional information to be printed out about the progress of the EM algorithm (default is \code{FALSE}).}
 #' \item{\code{max_its}}{An integer specifying the maximum number of iterations for the EM algorithm (default is \code{1e3}).}
 #' \item{\code{min_its}}{An integer specifying the minimum number of iterations for the EM algorithm (default is \code{10}).}
-#' \item{\code{priors}}{A list of prior hyperparameters (default is \code{NULL}). See \code{\link[JANE]{specify_priors}} on how to specify the hyperparameters.}
+#' \item{\code{priors}}{A list of S3 \code{\link{class}} "\code{JANE.priors}" representing prior hyperparameter specifications (default is \code{NULL}). See \code{\link[JANE]{specify_priors}} for details on how to specify the hyperparameters.}
 #' \item{\code{n_interior_knots}}{(only relevant for \code{model \%in\% c('RS', 'RSR')}) An integer specifying the number of interior knots used in fitting a natural cubic spline for degree heterogeneity (and connection strength heterogeneity if working with weighted network) models (default is \code{5}).}
 #' \item{\code{termination_rule}}{A character string to specify the termination rule to determine the convergence of the EM algorithm: \itemize{
 #'                                 \item{\code{'prob_mat'}: uses change in the absolute difference in \eqn{\hat{Z}^{U}} (i.e., the \eqn{N \times K} cluster membership probability matrix) between subsequent iterations (default)}
@@ -150,7 +150,7 @@
 #'                   case_control = FALSE,
 #'                   DA_type = "none")
 #'                   
-#' # Run JANE on simulated data - parallel with 5 cores
+#' # Run JANE on simulated data - parallel with 5 cores (NOT RUN)
 #' # future::plan(future::multisession, workers = 5)
 #' # res <- JANE::JANE(A = sim_data$A,
 #' #                   D = 2L,
@@ -204,7 +204,7 @@
 #'                    case_control = FALSE,
 #'                    DA_type = "none")
 #' ## Extract starting values                    
-#' start_vals <- res3$optimal_start  
+#' start_vals <- res3$optimal_start
 #' 
 #' ## Run JANE using extracted starting values, no need to specify D and K 
 #' ## below as function will determine those values from start_vals
@@ -351,7 +351,7 @@ JANE <- function(A,
   
   # Check if discrete data not supplied for family = "poisson"
   if(family == "poisson" & !all( (A@x %% 1.0) == 0.0 ) ){
-    stop(paste0("Non-discrete edge weights detected with family = ", family, ". Please supply an A matrix with discrete edge weights for family == 'poisson'"))
+    stop(paste0("Non-discrete edge weights detected with family = ", family, ". Please supply an A matrix with discrete edge weights for family = 'poisson'"))
   }
   
   # Check noise_weights input convert to unweighted network if noise_weights == FALSE & family %in% c("lognormal", "poisson")
@@ -419,7 +419,7 @@ JANE <- function(A,
       if(family != 'bernoulli'){
         
         if (guess_noise_weights <= 0 & family == "poisson"){
-          stop("Please supply a postive non-zero numeric value for guess_noise_weights with family = 'poisson'.")
+          stop("Please supply a positive non-zero numeric value for guess_noise_weights with family = 'poisson'.")
         }
        
         if (family == "poisson"){
@@ -434,7 +434,7 @@ JANE <- function(A,
         
       } else {
         if(!(0 < guess_noise_weights & guess_noise_weights < 1)){
-          stop("Please supply a vaild proportion in (0,1) for guess_noise_weights with family ='bernoulli'.")
+          stop("Please supply a valid proportion in (0,1) for guess_noise_weights with family ='bernoulli'.")
         }
 
         density_A <- (length(A@x) * (1.0-guess_noise_weights))/(nrow(A) * (nrow(A)-1.0))
@@ -467,8 +467,8 @@ JANE <- function(A,
   }
   
   # Check initialization
-  if(!is.list(initialization) && (!initialization %in% c("random", "GNN"))){
-    stop("Please provide one of the following for initialization: 'random', 'GNN', or a named list with the necessary starting paramters")
+  if(!inherits(initialization, "JANE.initial_values") && !(is.character(initialization) && length(initialization) ==1 && initialization %in% c("random", "GNN"))){
+    stop("Please provide one of the following for initialization: 'random', 'GNN', or a list of class 'JANE.initial_values' with the necessary starting parameters")
   } else {
     cl$initialization <- eval(initialization)
   }
@@ -497,7 +497,7 @@ JANE <- function(A,
   }
   
   # Updated con n_start if user supplied starting values
-  if (is.list(initialization)){
+  if (inherits(initialization, "JANE.initial_values")){
     control$n_start <- 1
   }
   
@@ -552,7 +552,7 @@ JANE <- function(A,
   cl$control <- eval(con)
   
   # Check initialization list if supplied
-  if(is.list(initialization)){
+  if(inherits(initialization, "JANE.initial_values")){
     
     K <- length(initialization$p)
     D <- ncol(initialization$U)
@@ -574,24 +574,193 @@ JANE <- function(A,
       cl$initialization <- eval(initialization)
     }
     
+    # Check initialization list K and D match prior list K and D if both supplied
+    if(!is.null(con$priors) && inherits(con$priors, "JANE.priors")){
+      
+      K_prior <- ifelse(is.call(con$priors$a), -Inf, ncol(con$priors$a))
+      D_prior <- ifelse(is.call(con$priors$nu), -Inf, length(con$priors$nu))
+      
+      if( (!is.infinite(K_prior) && (K != K_prior)) || (!is.infinite(D_prior) && (D != D_prior)) ){
+        stop("'K' or 'D' from specified 'prior' and 'initialization' do not match")
+      }
+      
+    } else {
+      
+      comb_priors <- cbind(K, D)
+      colnames(comb_priors) <- c("K", "D")
+      comb_priors <- comb_priors[order(comb_priors[, "K"],
+                                       comb_priors[, "D"]), , drop = F]
+      message(paste0("Combinations of K and D considered:\n", paste(utils::capture.output(print(comb_priors)), collapse = "\n")))
+      
+    }
+    
   }
   
-  # Check prior if supplied
-  if(!is.null(con$priors)){
-    check_priors(priors = con$priors,
-                 D = D,
-                 K = K,
-                 n_interior_knots = con$n_interior_knots,
-                 model = model,
-                 family = family,
-                 noise_weights = noise_weights)
-  }
-  
+  # Combination to run
   combinations_2run <- as.matrix(expand.grid(K = unique(K), D = unique(D), n_start = 1:con$n_start))
   combinations_2run <- combinations_2run[order(combinations_2run[, "K"],
                                                combinations_2run[, "D"], 
                                                combinations_2run[, "n_start"]), , drop = F]
   rownames(combinations_2run) <- NULL
+  
+  # Check priors if supplied
+  if(!is.null(con$priors)){
+    
+    # check if list is nested list
+    n_layers <- count_nested_lists(con$priors)
+    cl$control$priors$n_layers <- n_layers
+    
+    if(n_layers == 1){
+      
+      if(!inherits(con$priors, "JANE.priors")){
+        stop("Supplied 'priors' object is not of class JANE.priors")
+      }
+      
+      D_dynamic <- ifelse(is.call(con$priors$a), -Inf, ncol(con$priors$a))
+      K_dynamic <- ifelse(is.call(con$priors$nu), -Inf, length(con$priors$nu))
+      
+      if(xor(is.infinite(D_dynamic), is.infinite(K_dynamic))){
+
+        if(is.infinite(D_dynamic)){
+          
+          # Check priors
+          temp_evn <- list2env(list(K = K_dynamic, D = 2)) # test check using generic D
+          temp_prior_list <- lapply(con$priors, function(expr){eval_if_call(expr, envir = temp_evn)})
+          check_priors(priors = temp_prior_list,
+                       D = temp_evn$D,
+                       K = temp_evn$K,
+                       n_interior_knots = con$n_interior_knots,
+                       model = model,
+                       family = family,
+                       noise_weights = noise_weights)
+          
+          combinations_2run <- as.matrix(expand.grid(K = K_dynamic, D = unique(D), n_start = 1:con$n_start))
+          
+        } else {
+          
+          # Check priors
+          temp_evn <- list2env(list(K = 3, D = D_dynamic)) # test check using generic K 
+          temp_prior_list <- lapply(con$priors, function(expr){eval_if_call(expr, envir = temp_evn)})
+          check_priors(priors = temp_prior_list,
+                       D = temp_evn$D,
+                       K = temp_evn$K,
+                       n_interior_knots = con$n_interior_knots,
+                       model = model,
+                       family = family,
+                       noise_weights = noise_weights)
+          
+          combinations_2run <- as.matrix(expand.grid(K = unique(K), D = D_dynamic, n_start = 1:con$n_start))
+          
+        }
+        
+      } else if (is.infinite(D_dynamic) & is.infinite(K_dynamic)){
+        
+        # Check priors
+        temp_evn <- list2env(list(K = 3, D = 2)) # test check using generic K and D
+        temp_prior_list <- lapply(con$priors, function(expr){eval_if_call(expr, envir = temp_evn)})
+        check_priors(priors = temp_prior_list,
+                     D = temp_evn$D,
+                     K = temp_evn$K,
+                     n_interior_knots = con$n_interior_knots,
+                     model = model,
+                     family = family,
+                     noise_weights = noise_weights)
+        
+        combinations_2run <- as.matrix(expand.grid(K = unique(K), D = unique(D), n_start = 1:con$n_start))
+        
+      } else {
+        
+        # Check priors
+        check_priors(priors = con$priors,
+                     D = D_dynamic,
+                     K = K_dynamic,
+                     n_interior_knots = con$n_interior_knots,
+                     model = model,
+                     family = family,
+                     noise_weights = noise_weights)
+        
+        comb_priors <- cbind(K_dynamic, D_dynamic)
+        colnames(comb_priors) <- c("K", "D")
+        combinations_2run <- comb_priors[rep(1:nrow(comb_priors), each = con$n_start), , drop = FALSE]
+        combinations_2run <- cbind(combinations_2run, rep(1:con$n_start, times = nrow(comb_priors)))
+        colnames(combinations_2run)[3] <- "n_start"
+        
+      }
+      
+      combinations_2run <- combinations_2run[order(combinations_2run[, "K"],
+                                                   combinations_2run[, "D"], 
+                                                   combinations_2run[, "n_start"]), , drop = F]
+      rownames(combinations_2run) <- NULL
+      
+      print_priors <- combinations_2run[!duplicated(combinations_2run[, 1:2, drop = F], MARGIN = 1), 1:2, drop = F]
+      message(paste0("Combinations of K and D considered:\n", paste(utils::capture.output(print(print_priors)), collapse = "\n")))
+      cl$control$priors$comb_priors <- combinations_2run[!duplicated(combinations_2run[, 1:2, drop = F], MARGIN = 1), 1:2, drop = F]
+      
+    } else {
+      
+      bad_idx <- which(!sapply(con$priors, function(x) inherits(x, "JANE.priors")))
+      if (length(bad_idx) > 0) {
+        stop(paste0("Elements ", paste(bad_idx, collapse = ", "), " in 'priors' are not of class JANE.priors"))
+      }
+      
+      # Check for calls for K or D
+      calls_check <- sapply(con$priors, function(x){sapply(x, is.call)})
+      
+      if (any(calls_check)) {
+        stop("When 'priors' is supplied as a nested list, all hyperparameters must be fully specified values, i.e., no unevaluated calls")
+      }
+      
+      # Check for duplicated combs of K and D
+      comb_priors <- t(sapply(con$priors, function(x){c(length(x$nu), ncol(x$a))}))
+      colnames(comb_priors) <- c("K", "D")
+      dup_vals <- comb_priors[duplicated(comb_priors, MARGIN = 1), , drop = F]
+      
+      if(length(dup_vals)>0){
+        stop(paste0("Supplied 'priors' contains duplicated lists for combinations:\n", paste(utils::capture.output(print(dup_vals)), collapse = "\n")))
+      }
+      
+      # check each nested list
+      bad_lists <- lapply(seq_along(con$priors), function(i) {
+        prior_group <- con$priors[[i]]
+        tryCatch({
+          check_priors(priors = prior_group,
+                       D = ncol(prior_group$a),
+                       K = length(prior_group$nu),
+                       n_interior_knots = con$n_interior_knots,
+                       model = model,
+                       family = family,
+                       noise_weights = noise_weights)
+          return(FALSE)
+        }, error = function(e) {
+          cat("Element", i , "in 'priors' failed validation:\n")
+          cat("Message:\n", conditionMessage(e), "\n\n")
+          return(TRUE)  
+        })
+      })
+      
+      if(any(unlist(bad_lists))){
+        stop("One or more elements in 'priors' failed validation")      
+      } 
+      
+      cl$control$priors$comb_priors <- comb_priors
+      
+      comb_priors_print <- comb_priors[order(comb_priors[, "K"],
+                                             comb_priors[, "D"]), , drop = F]
+      
+      message(paste0("Combinations of K and D considered:\n", paste(utils::capture.output(print(comb_priors_print)), collapse = "\n")))
+      
+      combinations_2run <- comb_priors[rep(1:nrow(comb_priors), each = con$n_start), , drop = FALSE]
+      combinations_2run <- cbind(combinations_2run, rep(1:con$n_start, times = nrow(comb_priors)))
+      colnames(combinations_2run)[3] <- "n_start"
+      combinations_2run <- combinations_2run[order(combinations_2run[, "K"],
+                                                   combinations_2run[, "D"], 
+                                                   combinations_2run[, "n_start"]), , drop = F]
+      rownames(combinations_2run) <- NULL
+      
+    }
+  
+  }
+  
   cl$combinations_2run <- combinations_2run
   
   old_handlers <- progressr::handlers() # returns current set of progression handlers
@@ -669,7 +838,7 @@ JANE <- function(A,
     optimal_starting <- NULL
   }
 
-  if(is.list(initialization)){
+  if(inherits(initialization, "JANE.initial_values")){
     IC_out[, "n_start"] <- NA
     IC_out[, "selected"] <- NA
   }
@@ -693,9 +862,8 @@ JANE <- function(A,
     
   }))
 
-  
   return(structure(list(optimal_res = optimal_res[sort(names(optimal_res))],
-                        optimal_starting = optimal_starting[sort(names(optimal_starting))],
+                        optimal_starting = structure(optimal_starting[sort(names(optimal_starting))], class = "JANE.initial_values"),
                         input_params =  list(IC_selection = con$IC_selection,
                                              case_control = case_control,
                                              DA_type = DA_type,
@@ -1052,15 +1220,39 @@ EM_inner <- function(A,
 inner_parallel <- function(x, call_def, A){
   
   combinations_2run_x <- call_def$combinations_2run[x, ]
-  call_def$K <- combinations_2run_x["K"]
-  call_def$D <- combinations_2run_x["D"]
-
+  call_def$K <- combinations_2run_x[["K"]]
+  call_def$D <- combinations_2run_x[["D"]]
+  eval_env <- list2env(list(K = call_def$K*1.0, D = call_def$D*1.0))
+  comb_priors <- call_def$control$priors$comb_priors
+  n_layers <- call_def$control$priors$n_layers
+  call_def$control$priors$comb_priors <- NULL
+  call_def$control$priors$n_layers <- NULL
+  
+  if(!is.null(call_def$control$priors)){
+    
+    if(!is.null(n_layers) && n_layers > 1){
+      
+      call_def$control$priors <- lapply(call_def$control$priors, function(x){lapply(x, function(y){eval_if_call(y, envir = eval_env)})})
+      
+      if(!is.null(comb_priors)){
+        index <- which(comb_priors[, "K"] == call_def$K & comb_priors[, "D"] == call_def$D)
+        call_def$control$priors <- call_def$control$priors[[index]]
+      }
+      
+    } else {
+      
+      call_def$control$priors <- lapply(call_def$control$priors, function(expr){eval_if_call(expr, envir = eval_env)})
+      
+    }
+    
+  }
+  
   retry <- T
   retry_counter <- 0
   
   while(retry & retry_counter <= call_def$control$max_retry){
     
-    if(!is.list(call_def$initialization)){
+    if(!inherits(call_def$initialization, "JANE.initial_values")){
       
       call_def[[1]] <- as.symbol("initialize_starting_values")
       call_def$random_start <- ifelse(call_def$initialization == "GNN", F, T)
@@ -1081,7 +1273,7 @@ inner_parallel <- function(x, call_def, A){
       
       error = function(e) {
         if(call_def$control$verbose){
-          if(!is.list(call_def$initialization)){
+          if(!inherits(call_def$initialization, "JANE.initial_values")){
             message("Issues with starting values. Retrying with new starting values.\n")
           } 
         }
@@ -1090,7 +1282,7 @@ inner_parallel <- function(x, call_def, A){
       
       warning = function(w) {
         if(call_def$control$verbose){
-          if(!is.list(call_def$initialization)){
+          if(!inherits(call_def$initialization, "JANE.initial_values")){
             message("Issues with starting values. Retrying with new starting values.\n")
           } 
         }
@@ -1113,7 +1305,7 @@ inner_parallel <- function(x, call_def, A){
   
   if(retry){
     
-    if(!is.list(call_def$initialization)){
+    if(!inherits(call_def$initialization, "JANE.initial_values")){
       warning("Max retry (i.e., max_retry) attempts reached. Issues with starting values. Returning Inf values. If this occurs often consider using alternative initialization.")
     } else {
       warning("Issues with starting values. Returning Inf values. Consider using alternative initialization.")
@@ -1129,6 +1321,16 @@ inner_parallel <- function(x, call_def, A){
     
   }
   
+}
+
+eval_if_call <- function(expr, envir) {
+  if (is.call(expr)) {eval(expr, envir = envir)} else {expr}
+}
+
+count_nested_lists <- function(x) {
+  if (!is.list(x)) return(0)
+  if (length(x) == 0) return(1)
+  1 + sum(sapply(x, count_nested_lists, USE.NAMES = FALSE))
 }
 
 #' @useDynLib JANE  
