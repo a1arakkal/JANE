@@ -29,5 +29,7 @@
 * Add option to plotting function to remove noise edges if JANE was run with noise_weights = TRUE
 * Add citation information
 
-## 1.1.1
-* Improve documentation - add information about connection strength heterogeneity
+## 2.0.0
+* Update prior specification functionality
+* Make new S3 class for priors and initial values
+* Improve documentation - add information about connection strength heterogeneity, fix priors in 'details' of specify_priors, and fix typos
