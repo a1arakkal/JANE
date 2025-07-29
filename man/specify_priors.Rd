@@ -90,7 +90,6 @@ A function that allows the user to specify the prior hyperparameters for the EM 
 \details{
 \strong{Prior on \eqn{\boldsymbol{\mu}_k} and \eqn{\boldsymbol{\Omega}_k}} (note: the same prior is used for \eqn{k = 1,\ldots,K}) :
 
-\eqn{\pi(\boldsymbol{\mu}_k, \boldsymbol{\Omega}_k) = \pi(\boldsymbol{\mu}_k | \boldsymbol{\Omega}_k) \pi(\boldsymbol{\Omega}_k)}, thus
 \deqn{\boldsymbol{\Omega}_k \sim Wishart(c, \boldsymbol{G}^{-1})}
 \deqn{\boldsymbol{\mu}_k | \boldsymbol{\Omega}_k \sim MVN(\boldsymbol{a}, (b\boldsymbol{\Omega}_k)^{-1})}
 
@@ -100,7 +99,7 @@ For the current implementation we require that all elements of the \code{nu} vec
 \deqn{\boldsymbol{p} \sim Dirichlet(\nu_1 ,\ldots,\nu_K)}
 
 \strong{Prior on \eqn{\boldsymbol{\beta}_{LR}}}:
-\deqn{\boldsymbol{\beta}_{LR} \sim MVN(\boldsymbol{e}, \boldsymbol{f}^{-1})}
+\deqn{\boldsymbol{\beta}_{LR} \sim MVN(\boldsymbol{e}, \boldsymbol{F}^{-1})}
 
 \strong{Prior on \eqn{q}}:
 \deqn{q \sim Beta(h, l)}
@@ -108,7 +107,7 @@ For the current implementation we require that all elements of the \code{nu} vec
 \strong{\emph{Zero-truncated Poisson}}
 
 \strong{Prior on \eqn{\boldsymbol{\beta}_{GLM}}}:
-\deqn{\boldsymbol{\beta}_{GLM} \sim MVN(\boldsymbol{e}_{2}, \boldsymbol{f}_{2}^{-1})}
+\deqn{\boldsymbol{\beta}_{GLM} \sim MVN(\boldsymbol{e}_{2}, \boldsymbol{F}_{2}^{-1})}
 
 \strong{\emph{Log-normal}}
 
@@ -116,7 +115,7 @@ For the current implementation we require that all elements of the \code{nu} vec
 \deqn{\tau^2_{weights} \sim Gamma(\frac{m_1}{2}, \frac{o_1}{2})}
 
 \strong{Prior on \eqn{\boldsymbol{\beta}_{GLM}}}:
-\deqn{\boldsymbol{\beta}_{GLM}|\tau^2_{weights} \sim MVN(\boldsymbol{e}_{2}, (\tau^2_{weights}\boldsymbol{f}_{2})^{-1})}
+\deqn{\boldsymbol{\beta}_{GLM}|\tau^2_{weights} \sim MVN(\boldsymbol{e}_{2}, (\tau^2_{weights}\boldsymbol{F}_{2})^{-1})}
 
 \strong{Prior on \eqn{\tau^2_{noise \ weights}}}:
 \deqn{\tau^2_{noise \ weights} \sim Gamma(\frac{m_2}{2}, \frac{o_2}{2})}

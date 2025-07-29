@@ -1,0 +1,29 @@
+template:
+  bootstrap: 5
+  bootswatch: superhero
+
+build:
+  # Do not run examples in the pkgdown site build
+  run_examples: false
+  # Also do not build vignettes (if you want)
+  # build_articles: false
+
+navbar:
+  structure:
+    left:
+      - home
+      - reference
+      - articles
+      - news
+
+  components:
+    reference:
+      text: "Functions"
+      href: "reference/index.html"
+    articles:
+      text: "JANE User Guide"
+      href: "articles/JANE-User-Guide.html"
+    news:
+      text: "News"
+      href: "https://github.com/a1arakkal/JANE/blob/HEAD/NEWS.md"  
+      target: "_blank"
