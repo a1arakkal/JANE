@@ -18,8 +18,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          install.packages('devtools')
-          devtools::install_deps(dependencies = TRUE)
+          install.packages('remotes')
+          remotes::install_deps(dependencies = TRUE)
           install.packages('pkgdown')
         shell: Rscript {0}
 
