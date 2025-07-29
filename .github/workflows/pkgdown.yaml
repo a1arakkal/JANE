@@ -2,7 +2,7 @@ name: Build and Deploy pkgdown
 
 on:
   push:
-    branches: [main]  # Or 'master' if that's your default
+    branches: [master]  # Or 'master' if that's your default
 
 permissions:
   contents: write
