@@ -493,12 +493,12 @@ q \sim \text{Beta}(h, l)
 -  $c = D+1$
 -  $\boldsymbol{e} = \boldsymbol{0}_{dim(\boldsymbol{\beta}_{LR})}$
 -  $\boldsymbol{e}_2 = \boldsymbol{0}_{dim(\boldsymbol{\beta}_{GLM})}$
--  $\boldsymbol{F} = \text{Diag}(1/100, (1/2.5^2)\mathrm{\bf{1}}_{dim(\boldsymbol{\beta}_{LR})})$
--  $\boldsymbol{F}_2 = \text{Diag}(1/100, (1/2.5^2)\mathrm{\bf{1}}_{dim(\boldsymbol{\beta}_{GLM})})$
--  $\boldsymbol{G} = \mathrm{\bf{I}}_D$
+-  $\boldsymbol{F} = \text{Diag}(1/100, (1/2.5^2)\mathbf{1}_{dim(\boldsymbol{\beta}_{LR})})$
+-  $\boldsymbol{F}_2 = \text{Diag}(1/100, (1/2.5^2)\mathbf{1}_{dim(\boldsymbol{\beta}_{GLM})})$
+-  $\boldsymbol{G} = \mathbf{I}_D$
 -  $h = l =1$
 -  $m_1 = m_2 = o_1 = o_2 = 2$
--  $\boldsymbol{\nu} = 3\mathrm{\bf{1}}_{K}$
+-  $\boldsymbol{\nu} = 3\mathbf{1}_{K}$
 
 where, $D$ is the dimension of the latent space, $K$ is the number of clusters, $$dim(\boldsymbol{\beta}_{LR}) = dim(\boldsymbol{\beta}_{GLM}) = \begin{cases}0 & \text{"NDH''}\\ \zeta+1 &  \text{"RS''} \\ 2\zeta+2 & \text{"RSR''},\end{cases}$$ and $\zeta$ is the number of interior knots used in fitting a natural cubic spline for degree heterogeneity (and connection strength heterogeneity if working with weighted network) models (i.e., `"RS"` and `"RSR"` only).
 
