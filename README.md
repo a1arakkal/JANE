@@ -13,9 +13,17 @@ coverage](https://codecov.io/gh/a1arakkal/JANE/branch/master/graph/badge.svg)](h
 
 <!-- badges: end -->
 
-**JANE** is an R package for fitting latent space network cluster models using an expectation-maximization (EM) algorithm. It enables flexible modeling of unweighted or weighted network data, with or without noise edges, and supports both directed and undirected networks, with or without degree and strength heterogeneity. Designed to efficiently handle large networks, **JANE** allows users to explore latent structure, identify actor-centric communities, and simulate networks with customizable clustering and connectivity patterns.
+**JANE** is an R package for fitting latent space network cluster models
+using an expectation-maximization (EM) algorithm. It enables flexible
+modeling of unweighted or weighted network data, with or without noise
+edges, and supports both directed and undirected networks, with or
+without degree and strength heterogeneity. Designed to efficiently
+handle large networks, **JANE** allows users to explore latent
+structure, identify actor-centric communities, and simulate networks
+with customizable clustering and connectivity patterns.
 
-Details on the methodology underlying the package can be found [here](https://doi.org/10.1016/j.csda.2025.108228).
+Details on the methodology underlying the package can be found
+[here](https://doi.org/10.1016/j.csda.2025.108228).
 
 ## Installation
 
