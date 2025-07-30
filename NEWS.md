@@ -33,3 +33,4 @@
 * Update prior specification functionality
 * Make new S3 class for priors and initial values
 * Improve documentation - add information about connection strength heterogeneity, fix priors in 'details' of specify_priors, and fix typos
+* Add vignette "JANE User Guide"
