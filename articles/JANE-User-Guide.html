@@ -69,7 +69,7 @@
 network cluster models using an expectation-maximization (EM) algorithm.
 It enables flexible modeling of unweighted or weighted network data,
 with or without noise edges, and supports both directed and undirected
-networks, with or without degree or strength heterogeneity. Designed to
+networks, with or without degree and strength heterogeneity. Designed to
 efficiently handle large networks, <strong>JANE</strong> allows users to
 explore latent structure, identify actor-centric communities, and
 simulate networks with customizable clustering and connectivity
@@ -82,24 +82,19 @@ patterns.</p>
 </h2>
 <ul>
 <li>Fine-tuned algorithm for fast and accurate actor-centric clustering
-using latent space models<br>
-</li>
+using latent space models</li>
 <li>Supports both weighted and unweighted networks, with or without
-noisy edges<br>
-</li>
-<li>Allows for modeling of discrete and continuous edge weights<br>
-</li>
+noisy edges</li>
+<li>Allows for modeling of discrete and continuous edge weights</li>
 <li>Multiple initialization strategies for the EM algorithm, including
 random initialization, a novel graphical neural network initialization,
-and user-specified values<br>
-</li>
-<li>Customizable prior hyperparameter specification<br>
-</li>
+and user-specified values</li>
+<li>Customizable prior hyperparameter specification</li>
 <li>Supports parallel implementation for faster inference using the
-<strong>future</strong> and <strong>future.apply</strong> packages <span class="citation">(Bengtsson 2021)</span><br>
+<strong>future</strong> and <strong>future.apply</strong> packages <span class="citation">(Bengtsson 2021)</span>
 </li>
-<li>Supports case-control likelihood approximation <span class="citation">(Raftery et al. 2012)</span> for scalable
-inference<br>
+<li>Supports case-control likelihood approximation for scalable
+inference <span class="citation">(Raftery et al. 2012)</span>
 </li>
 <li>Built-in visualization and summary tools</li>
 </ul>
@@ -140,7 +135,7 @@ edges<a class="anchor" aria-label="anchor" href="#fitting-jane-on-networks-witho
 </h2>
 <p>When the <code>noise_weights</code> argument in <code><a href="../reference/JANE.html">JANE()</a></code>
 is set to <code>FALSE</code> (default), a standard latent space cluster
-model is fit to the supplied network.</p>
+model is fit to the supplied <em>unweighted</em> network.</p>
 <div class="section level3">
 <h3 id="available-models">Available models<a class="anchor" aria-label="anchor" href="#available-models"></a>
 </h3>
@@ -149,13 +144,15 @@ model is fit to the supplied network.</p>
 <code>model = "NDH"</code><a class="anchor" aria-label="anchor" href="#model-ndh"></a>
 </h4>
 <p>Applicable for undirected networks and assumes no degree
-heterogeneity. Below is an example that fits an NDH model, specifying
-the dimension of the latent space as 2 and the number of clusters as
-3.</p>
+heterogeneity. However, in real-world networks, it is rare to find no
+degree heterogeneity, as most networks exhibit considerable variation in
+node connectivity. Below is an example that fits an NDH model,
+specifying the dimension of the latent space as 2 and the number of
+clusters as 3.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
-<span>     D <span class="op">=</span> <span class="fl">2L</span>,</span>
-<span>     K <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>     D <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>     K <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>     model <span class="op">=</span> <span class="st">"NDH"</span>,</span>
 <span>     noise_weights <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -171,7 +168,7 @@ latent space is considered.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
 <span>     D <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">5</span>,</span>
-<span>     K <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>     K <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>     model <span class="op">=</span> <span class="st">"RS"</span>,</span>
 <span>     noise_weights <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -197,23 +194,23 @@ the latent space is considered.</p>
 <h2 id="fitting-jane-on-networks-with-noise-edges">Fitting <strong>JANE</strong> on networks <em>with</em> noise
 edges<a class="anchor" aria-label="anchor" href="#fitting-jane-on-networks-with-noise-edges"></a>
 </h2>
-<p>A weighted networks are particularly useful in settings where noise
-edges are present. In such settings, when the <code>noise_weights</code>
-argument in <code><a href="../reference/JANE.html">JANE()</a></code> is set to <code>TRUE</code>, a latent
-space hurdle model if fit that leverages information from both the
-propoensity to form and edge and the observed edge weights to
-probabilistically down-weight noisy edges, while preserving edges that
-are structurally meaningful, subsequently enhancing community
-detection.</p>
+<p>With <code><a href="../reference/JANE.html">JANE()</a></code>, <em>weighted</em> networks are particularly
+useful in settings where noise edges are present. In such settings, when
+the <code>noise_weights</code> argument in <code><a href="../reference/JANE.html">JANE()</a></code> is set to
+<code>TRUE</code>, a latent space hurdle model (LSHM) is fit. The LSHM
+leverages information from both the propensity to form an edge and the
+observed edge weights to probabilistically down-weight noisy edges,
+while preserving edges that are structurally meaningful, subsequently
+enhancing community detection.</p>
 <p>If the supplied network is a weighted network, in the absence of
-noise it can be shown that, the latent positions, regression parameters
+noise it can be shown that the latent positions, regression parameters
 associated with the logistic regression model, finite mixture model
 parameters, and actor-specific cluster membership probabilities can all
-be estimated separately from the parameters generalized linear model
-parameters for the edge weights. Thus, when
-<code>noise_weights = FALSE</code>, <code><a href="../reference/JANE.html">JANE()</a></code> will simply
-dichotomize the weighted network based on a threshold value of 0 and fit
-a standard latent space cluster model.</p>
+be estimated separately from the generalized linear model parameters for
+the edge weights. <strong>Thus, when <code>noise_weights = FALSE</code>,
+<code><a href="../reference/JANE.html">JANE()</a></code> will simply dichotomize the supplied weighted
+network based on a threshold value of 0 and fit a standard latent space
+cluster model</strong>.</p>
 <div class="section level3">
 <h3 id="available-models-1">Available models<a class="anchor" aria-label="anchor" href="#available-models-1"></a>
 </h3>
@@ -239,7 +236,7 @@ argument</li>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
 <span>     D <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>     K <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>     model <span class="op">=</span> <span class="st">"NDH"</span>,</span>
+<span>     model <span class="op">=</span> <span class="st">"RS"</span>,</span>
 <span>     noise_weights <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>     family <span class="op">=</span> <span class="st">"poisson"</span>,</span>
 <span>     guess_noise_weights <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span></code></pre></div>
@@ -248,8 +245,9 @@ argument</li>
 <h4 id="family-lognormal">
 <code>family = "lognormal"</code><a class="anchor" aria-label="anchor" href="#family-lognormal"></a>
 </h4>
-<p>Use this setting when edge weights are positive, continuous values.
-Here:</p>
+<p>Use this option when edge weights are positive, continuous values.
+This setting models observed edge weights using a log-normal
+distribution:</p>
 <ul>
 <li>Signal edges are modeled using a log-normal distribution with an
 identity link</li>
@@ -257,13 +255,14 @@ identity link</li>
 a user-specified log-scale mean via the <code>guess_noise_weights</code>
 argument</li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">JANE</span>(<span class="at">A =</span> network_adjacency_matrix,</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>     <span class="at">D =</span> <span class="dv">2</span>,</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>     <span class="at">K =</span> <span class="dv">5</span>,</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>     <span class="at">model =</span> <span class="st">"RS"</span>,</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>     <span class="at">noise_weights =</span> <span class="cn">TRUE</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>     <span class="at">family =</span> <span class="st">"lognormal"</span>,</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>     <span class="at">guess_noise_weights =</span> <span class="sc">-</span><span class="fl">3.5</span>) <span class="co"># log-scale mean</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
+<span>     D <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>     K <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>     model <span class="op">=</span> <span class="st">"RS"</span>,</span>
+<span>     noise_weights <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>     family <span class="op">=</span> <span class="st">"lognormal"</span>,</span>
+<span>     guess_noise_weights <span class="op">=</span> <span class="op">-</span><span class="fl">3.5</span><span class="op">)</span> <span class="co"># log-scale mean</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="family-bernoulli-default">
@@ -279,13 +278,14 @@ likely noise edges</li>
 <code>guess_noise_weights</code> is interpreted as the expected
 proportion of all edges that are likely to be noise</li>
 </ul>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">JANE</span>(<span class="at">A =</span> network_adjacency_matrix,</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>     <span class="at">D =</span> <span class="dv">2</span>,</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>     <span class="at">K =</span> <span class="dv">5</span>,</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>     <span class="at">model =</span> <span class="st">"NDH"</span>,</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>     <span class="at">noise_weights =</span> <span class="cn">TRUE</span></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>     <span class="at">family =</span> <span class="st">"bernoulli"</span>,</span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>     <span class="at">guess_noise_weights =</span> <span class="fl">0.2</span>) <span class="co"># expected noise edge proportion</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
+<span>     D <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>     K <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>     model <span class="op">=</span> <span class="st">"RSR"</span>,</span>
+<span>     noise_weights <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>     family <span class="op">=</span> <span class="st">"bernoulli"</span>,</span>
+<span>     guess_noise_weights <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="co"># expected noise edge proportion</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -294,13 +294,14 @@ proportion of all edges that are likely to be noise</li>
 </h3>
 <p>If guess_noise_weights is left as NULL (the default),
 <code><a href="../reference/JANE.html">JANE()</a></code> will automatically set this value based on the
-distribution family:</p>
+<code>family</code> argument:</p>
 <ul>
 <li>For <code>family %in% c("lognormal", "poisson")</code>, the 1st
-percentile of the non-zero edge weights is used</li>
+percentile of the non-zero edge weights is used (log-transformed weights
+for <code>lognormal</code>)</li>
 <li>For <code>family = "bernoulli"</code>, a default value of 0.01
 (i.e., 1%) is used, representing the assumed proportion of noisy
-edges.</li>
+edges</li>
 </ul>
 </div>
 </div>
@@ -318,8 +319,8 @@ representing the “true” underlying unweighted network with no noise
 edges</li>
 <li>
 <code>W</code>: A sparse adjacency matrix of class ‘dgCMatrix’
-representing the unweighted or weighted network, with or without
-noise.</li>
+representing the unweighted or weighted network, with or without noise
+edges</li>
 </ul>
 <p>The relationship between <code>A</code> and <code>W</code> depends on
 the values specified for <code>family</code> and
@@ -327,24 +328,26 @@ the values specified for <code>family</code> and
 <ul>
 <li>If <code>family = "bernoulli"</code> and
 <code>noise_weights_prob = 0</code>, then <code>A</code> and
-<code>W</code> are identical (i.e., no noise simulated).</li>
+<code>W</code> are identical (i.e., no noise simulated)</li>
 <li>If <code>family = "bernoulli"</code> and
 <code>noise_weights_prob &gt; 0</code>, then <code>W</code> contains
 added noise edges, while <code>A</code> represents the noise-free
-underlying network.</li>
+underlying network</li>
 <li>If <code>family %in% c("poisson", "lognormal")</code> and
 <code>noise_weights_prob = 0</code>, then <code>W</code> contains
 continuous or count-valued edge weights, but dichotomizing
-<code>W</code> at 0 will reproduce <code>A</code>.</li>
+<code>W</code> at 0 will reproduce <code>A</code>
+</li>
 <li>If <code>family %in% c("poisson", "lognormal")</code> and
 <code>noise_weights_prob &gt; 0</code>, then <code>W</code> is a noisy,
 weighted network with additional spurious edges, and <code>A</code>
-remains the true underlying structure.</li>
+remains the true underlying structure</li>
 </ul>
 <p>Below is an example to simulate an unweighted, undirected, noise-free
-network with a 2-dimensional latent space and 3 clusters.</p>
+network with a 2-dimensional latent space and 3 clusters, assuming no
+degree heterogeneity.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Specify the 3 x 2 matrix containing the 2 x 1 mean vectors of the 3 bivariate normals</span></span>
+<code class="sourceCode R"><span><span class="co"># Specify the 3 x 2 matrix containing the 1 x 2 mean vectors of the 3 bivariate normals</span></span>
 <span><span class="va">mus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="op">-</span><span class="fl">1</span>,  <span class="co"># Mean vector 1</span></span>
 <span>                 <span class="fl">1</span>,<span class="op">-</span><span class="fl">1</span>,  <span class="co"># Mean vector 2</span></span>
 <span>                 <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, <span class="co"># Mean vector 3</span></span>
@@ -359,17 +362,17 @@ network with a 2-dimensional latent space and 3 clusters.</p>
 <span>                  dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">2</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Simulate a network</span></span>
-<span><span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_A.html">sim_A</a></span><span class="op">(</span>N <span class="op">=</span> <span class="fl">100L</span>, </span>
-<span>                  model <span class="op">=</span> <span class="st">"NDH"</span>,</span>
-<span>                  mus <span class="op">=</span> <span class="va">mus</span>, </span>
-<span>                  omegas <span class="op">=</span> <span class="va">omegas</span>, </span>
-<span>                  p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>, </span>
-<span>                  params_LR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta0 <span class="op">=</span> <span class="fl">1.0</span><span class="op">)</span>,</span>
-<span>                  remove_isolates <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>The parameter <code>beta0</code> can be tuned to achieve a desired
-network denisty:</p>
+<span><span class="fu"><a href="../reference/sim_A.html">sim_A</a></span><span class="op">(</span>N <span class="op">=</span> <span class="fl">100L</span>, </span>
+<span>      model <span class="op">=</span> <span class="st">"NDH"</span>,</span>
+<span>      mus <span class="op">=</span> <span class="va">mus</span>, </span>
+<span>      omegas <span class="op">=</span> <span class="va">omegas</span>, </span>
+<span>      p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>, </span>
+<span>      params_LR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta0 <span class="op">=</span> <span class="fl">1.0</span><span class="op">)</span>,</span>
+<span>      remove_isolates <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>The parameter <code>beta0</code> above can be tuned to achieve a
+desired network density:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Specify the 3 x 2 matrix containing the 2 x 1 mean vectors of the 3 bivariate normals</span></span>
+<code class="sourceCode R"><span><span class="co"># Specify the 3 x 2 matrix containing the 1 x 2 mean vectors of the 3 bivariate normals</span></span>
 <span><span class="va">mus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="op">-</span><span class="fl">1</span>,  <span class="co"># Mean vector 1</span></span>
 <span>                 <span class="fl">1</span>,<span class="op">-</span><span class="fl">1</span>,  <span class="co"># Mean vector 2</span></span>
 <span>                 <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, <span class="co"># Mean vector 3</span></span>
@@ -394,7 +397,7 @@ network denisty:</p>
 <span><span class="va">max_its</span> <span class="op">&lt;-</span> <span class="fl">100</span> <span class="co"># Maximum number of iterations</span></span>
 <span><span class="va">change_beta0</span> <span class="op">&lt;-</span> <span class="fl">0.1</span>  <span class="co"># Amount to adjust beta0 by</span></span>
 <span></span>
-<span><span class="co"># Adjust beta0 until simulated network has approximately desired density</span></span>
+<span><span class="co"># Adjust beta0 until simulated network has the approximate desired density</span></span>
 <span><span class="kw">while</span><span class="op">(</span><span class="op">!</span> <span class="op">(</span><span class="va">density</span> <span class="op">&gt;=</span> <span class="va">min_density</span> <span class="op">&amp;</span> <span class="va">density</span> <span class="op">&lt;=</span> <span class="va">max_density</span><span class="op">)</span> <span class="op">)</span><span class="op">{</span></span>
 <span>  </span>
 <span>  <span class="kw">if</span><span class="op">(</span><span class="va">n_while_loop</span><span class="op">&gt;</span><span class="va">max_its</span><span class="op">)</span><span class="op">{</span></span>
@@ -404,7 +407,7 @@ network denisty:</p>
 <span>  <span class="va">n_retry_isolate</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
 <span>  <span class="va">retry_isolate</span> <span class="op">&lt;-</span> <span class="cn">T</span></span>
 <span>  </span>
-<span>  <span class="co"># Retry until a network with no isolates is generated</span></span>
+<span>  <span class="co"># Retry until a network with no isolates is generated (this while loop is optional)</span></span>
 <span>  <span class="kw">while</span><span class="op">(</span><span class="va">retry_isolate</span><span class="op">)</span><span class="op">{</span></span>
 <span>    </span>
 <span>    <span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_A.html">sim_A</a></span><span class="op">(</span>N <span class="op">=</span> <span class="va">n_act</span>, </span>
@@ -443,12 +446,12 @@ network denisty:</p>
 <span><span class="op">}</span>    </span>
 <span></span>
 <span><span class="va">A</span> <span class="op">&lt;-</span> <span class="va">sim_data</span><span class="op">$</span><span class="va">A</span> <span class="co"># Final simulated adjacency matrix</span></span>
-<span><span class="fu">igraph</span><span class="fu">::</span><span class="fu"><a href="https://r.igraph.org/reference/graph.density.html" class="external-link">graph.density</a></span><span class="op">(</span><span class="fu">igraph</span><span class="fu">::</span><span class="fu"><a href="https://r.igraph.org/reference/graph_from_adjacency_matrix.html" class="external-link">graph_from_adjacency_matrix</a></span><span class="op">(</span><span class="va">A</span>, mode <span class="op">=</span> <span class="st">"undirected"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">igraph</span><span class="fu">::</span><span class="fu"><a href="https://r.igraph.org/reference/graph.density.html" class="external-link">graph.density</a></span><span class="op">(</span><span class="fu">igraph</span><span class="fu">::</span><span class="fu"><a href="https://r.igraph.org/reference/graph_from_adjacency_matrix.html" class="external-link">graph_from_adjacency_matrix</a></span><span class="op">(</span><span class="va">A</span>, mode <span class="op">=</span> <span class="st">"undirected"</span><span class="op">)</span><span class="op">)</span> <span class="co"># Verify density</span></span></code></pre></div>
 <p>Below is an example that simulates a directed, weighted network with
 noise, degree and strength heterogeneity, a 2-dimensional latent space,
 and 3 clusters.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Specify the 3 x 2 matrix containing the 2 x 1 mean vectors of the 3 bivariate normals</span></span>
+<code class="sourceCode R"><span><span class="co"># Specify the 3 x 2 matrix containing the 1 x 2 mean vectors of the 3 bivariate normals</span></span>
 <span><span class="va">mus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="op">-</span><span class="fl">1</span>,  <span class="co"># Mean vector 1</span></span>
 <span>                 <span class="fl">1</span>,<span class="op">-</span><span class="fl">1</span>,  <span class="co"># Mean vector 2</span></span>
 <span>                 <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, <span class="co"># Mean vector 3</span></span>
@@ -463,27 +466,27 @@ and 3 clusters.</p>
 <span>                  dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">2</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Simulate a network</span></span>
-<span><span class="fu">JANE</span><span class="fu">::</span><span class="fu"><a href="../reference/sim_A.html">sim_A</a></span><span class="op">(</span>N <span class="op">=</span> <span class="fl">100L</span>, </span>
-<span>            model <span class="op">=</span> <span class="st">"RSR"</span>,</span>
-<span>            family <span class="op">=</span> <span class="st">"poisson"</span>,</span>
-<span>            mus <span class="op">=</span> <span class="va">mus</span>, </span>
-<span>            omegas <span class="op">=</span> <span class="va">omegas</span>, </span>
-<span>            p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>, </span>
-<span>            params_LR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta0 <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
-<span>            params_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta0 <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
-<span>            noise_weights_prob <span class="op">=</span> <span class="fl">0.1</span>,</span>
-<span>            mean_noise_weights <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>            remove_isolates <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/sim_A.html">sim_A</a></span><span class="op">(</span>N <span class="op">=</span> <span class="fl">100L</span>, </span>
+<span>      model <span class="op">=</span> <span class="st">"RSR"</span>,</span>
+<span>      family <span class="op">=</span> <span class="st">"poisson"</span>,</span>
+<span>      mus <span class="op">=</span> <span class="va">mus</span>, </span>
+<span>      omegas <span class="op">=</span> <span class="va">omegas</span>, </span>
+<span>      p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span>, </span>
+<span>      params_LR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta0 <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>      params_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>beta0 <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
+<span>      noise_weights_prob <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>      mean_noise_weights <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>      remove_isolates <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="model-selection-criteria-for-choosing-the-number-of-clusters">Model selection criteria for choosing the number of clusters<a class="anchor" aria-label="anchor" href="#model-selection-criteria-for-choosing-the-number-of-clusters"></a>
 </h2>
 <p><code><a href="../reference/JANE.html">JANE()</a></code> allows for the following model selection criteria
-to choose the number of clusters and the best initalization of the EM
+to choose the number of clusters and the best initialization of the EM
 algorithm (smaller values are favored):</p>
 <ul>
 <li>
-<code>"Total_BIC"</code>: Sum of
+<code>"Total_BIC"</code> (i.e., BIC): Sum of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mi>I</mi><msub><mi>C</mi><mrow><mi>m</mi><mi>o</mi><mi>d</mi><mi>e</mi><mi>l</mi></mrow></msub></mrow><annotation encoding="application/x-tex">BIC_{model}</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mi>I</mi><msub><mi>C</mi><mrow><mi>m</mi><mi>b</mi><mi>c</mi></mrow></msub></mrow><annotation encoding="application/x-tex">BIC_{mbc}</annotation></semantics></math>,
@@ -494,15 +497,16 @@ and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mi>I</mi><msub><mi>C</mi><mrow><mi>m</mi><mi>b</mi><mi>c</mi></mrow></msub></mrow><annotation encoding="application/x-tex">BIC_{mbc}</annotation></semantics></math>
 is the BIC computed from model based clustering component. This is the
 model selection criterion proposed by <span class="citation">Handcock,
-Raftery, and Tantrum (2007)</span>.</li>
+Raftery, and Tantrum (2007)</span>
+</li>
 <li>
-<code>"Total_ICL"</code>: (default) sum of
+<code>"Total_ICL"</code> (i.e., BICL): (default) sum of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mi>I</mi><msub><mi>C</mi><mrow><mi>m</mi><mi>o</mi><mi>d</mi><mi>e</mi><mi>l</mi></mrow></msub></mrow><annotation encoding="application/x-tex">BIC_{model}</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mi>C</mi><msub><mi>L</mi><mrow><mi>m</mi><mi>b</mi><mi>c</mi></mrow></msub></mrow><annotation encoding="application/x-tex">ICL_{mbc}</annotation></semantics></math>,
 this criterion is similar to <code>"Total_BIC"</code>, but uses the
-integrated complete likelihood (ICL) for the model based clustering
-component, which tends to favor more well-separated clusters.</li>
+integrated completed likelihood (ICL) for the model based clustering
+component, which tends to favor more well-separated clusters</li>
 </ul>
 <p>Based on simulation studies, <span class="citation">Biernacki,
 Celeux, and Govaert (2000)</span> recommends that when the interest in
@@ -521,9 +525,9 @@ appropriate to use the model selection criterion above to select the
 dimension of the latent space
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>.</p>
 <p>Below is an example that fits an RSR model, where a range of cluster
-numbers between 2 and 10 is considered for a 2-dimensional the latent
-space and <code>"Total_BIC"</code> is used to select the optimal number
-of clusters and best initialization of the EM algorithm.</p>
+numbers between 2 and 10 is considered for a 2-dimensional latent space
+and <code>"Total_BIC"</code> is used to select the optimal number of
+clusters and best initialization of the EM algorithm.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
 <span>     D <span class="op">=</span> <span class="fl">2</span>,</span>
@@ -531,27 +535,34 @@ of clusters and best initialization of the EM algorithm.</p>
 <span>     model <span class="op">=</span> <span class="st">"RSR"</span>,</span>
 <span>     noise_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>     control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>IC_selection <span class="op">=</span> <span class="st">"Total_BIC"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Below is an example that fits an RSR model, for a 2-dimensional the
-latent space with 3 clusters and <code>"Total_ICL"</code> is used to
-select the optimal initialization of the EM algorithm.</p>
+<p>Below is an example that fits an RSR model for a 2-dimensional latent
+space with 3 clusters and <code>"Total_ICL"</code> is used to select the
+optimal initialization of the EM algorithm from 10 unique starts. Note:
+the number of starts for the EM algorithm is controlled through the
+<code>control</code> argument by supplying a value for
+<code>n_start</code>.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
 <span>     D <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>     K <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>     model <span class="op">=</span> <span class="st">"RSR"</span>,</span>
 <span>     noise_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>     control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>IC_selection <span class="op">=</span> <span class="st">"Total_ICL"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>     control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>IC_selection <span class="op">=</span> <span class="st">"Total_ICL"</span>,</span>
+<span>                    n_start <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="initialization-of-em-algorithm">Initialization of EM-algorithm<a class="anchor" aria-label="anchor" href="#initialization-of-em-algorithm"></a>
+<h2 id="initialization-of-em-algorithm">Initialization of EM algorithm<a class="anchor" aria-label="anchor" href="#initialization-of-em-algorithm"></a>
 </h2>
 <p><code><a href="../reference/JANE.html">JANE()</a></code> has three initialization strategies to generate
-starting values for the EM algorthm, controlled throught the
+starting values for the EM algorithm, controlled through the
 <code>initialization</code> argument:</p>
 <ul>
 <li>
 <code>"GNN"</code>: uses a type of graphical neural network approach
-to generate initial values (default)</li>
+to generate initial values (default). Details of the graphical neural
+network approach can be found in <span class="citation">Arakkal and
+Sewell (2025)</span>
+</li>
 <li>
 <code>"random"</code>: uses random initial values</li>
 <li>A user-supplied list of S3 class <code>"JANE.initial_values"</code>
@@ -559,14 +570,12 @@ representing initial values for the EM algorithm. See
 <code><a href="../reference/specify_initial_values.html">?specify_initial_values</a></code> for details on how to specify
 initial values</li>
 </ul>
-<p>Details of the graphical neural network approach can be found in
-<span class="citation">Arakkal and Sewell (2025)</span>.</p>
 <p>Below is an example where starting values are supplied to
 <code><a href="../reference/JANE.html">JANE()</a></code> using <code><a href="../reference/specify_initial_values.html">specify_initial_values()</a></code>.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Specify starting values</span></span>
-<span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fl">3L</span></span>
-<span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fl">5L</span></span>
+<span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
+<span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
 <span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">$</span><span class="va">A</span><span class="op">)</span></span>
 <span><span class="va">n_interior_knots</span> <span class="op">&lt;-</span> <span class="fl">5L</span></span>
 <span><span class="va">U</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">*</span><span class="va">D</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="va">N</span>, ncol <span class="op">=</span> <span class="va">D</span><span class="op">)</span></span>
@@ -576,17 +585,17 @@ initial values</li>
 <span><span class="va">Z</span> <span class="op">&lt;-</span>  <span class="fu">extraDistr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/extraDistr/man/Dirichlet.html" class="external-link">rdirichlet</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">N</span>, alpha <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">K</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">beta</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">n_interior_knots</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">my_starting_values</span> <span class="op">&lt;-</span> <span class="fu">JANE</span><span class="fu">::</span><span class="fu"><a href="../reference/specify_initial_values.html">specify_initial_values</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
-<span>                                                   D <span class="op">=</span> <span class="va">D</span>,</span>
-<span>                                                   K <span class="op">=</span> <span class="va">K</span>,</span>
-<span>                                                   model <span class="op">=</span> <span class="st">"RSR"</span>,</span>
-<span>                                                   n_interior_knots <span class="op">=</span> <span class="va">n_interior_knots</span>,</span>
-<span>                                                   U <span class="op">=</span> <span class="va">U</span>,</span>
-<span>                                                   omegas <span class="op">=</span> <span class="va">omegas</span>, </span>
-<span>                                                   mus <span class="op">=</span> <span class="va">mus</span>, </span>
-<span>                                                   p <span class="op">=</span> <span class="va">p</span>, </span>
-<span>                                                   Z <span class="op">=</span> <span class="va">Z</span>,</span>
-<span>                                                   beta <span class="op">=</span> <span class="va">beta</span><span class="op">)</span>         </span>
+<span><span class="va">my_starting_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/specify_initial_values.html">specify_initial_values</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
+<span>                                             D <span class="op">=</span> <span class="va">D</span>,</span>
+<span>                                             K <span class="op">=</span> <span class="va">K</span>,</span>
+<span>                                             model <span class="op">=</span> <span class="st">"RSR"</span>,</span>
+<span>                                             n_interior_knots <span class="op">=</span> <span class="va">n_interior_knots</span>,</span>
+<span>                                             U <span class="op">=</span> <span class="va">U</span>,</span>
+<span>                                             omegas <span class="op">=</span> <span class="va">omegas</span>, </span>
+<span>                                             mus <span class="op">=</span> <span class="va">mus</span>, </span>
+<span>                                             p <span class="op">=</span> <span class="va">p</span>, </span>
+<span>                                             Z <span class="op">=</span> <span class="va">Z</span>,</span>
+<span>                                             beta <span class="op">=</span> <span class="va">beta</span><span class="op">)</span>         </span>
 <span></span>
 <span><span class="co"># Run JANE using my_starting_values (no need to specify D and K as function will </span></span>
 <span><span class="co"># determine those values from my_starting_values)</span></span>
@@ -696,8 +705,8 @@ q \sim \text{Beta}(h, l)
 <li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mo>=</mo><mi>D</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">c = D+1</annotation></semantics></math></li>
 <li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐞</mi><mo>=</mo><msub><mn>𝟎</mn><mrow><mi>d</mi><mi>i</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝛃</mi><mrow><mi>L</mi><mi>R</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msub></mrow><annotation encoding="application/x-tex">\boldsymbol{e} = \boldsymbol{0}_{dim(\boldsymbol{\beta}_{LR})}</annotation></semantics></math></li>
 <li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐞</mi><mn>2</mn></msub><mo>=</mo><msub><mn>𝟎</mn><mrow><mi>d</mi><mi>i</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝛃</mi><mrow><mi>G</mi><mi>L</mi><mi>M</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msub></mrow><annotation encoding="application/x-tex">\boldsymbol{e}_2 = \boldsymbol{0}_{dim(\boldsymbol{\beta}_{GLM})}</annotation></semantics></math></li>
-<li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐅</mi><mo>=</mo><mtext mathvariant="normal">Diag</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mi>/</mi><mn>100</mn><mo>,</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mi>/</mi><msup><mn>2.5</mn><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow><msub><mn>𝟏</mn><mrow><mi>d</mi><mi>i</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝛃</mi><mrow><mi>L</mi><mi>R</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\boldsymbol{F} = \text{Diag}(1/100, (1/2.5^2)\mathbf{1}_{dim(\boldsymbol{\beta}_{LR})})</annotation></semantics></math></li>
-<li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐅</mi><mn>2</mn></msub><mo>=</mo><mtext mathvariant="normal">Diag</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mi>/</mi><mn>100</mn><mo>,</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mi>/</mi><msup><mn>2.5</mn><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow><msub><mn>𝟏</mn><mrow><mi>d</mi><mi>i</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝛃</mi><mrow><mi>G</mi><mi>L</mi><mi>M</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\boldsymbol{F}_2 = \text{Diag}(1/100, (1/2.5^2)\mathbf{1}_{dim(\boldsymbol{\beta}_{GLM})})</annotation></semantics></math></li>
+<li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐅</mi><mo>=</mo><mtext mathvariant="normal">Diag</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mi>/</mi><mn>100</mn><mo>,</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mi>/</mi><msup><mn>2.5</mn><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow><msub><mn>𝟏</mn><mrow><mi>d</mi><mi>i</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝛃</mi><mrow><mi>L</mi><mi>R</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\boldsymbol{F} = \text{Diag}(1/100, (1/2.5^2)\mathbf{1}_{dim(\boldsymbol{\beta}_{LR})-1})</annotation></semantics></math></li>
+<li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐅</mi><mn>2</mn></msub><mo>=</mo><mtext mathvariant="normal">Diag</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mi>/</mi><mn>100</mn><mo>,</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mi>/</mi><msup><mn>2.5</mn><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow><msub><mn>𝟏</mn><mrow><mi>d</mi><mi>i</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝛃</mi><mrow><mi>G</mi><mi>L</mi><mi>M</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\boldsymbol{F}_2 = \text{Diag}(1/100, (1/2.5^2)\mathbf{1}_{dim(\boldsymbol{\beta}_{GLM})-1})</annotation></semantics></math></li>
 <li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐆</mi><mo>=</mo><msub><mi>𝐈</mi><mi>D</mi></msub></mrow><annotation encoding="application/x-tex">\boldsymbol{G} = \mathbf{I}_D</annotation></semantics></math></li>
 <li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mo>=</mo><mi>l</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">h = l =1</annotation></semantics></math></li>
 <li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mn>1</mn></msub><mo>=</mo><msub><mi>m</mi><mn>2</mn></msub><mo>=</mo><msub><mi>o</mi><mn>1</mn></msub><mo>=</mo><msub><mi>o</mi><mn>2</mn></msub><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">m_1 = m_2 = o_1 = o_2 = 2</annotation></semantics></math></li>
@@ -708,7 +717,7 @@ q \sim \text{Beta}(h, l)
 is the dimension of the latent space,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
 is the number of clusters,
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>i</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝛃</mi><mrow><mi>L</mi><mi>R</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>d</mi><mi>i</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝛃</mi><mrow><mi>G</mi><mi>L</mi><mi>M</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mn>0</mn></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">"NDH”</mtext></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mi>ζ</mi><mo>+</mo><mn>1</mn></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">"RS”</mtext></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mn>2</mn><mi>ζ</mi><mo>+</mo><mn>2</mn></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">"RSR”</mtext><mo>,</mo></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">dim(\boldsymbol{\beta}_{LR}) = dim(\boldsymbol{\beta}_{GLM}) = \begin{cases}0 &amp; \text{"NDH''}\\ \zeta+1 &amp;  \text{"RS''} \\ 2\zeta+2 &amp; \text{"RSR''},\end{cases}</annotation></semantics></math>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>i</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝛃</mi><mrow><mi>L</mi><mi>R</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>d</mi><mi>i</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝛃</mi><mrow><mi>G</mi><mi>L</mi><mi>M</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mn>1</mn></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">"NDH”</mtext></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mi>ζ</mi><mo>+</mo><mn>2</mn></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">"RS”</mtext></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mn>2</mn><mi>ζ</mi><mo>+</mo><mn>3</mn></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">"RSR”</mtext><mo>,</mo></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">dim(\boldsymbol{\beta}_{LR}) = dim(\boldsymbol{\beta}_{GLM}) = \begin{cases}1 &amp; \text{"NDH''}\\ \zeta+2 &amp;  \text{"RS''} \\ 2\zeta+3 &amp; \text{"RSR''},\end{cases}</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ζ</mi><annotation encoding="application/x-tex">\zeta</annotation></semantics></math>
 is the number of interior knots used in fitting a natural cubic spline
@@ -725,8 +734,8 @@ and
 </h3>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Specify prior hyperparameters</span></span>
-<span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fl">3L</span></span>
-<span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fl">5L</span></span>
+<span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
+<span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
 <span><span class="va">n_interior_knots</span> <span class="op">&lt;-</span> <span class="fl">5L</span></span>
 <span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">D</span><span class="op">)</span></span>
 <span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
@@ -748,27 +757,27 @@ and
 <span>                                           e <span class="op">=</span> <span class="va">e</span>,</span>
 <span>                                           f <span class="op">=</span> <span class="va">f</span><span class="op">)</span></span>
 <span>                                           </span>
-<span><span class="co"># Run JANE on simulated data using supplied prior hyperparameters (no need to </span></span>
-<span><span class="co"># specify D and K as function will determine those values from my_prior_hyperparameters)</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">JANE</span><span class="fu">::</span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
-<span>                  initialization <span class="op">=</span> <span class="st">"GNN"</span>,</span>
-<span>                  model <span class="op">=</span> <span class="st">"RS"</span>,</span>
-<span>                  noise_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>priors <span class="op">=</span> <span class="va">my_prior_hyperparameters</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Run JANE using supplied prior hyperparameters (no need to specify D and K </span></span>
+<span><span class="co"># as function will determine those values from my_prior_hyperparameters)</span></span>
+<span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
+<span>     initialization <span class="op">=</span> <span class="st">"GNN"</span>,</span>
+<span>     model <span class="op">=</span> <span class="st">"RS"</span>,</span>
+<span>     noise_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>     control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>priors <span class="op">=</span> <span class="va">my_prior_hyperparameters</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="example-of-specifying-hyperparameters-for-a-multiple-combinations-of-k-and-d">Example of specifying hyperparameters for a multiple combinations of
+<h3 id="example-of-specifying-hyperparameters-for-multiple-combinations-of-k-and-d">Example of specifying hyperparameters for multiple combinations of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math><a class="anchor" aria-label="anchor" href="#example-of-specifying-hyperparameters-for-a-multiple-combinations-of-k-and-d"></a>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math><a class="anchor" aria-label="anchor" href="#example-of-specifying-hyperparameters-for-multiple-combinations-of-k-and-d"></a>
 </h3>
 <div class="section level4">
 <h4 id="nested-list">Nested list<a class="anchor" aria-label="anchor" href="#nested-list"></a>
 </h4>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Specify first set of prior hyperparameters</span></span>
-<span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fl">3L</span></span>
-<span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fl">5L</span></span>
+<span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
+<span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
 <span><span class="va">n_interior_knots</span> <span class="op">&lt;-</span> <span class="fl">5L</span></span>
 <span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">D</span><span class="op">)</span></span>
 <span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
@@ -791,8 +800,8 @@ and
 <span>                                             f <span class="op">=</span> <span class="va">f</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Specify second set of prior hyperparameters</span></span>
-<span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fl">2L</span></span>
-<span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fl">3L</span></span>
+<span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fl">2</span></span>
+<span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
 <span><span class="va">n_interior_knots</span> <span class="op">&lt;-</span> <span class="fl">5L</span></span>
 <span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">D</span><span class="op">)</span></span>
 <span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
@@ -818,13 +827,13 @@ and
 <span><span class="va">my_prior_hyperparameters</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">my_prior_hyperparameters_1</span>,</span>
 <span>                                 <span class="va">my_prior_hyperparameters_2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Run JANE on simulated data using supplied prior hyperparameters (no need to </span></span>
-<span><span class="co"># specify D and K as function will determine those values from my_prior_hyperparameters)</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">JANE</span><span class="fu">::</span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
-<span>                  initialization <span class="op">=</span> <span class="st">"GNN"</span>,</span>
-<span>                  model <span class="op">=</span> <span class="st">"RS"</span>,</span>
-<span>                  noise_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>priors <span class="op">=</span> <span class="va">my_prior_hyperparameters</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Run JANE using supplied prior hyperparameters (no need to specify D and K </span></span>
+<span><span class="co"># as function will determine those values from my_prior_hyperparameters)</span></span>
+<span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
+<span>     initialization <span class="op">=</span> <span class="st">"GNN"</span>,</span>
+<span>     model <span class="op">=</span> <span class="st">"RS"</span>,</span>
+<span>     noise_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>     control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>priors <span class="op">=</span> <span class="va">my_prior_hyperparameters</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="unevaluated-calls">Unevaluated calls<a class="anchor" aria-label="anchor" href="#unevaluated-calls"></a>
@@ -850,19 +859,19 @@ and
 <span>                                           e <span class="op">=</span> <span class="va">e</span>,</span>
 <span>                                           f <span class="op">=</span> <span class="va">f</span><span class="op">)</span></span>
 <span>                                           </span>
-<span><span class="co"># Run JANE on simulated data using supplied prior hyperparameters</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">JANE</span><span class="fu">::</span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">sim_data</span><span class="op">$</span><span class="va">A</span>,</span>
-<span>                  D <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">5</span>,</span>
-<span>                  K <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">10</span>,</span>
-<span>                  initialization <span class="op">=</span> <span class="st">"GNN"</span>,</span>
-<span>                  model <span class="op">=</span> <span class="st">"RS"</span>,</span>
-<span>                  noise_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                  control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>priors <span class="op">=</span> <span class="va">my_prior_hyperparameters</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Run JANE using supplied prior hyperparameters</span></span>
+<span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
+<span>     D <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">5</span>,</span>
+<span>     K <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">10</span>,</span>
+<span>     initialization <span class="op">=</span> <span class="st">"GNN"</span>,</span>
+<span>     model <span class="op">=</span> <span class="st">"RS"</span>,</span>
+<span>     noise_weights <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>     control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>priors <span class="op">=</span> <span class="va">my_prior_hyperparameters</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="parallel-implementation-of-jane">Parallel implementation of <strong>JANE</strong><a class="anchor" aria-label="anchor" href="#parallel-implementation-of-jane"></a>
+<h2 id="parallel-implementation-of-jane">Parallel implementation of <code>JANE()</code><a class="anchor" aria-label="anchor" href="#parallel-implementation-of-jane"></a>
 </h2>
 <p>You can speed up fitting models for multiple combinations of cluster
 number <code>K</code>, latent space dimension <code>D</code>, and number
@@ -878,35 +887,38 @@ to sequential processing.</p>
 <span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/multisession.html" class="external-link">multisession</a></span>, workers <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Run JANE in parallel </span></span>
-<span><span class="va">res_parallel</span> <span class="op">&lt;-</span> <span class="fu">JANE</span><span class="fu">::</span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
-<span>                           D <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">5</span>,</span>
-<span>                           K <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">10</span>,</span>
-<span>                           initialization <span class="op">=</span> <span class="st">"GNN"</span>,</span>
-<span>                           model <span class="op">=</span> <span class="st">"RSR"</span><span class="op">)</span></span>
+<span><span class="va">res_parallel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
+<span>                     D <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">5</span>,</span>
+<span>                     K <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">10</span>,</span>
+<span>                     initialization <span class="op">=</span> <span class="st">"GNN"</span>,</span>
+<span>                     model <span class="op">=</span> <span class="st">"RSR"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Reset to sequential processing.</span></span>
+<span><span class="co"># Reset to sequential processing</span></span>
 <span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/sequential.html" class="external-link">sequential</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="case-control-implementation-of-jane">Case-control implementation of <strong>JANE</strong><a class="anchor" aria-label="anchor" href="#case-control-implementation-of-jane"></a>
+<h2 id="case-control-implementation-of-jane">Case-control implementation of <code>JANE()</code><a class="anchor" aria-label="anchor" href="#case-control-implementation-of-jane"></a>
 </h2>
 <p>When working with large <em>sparse</em> networks, the case-control
 approximation implemented in <code><a href="../reference/JANE.html">JANE()</a></code> can reduce
 computational cost. This approach leverages approximation methods
-developed by <span class="citation">(Raftery et al. 2012)</span>. The
-implementation in <code><a href="../reference/JANE.html">JANE()</a></code> samples a fixed number of
-non-links (i.e., “controls”) for each actor instead of considering all
-possible non-links, thereby improving scalability.</p>
+developed by <span class="citation">Raftery et al. (2012)</span>. With
+the case-control implementation, the likelihood includes all edges
+(where most of the information lies) but uses a Monte Carlo
+approximation of terms involving the unconnected dyads of the network
+(i.e., non-edges). Thus, the cost of evaluating the likelihood becomes
+linear, rather than quadratic, in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>.</p>
 <p>Below is an example running <code><a href="../reference/JANE.html">JANE()</a></code> with the case-control
-approach, sampling 20 controls per actor.</p>
+approach, sampling 20 controls (i.e., non-edges) per actor.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">res_case_control</span> <span class="op">&lt;-</span> <span class="fu">JANE</span><span class="fu">::</span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
-<span>                               D <span class="op">=</span> <span class="fl">2L</span>,</span>
-<span>                               K <span class="op">=</span> <span class="fl">3L</span>,</span>
-<span>                               initialization <span class="op">=</span> <span class="st">"GNN"</span>,</span>
-<span>                               model <span class="op">=</span> <span class="st">"RSR"</span>,</span>
-<span>                               case_control <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                               control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>n_control <span class="op">=</span> <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/JANE.html">JANE</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">network_adjacency_matrix</span>,</span>
+<span>     D <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>     K <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>     initialization <span class="op">=</span> <span class="st">"GNN"</span>,</span>
+<span>     model <span class="op">=</span> <span class="st">"RSR"</span>,</span>
+<span>     case_control <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>     control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>n_control <span class="op">=</span> <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="using-s3-methods-with-jane-objects">Using S3 methods with <strong>JANE</strong> objects<a class="anchor" aria-label="anchor" href="#using-s3-methods-with-jane-objects"></a>
@@ -947,11 +959,11 @@ empty clusters based on the hard cluster assignments</li>
 <h3 id="summary">
 <code>summary()</code><a class="anchor" aria-label="anchor" href="#summary"></a>
 </h3>
-<p>Use the<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> method to extract and display detailed
+<p>Use the <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> method to extract and display detailed
 information about the estimated model.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
-<p>You can also compare estiamted clusters assignments to known true
+<p>You can also compare estimated cluster assignments to known true
 assigments using the <code>true_labels</code> argument, or inspect
 starting values using <code>initial_values = TRUE</code>.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
@@ -965,10 +977,10 @@ starting values using <code>initial_values = TRUE</code>.</p>
 <li>Clustering uncertainty</li>
 <li>ARI, NMI, classification error rate (if <code>true_labels</code> is
 supplied)</li>
-<li>Model selection criteria (BIC, ICL)</li>
+<li>Model selection criteria</li>
 <li>Summary of noise edges if <code>noise_weights = TRUE</code>. This
 includes the estimated conditional probability that a specific edge is a
-noise or a non-noise edge, and their corresponding noise-edge cluster
+noise or a non-noise edge, and their corresponding noise edge cluster
 assignment based on a hard clustering rule of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>h</mi><mo stretchy="false" form="prefix">|</mo><msubsup><mover><mi>Z</mi><mo accent="true">̂</mo></mover><mrow><mi>e</mi><mi>h</mi></mrow><mi>W</mi></msubsup><mo>=</mo><mi>m</mi><mi>a</mi><mi>x</mi><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mover><mi>Z</mi><mo accent="true">̂</mo></mover><mrow><mi>e</mi><mn>1</mn></mrow><mi>W</mi></msubsup><mo>,</mo><msubsup><mover><mi>Z</mi><mo accent="true">̂</mo></mover><mrow><mi>e</mi><mn>2</mn></mrow><mi>W</mi></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{h | \hat{Z}^{W}_{eh} = max(\hat{Z}^{W}_{e1}, \hat{Z}^{W}_{e2})\}</annotation></semantics></math>
 for
@@ -982,32 +994,33 @@ are the estimated conditional probabilities that the
 edge is a non-noise and noise edge, respectively, and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">|</mo><mi>E</mi><mo stretchy="true" form="postfix">|</mo></mrow><annotation encoding="application/x-tex">|E|</annotation></semantics></math>
 represents the total number of edges in the network (for undirected
-networks, only the upper diagonal edges are retained). Noise-edge
-cluster are defined as: 1 = non-noise edge and 2 = noise edge</li>
+networks, only the upper diagonal edges are retained). Noise edge
+cluster labels are defined as: 1 = non-noise edge and 2 = noise
+edge</li>
 </ul>
 </div>
 <div class="section level3">
 <h3 id="plot">
-<code>plot()</code>:<a class="anchor" aria-label="anchor" href="#plot"></a>
+<code>plot()</code><a class="anchor" aria-label="anchor" href="#plot"></a>
 </h3>
 <p>The <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method provides visualizations depending on
-the ‘type’ argument.</p>
+the <code>type</code> argument.</p>
 <div class="section level4">
-<h4 id="latent-space-clustering-default-type-lsnc">Latent Space Clustering (default <code>type = "lsnc"</code>)<a class="anchor" aria-label="anchor" href="#latent-space-clustering-default-type-lsnc"></a>
+<h4 id="latent-space-clustering-default-type-lsnc">Latent space clustering (default <code>type = "lsnc"</code>)<a class="anchor" aria-label="anchor" href="#latent-space-clustering-default-type-lsnc"></a>
 </h4>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></code></pre></div>
 <ul>
 <li>Plots latent positions colored by cluster</li>
-<li>Ellipses show the fitted Gaussian components when
+<li>Contours show the fitted Gaussian components when
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
 = 2. When
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
-&gt; 2, pairwise plots of the dimensions are displayed instead.</li>
+&gt; 2, pairwise plots of the dimensions are displayed instead</li>
 </ul>
 </div>
 <div class="section level4">
-<h4 id="misclassified-actors-type-misclassified">Misclassified Actors (<code>type = "misclassified"</code>)<a class="anchor" aria-label="anchor" href="#misclassified-actors-type-misclassified"></a>
+<h4 id="misclassified-actors-type-misclassified">Misclassified actors (<code>type = "misclassified"</code>)<a class="anchor" aria-label="anchor" href="#misclassified-actors-type-misclassified"></a>
 </h4>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"misclassified"</span>, true_labels <span class="op">=</span> <span class="va">true_labels_vec</span><span class="op">)</span></span></code></pre></div>
@@ -1018,22 +1031,22 @@ example)</li>
 </ul>
 </div>
 <div class="section level4">
-<h4 id="clustering-uncertainty-type-uncertainty">Clustering Uncertainty (<code>type = "uncertainty"</code>)<a class="anchor" aria-label="anchor" href="#clustering-uncertainty-type-uncertainty"></a>
+<h4 id="clustering-uncertainty-type-uncertainty">Clustering uncertainty (<code>type = "uncertainty"</code>)<a class="anchor" aria-label="anchor" href="#clustering-uncertainty-type-uncertainty"></a>
 </h4>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"uncertainty"</span><span class="op">)</span></span></code></pre></div>
 <ul>
 <li>Colors nodes by uncertainty (i.e., 1 -
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mover><mi>Z</mi><mo accent="true">̂</mo></mover><mrow><mi>i</mi><mi>k</mi></mrow><mi>U</mi></msubsup><annotation encoding="application/x-tex">\hat{Z}^{U}_{ik}</annotation></semantics></math>)</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mi>a</mi><msub><mi>x</mi><mi>k</mi></msub><msubsup><mover><mi>Z</mi><mo accent="true">̂</mo></mover><mrow><mi>i</mi><mi>k</mi></mrow><mi>U</mi></msubsup></mrow><annotation encoding="application/x-tex">max_k\hat{Z}^{U}_{ik}</annotation></semantics></math>)</li>
 </ul>
 </div>
 <div class="section level4">
-<h4 id="em-trace-plot-type-trace_plot">EM Trace Plot (<code>type = "trace_plot"</code>)<a class="anchor" aria-label="anchor" href="#em-trace-plot-type-trace_plot"></a>
+<h4 id="em-trace-plot-type-trace_plot">EM trace plot (<code>type = "trace_plot"</code>)<a class="anchor" aria-label="anchor" href="#em-trace-plot-type-trace_plot"></a>
 </h4>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span>, type <span class="op">=</span> <span class="st">"trace_plot"</span><span class="op">)</span></span></code></pre></div>
 <ul>
-<li>Shows convergence metrics over EM iterations.</li>
+<li>Shows convergence metrics over EM iterations</li>
 </ul>
 </div>
 <div class="section level4">
@@ -1042,11 +1055,12 @@ example)</li>
 <ul>
 <li>
 <code>alpha_edge</code>, <code>alpha_node</code>, <code>zoom</code>,
-<code>swap_axes</code>, <code>rotation_angle</code>, <code>zoom</code>,
-etc.</li>
-<li>When <code>noise_weights=TRUE</code>,
+<code>swap_axes</code>, <code>rotation_angle</code>,
+<code>cluster_cols</code>, etc.</li>
+<li>
 <code>remove_noise_edges = TRUE</code> removes noise edges based on
-noise-edge cluster assignment</li>
+noise edge hard cluster assignment (only applicable if
+<code><a href="../reference/JANE.html">JANE()</a></code> was run with <code>noise_weights = TRUE</code>)</li>
 </ul>
 </div>
 </div>
