@@ -34,19 +34,19 @@ set.seed(1) # for reproducibility
 
 # Description
 
-**JANE** is an R package for fitting latent space network cluster models using an expectation-maximization (EM) algorithm. It enables flexible modeling of unweighted or weighted network data, with or without noise edges, and supports both directed and undirected networks, with or without degree or strength heterogeneity. Designed to efficiently handle large networks, **JANE** allows users to explore latent structure, identify actor-centric communities, and simulate networks with customizable clustering and connectivity patterns.
+**JANE** is an R package for fitting latent space network cluster models using an expectation-maximization (EM) algorithm. It enables flexible modeling of unweighted or weighted network data, with or without noise edges, and supports both directed and undirected networks, with or without degree and strength heterogeneity. Designed to efficiently handle large networks, **JANE** allows users to explore latent structure, identify actor-centric communities, and simulate networks with customizable clustering and connectivity patterns.
 
 Details on the methodology underlying the package can be found in @JANE.
 
 # Features
 
--   Fine-tuned algorithm for fast and accurate actor-centric clustering using latent space models\
--   Supports both weighted and unweighted networks, with or without noisy edges\
--   Allows for modeling of discrete and continuous edge weights\
--   Multiple initialization strategies for the EM algorithm, including random initialization, a novel graphical neural network initialization, and user-specified values\
--   Customizable prior hyperparameter specification\
--   Supports parallel implementation for faster inference using the **future** and **future.apply** packages [@RJ-2021-048]\
--   Supports case-control likelihood approximation [@Raftery2012] for scalable inference\
+-   Fine-tuned algorithm for fast and accurate actor-centric clustering using latent space models
+-   Supports both weighted and unweighted networks, with or without noisy edges
+-   Allows for modeling of discrete and continuous edge weights
+-   Multiple initialization strategies for the EM algorithm, including random initialization, a novel graphical neural network initialization, and user-specified values
+-   Customizable prior hyperparameter specification
+-   Supports parallel implementation for faster inference using the **future** and **future.apply** packages [@RJ-2021-048]
+-   Supports case-control likelihood approximation for scalable inference [@Raftery2012] 
 -   Built-in visualization and summary tools
 
 # Getting Started
@@ -79,18 +79,18 @@ RShowDoc("JANE-User-Guide", package = "JANE")
 
 # Fitting **JANE** on networks *without* noise edges
 
-When the `noise_weights` argument in `JANE()` is set to `FALSE` (default), a standard latent space cluster model is fit to the supplied network. 
+When the `noise_weights` argument in `JANE()` is set to `FALSE` (default), a standard latent space cluster model is fit to the supplied *unweighted* network. 
 
 ## Available models
 
 ### `model = "NDH"`
 
-Applicable for undirected networks and assumes no degree heterogeneity. Below is an example that fits an NDH model, specifying the dimension of the latent space as 2 and the number of clusters as 3.
+Applicable for undirected networks and assumes no degree heterogeneity. However, in real-world networks, it is rare to find no degree heterogeneity, as most networks exhibit considerable variation in node connectivity. Below is an example that fits an NDH model, specifying the dimension of the latent space as 2 and the number of clusters as 3.
 
 ```{r, eval = FALSE}
 JANE(A = network_adjacency_matrix,
-     D = 2L,
-     K = 3L,
+     D = 2,
+     K = 3,
      model = "NDH",
      noise_weights = FALSE)
 ```
@@ -102,7 +102,7 @@ Applicable for undirected networks and adjusts for degree heterogeneity through 
 ```{r, eval = FALSE}
 JANE(A = network_adjacency_matrix,
      D = 2:5,
-     K = 3L,
+     K = 3,
      model = "RS",
      noise_weights = FALSE)
 ```
@@ -121,9 +121,9 @@ JANE(A = network_adjacency_matrix,
 
 # Fitting **JANE** on networks *with* noise edges
 
-A weighted networks are particularly useful in settings where noise edges are present. In such settings, when the `noise_weights` argument in `JANE()` is set to `TRUE`, a latent space hurdle model if fit that leverages information from both the propoensity to form and edge and the observed edge weights to probabilistically down-weight noisy edges, while preserving edges that are structurally meaningful, subsequently enhancing community detection.
+With `JANE()`, *weighted* networks are particularly useful in settings where noise edges are present. In such settings, when the `noise_weights` argument in `JANE()` is set to `TRUE`, a latent space hurdle model (LSHM) is fit. The LSHM leverages information from both the propensity to form an edge and the observed edge weights to probabilistically down-weight noisy edges, while preserving edges that are structurally meaningful, subsequently enhancing community detection.
 
-If the supplied network is a weighted network, in the absence of noise it can be shown that, the latent positions, regression parameters associated with the logistic regression model, finite mixture model parameters, and actor-specific cluster membership probabilities can all be estimated separately from the parameters generalized linear model parameters for the edge weights. Thus, when `noise_weights = FALSE`, `JANE()` will simply dichotomize the weighted network based on a threshold value of 0 and fit a standard latent space cluster model.
+If the supplied network is a weighted network, in the absence of noise it can be shown that the latent positions, regression parameters associated with the logistic regression model, finite mixture model parameters, and actor-specific cluster membership probabilities can all be estimated separately from the generalized linear model parameters for the edge weights. **Thus, when `noise_weights = FALSE`, `JANE()` will simply dichotomize the supplied weighted network based on a threshold value of 0 and fit a standard latent space cluster model**.
 
 ## Available models
 
@@ -140,7 +140,7 @@ Use this option for count-weighted networks. This setting models observed edge w
 JANE(A = network_adjacency_matrix,
      D = 2,
      K = 5,
-     model = "NDH",
+     model = "RS",
      noise_weights = TRUE,
      family = "poisson",
      guess_noise_weights = 1L)
@@ -148,7 +148,7 @@ JANE(A = network_adjacency_matrix,
 
 ### `family = "lognormal"`
 
-Use this setting when edge weights are positive, continuous values. Here:
+Use this option when edge weights are positive, continuous values. This setting models observed edge weights using a log-normal distribution:
 
 -  Signal edges are modeled using a log-normal distribution with an identity link
 -  Noise edge weights are modeled using a log-normal distribution with a user-specified log-scale mean via the `guess_noise_weights` argument
@@ -158,7 +158,7 @@ JANE(A = network_adjacency_matrix,
      D = 2,
      K = 5,
      model = "RS",
-     noise_weights = TRUE
+     noise_weights = TRUE,
      family = "lognormal",
      guess_noise_weights = -3.5) # log-scale mean
 ```
@@ -174,37 +174,37 @@ This setting is used for unweighted (binary) networks. In this case:
 JANE(A = network_adjacency_matrix,
      D = 2,
      K = 5,
-     model = "NDH",
-     noise_weights = TRUE
+     model = "RSR",
+     noise_weights = TRUE,
      family = "bernoulli",
      guess_noise_weights = 0.2) # expected noise edge proportion
 ```
 
 ## `guess_noise_weights`
 
-If guess_noise_weights is left as NULL (the default), `JANE()` will automatically set this value based on the distribution family:
+If guess_noise_weights is left as NULL (the default), `JANE()` will automatically set this value based on the `family` argument:
 
--  For `family %in% c("lognormal", "poisson")`, the 1st percentile of the non-zero edge weights is used
--  For `family = "bernoulli"`, a default value of 0.01 (i.e., 1%) is used, representing the assumed proportion of noisy edges.
+-  For `family %in% c("lognormal", "poisson")`, the 1st percentile of the non-zero edge weights is used (log-transformed weights for `lognormal`)
+-  For `family = "bernoulli"`, a default value of 0.01 (i.e., 1%) is used, representing the assumed proportion of noisy edges
 
 # Simulating networks
 
 **JANE** includes a built-in function, `sim_A()`, for simulating networks with varying clustering and connectivity patterns. The function returns a list, which includes the following two components:
 
 - `A`: A sparse adjacency matrix of class 'dgCMatrix' representing the "true" underlying unweighted network with no noise edges
-- `W`: A sparse adjacency matrix of class 'dgCMatrix' representing the unweighted or weighted network, with or without noise.
+- `W`: A sparse adjacency matrix of class 'dgCMatrix' representing the unweighted or weighted network, with or without noise edges
 
 The relationship between `A` and `W` depends on the values specified for `family` and `noise_weights_prob`:
 
-- If `family = "bernoulli"` and `noise_weights_prob = 0`, then `A` and `W` are identical (i.e., no noise simulated).
-- If `family = "bernoulli"` and `noise_weights_prob > 0`, then `W` contains added noise edges, while `A` represents the noise-free underlying network.
-- If `family %in% c("poisson", "lognormal")` and `noise_weights_prob = 0`, then `W` contains continuous or count-valued edge weights, but dichotomizing `W` at 0 will reproduce `A`.
-- If `family %in% c("poisson", "lognormal")` and `noise_weights_prob > 0`, then `W` is a noisy, weighted network with additional spurious edges, and `A` remains the true underlying structure.
+- If `family = "bernoulli"` and `noise_weights_prob = 0`, then `A` and `W` are identical (i.e., no noise simulated)
+- If `family = "bernoulli"` and `noise_weights_prob > 0`, then `W` contains added noise edges, while `A` represents the noise-free underlying network
+- If `family %in% c("poisson", "lognormal")` and `noise_weights_prob = 0`, then `W` contains continuous or count-valued edge weights, but dichotomizing `W` at 0 will reproduce `A`
+- If `family %in% c("poisson", "lognormal")` and `noise_weights_prob > 0`, then `W` is a noisy, weighted network with additional spurious edges, and `A` remains the true underlying structure
 
-Below is an example to simulate an unweighted, undirected, noise-free network with a 2-dimensional latent space and 3 clusters.
+Below is an example to simulate an unweighted, undirected, noise-free network with a 2-dimensional latent space and 3 clusters, assuming no degree heterogeneity.
 
 ```{r, eval = FALSE}
-# Specify the 3 x 2 matrix containing the 2 x 1 mean vectors of the 3 bivariate normals
+# Specify the 3 x 2 matrix containing the 1 x 2 mean vectors of the 3 bivariate normals
 mus <- matrix(c(-1,-1,  # Mean vector 1
                  1,-1,  # Mean vector 2
                  1, 1), # Mean vector 3
@@ -219,19 +219,19 @@ omegas <- array(c(diag(rep(7,2)),  # Precision matrix 1
                   dim = c(2,2,3))
 
 # Simulate a network
-sim_data <- sim_A(N = 100L, 
-                  model = "NDH",
-                  mus = mus, 
-                  omegas = omegas, 
-                  p = rep(1/3, 3), 
-                  params_LR = list(beta0 = 1.0),
-                  remove_isolates = TRUE)
+sim_A(N = 100L, 
+      model = "NDH",
+      mus = mus, 
+      omegas = omegas, 
+      p = rep(1/3, 3), 
+      params_LR = list(beta0 = 1.0),
+      remove_isolates = TRUE)
 ```
 
-The parameter `beta0` can be tuned to achieve a desired network denisty:
+The parameter `beta0` above can be tuned to achieve a desired network density:
 
 ```{r, eval = !identical(Sys.getenv("IN_PKGDOWN"), "true"), message=FALSE}
-# Specify the 3 x 2 matrix containing the 2 x 1 mean vectors of the 3 bivariate normals
+# Specify the 3 x 2 matrix containing the 1 x 2 mean vectors of the 3 bivariate normals
 mus <- matrix(c(-1,-1,  # Mean vector 1
                  1,-1,  # Mean vector 2
                  1, 1), # Mean vector 3
@@ -256,7 +256,7 @@ n_while_loop <- 0 # Counter for outer loop iterations
 max_its <- 100 # Maximum number of iterations
 change_beta0 <- 0.1  # Amount to adjust beta0 by
 
-# Adjust beta0 until simulated network has approximately desired density
+# Adjust beta0 until simulated network has the approximate desired density
 while(! (density >= min_density & density <= max_density) ){
   
   if(n_while_loop>max_its){
@@ -266,7 +266,7 @@ while(! (density >= min_density & density <= max_density) ){
   n_retry_isolate <- 0
   retry_isolate <- T
   
-  # Retry until a network with no isolates is generated
+  # Retry until a network with no isolates is generated (this while loop is optional)
   while(retry_isolate){
     
     sim_data <- sim_A(N = n_act, 
@@ -305,13 +305,13 @@ while(! (density >= min_density & density <= max_density) ){
 }    
 
 A <- sim_data$A # Final simulated adjacency matrix
-igraph::graph.density(igraph::graph_from_adjacency_matrix(A, mode = "undirected"))
+igraph::graph.density(igraph::graph_from_adjacency_matrix(A, mode = "undirected")) # Verify density
 ```
 
 Below is an example that simulates a directed, weighted network with noise, degree and strength heterogeneity, a 2-dimensional latent space, and 3 clusters.
 
 ```{r, eval = FALSE}
-# Specify the 3 x 2 matrix containing the 2 x 1 mean vectors of the 3 bivariate normals
+# Specify the 3 x 2 matrix containing the 1 x 2 mean vectors of the 3 bivariate normals
 mus <- matrix(c(-1,-1,  # Mean vector 1
                  1,-1,  # Mean vector 2
                  1, 1), # Mean vector 3
@@ -326,31 +326,31 @@ omegas <- array(c(diag(rep(7,2)),  # Precision matrix 1
                   dim = c(2,2,3))
 
 # Simulate a network
-JANE::sim_A(N = 100L, 
-            model = "RSR",
-            family = "poisson",
-            mus = mus, 
-            omegas = omegas, 
-            p = rep(1/3, 3), 
-            params_LR = list(beta0 = 1),
-            params_weights = list(beta0 = 2),
-            noise_weights_prob = 0.1,
-            mean_noise_weights = 1,
-            remove_isolates = TRUE)
+sim_A(N = 100L, 
+      model = "RSR",
+      family = "poisson",
+      mus = mus, 
+      omegas = omegas, 
+      p = rep(1/3, 3), 
+      params_LR = list(beta0 = 1),
+      params_weights = list(beta0 = 2),
+      noise_weights_prob = 0.1,
+      mean_noise_weights = 1,
+      remove_isolates = TRUE)
 ```
 
 # Model selection criteria for choosing the number of clusters
 
-`JANE()` allows for the following model selection criteria to choose the number of clusters and the best initalization of the EM algorithm (smaller values are favored):
+`JANE()` allows for the following model selection criteria to choose the number of clusters and the best initialization of the EM algorithm (smaller values are favored):
 
-- `"Total_BIC"`: Sum of $BIC_{model}$ and $BIC_{mbc}$, where $BIC_{model}$ is the BIC computed from logistic regression or Hurdle model component and $BIC_{mbc}$ is the BIC computed from model based clustering component. This is the model selection criterion proposed by @handcock2007model.
-- `"Total_ICL"`: (default) sum of $BIC_{model}$ and $ICL_{mbc}$, this criterion is similar to `"Total_BIC"`, but uses the integrated complete likelihood (ICL) for the model based clustering component, which tends to favor more well-separated clusters.
+- `"Total_BIC"` (i.e., BIC): Sum of $BIC_{model}$ and $BIC_{mbc}$, where $BIC_{model}$ is the BIC computed from logistic regression or Hurdle model component and $BIC_{mbc}$ is the BIC computed from model based clustering component. This is the model selection criterion proposed by @handcock2007model
+- `"Total_ICL"` (i.e., BICL): (default) sum of $BIC_{model}$ and $ICL_{mbc}$, this criterion is similar to `"Total_BIC"`, but uses the integrated completed likelihood (ICL) for the model based clustering component, which tends to favor more well-separated clusters
 
 Based on simulation studies, @ICL recommends that when the interest in mixture modeling is cluster analysis, instead of density estimation, the $ICL_{mbc}$ criterion should be favored over the $BIC_{mbc}$ criterion, as the $BIC_{mbc}$ criterion tends to overestimate the number of clusters. The $BIC_{mbc}$ criterion is designed to choose the number of components in a mixture model rather than the number of clusters.
 
 ***Warning***: It is not certain whether it is appropriate to use the model selection criterion above to select the dimension of the latent space $D$.
 
-Below is an example that fits an RSR model, where a range of cluster numbers between 2 and 10 is considered for a 2-dimensional the latent space and `"Total_BIC"` is used to select the optimal number of clusters and best initialization of the EM algorithm.
+Below is an example that fits an RSR model, where a range of cluster numbers between 2 and 10 is considered for a 2-dimensional latent space and `"Total_BIC"` is used to select the optimal number of clusters and best initialization of the EM algorithm.
 
 ```{r, eval = FALSE}
 JANE(A = network_adjacency_matrix,
@@ -361,7 +361,7 @@ JANE(A = network_adjacency_matrix,
      control = list(IC_selection = "Total_BIC"))
 ```
 
-Below is an example that fits an RSR model, for a 2-dimensional the latent space with 3 clusters and `"Total_ICL"` is used to select the optimal initialization of the EM algorithm.
+Below is an example that fits an RSR model for a 2-dimensional latent space with 3 clusters and `"Total_ICL"` is used to select the optimal initialization of the EM algorithm from 10 unique starts. Note: the number of starts for the EM algorithm is controlled through the `control` argument by supplying a value for `n_start`.
 
 ```{r, eval = FALSE}
 JANE(A = network_adjacency_matrix,
@@ -369,25 +369,24 @@ JANE(A = network_adjacency_matrix,
      K = 3,
      model = "RSR",
      noise_weights = FALSE,
-     control = list(IC_selection = "Total_ICL"))
+     control = list(IC_selection = "Total_ICL",
+                    n_start = 10))
 ```
 
-# Initialization of EM-algorithm
+# Initialization of EM algorithm
 
-`JANE()` has three initialization strategies to generate starting values for the EM algorthm, controlled throught the `initialization` argument:
+`JANE()` has three initialization strategies to generate starting values for the EM algorithm, controlled through the `initialization` argument:
 
--  `"GNN"`: uses a type of graphical neural network approach to generate initial values (default)
+-  `"GNN"`: uses a type of graphical neural network approach to generate initial values (default). Details of the graphical neural network approach can be found in @JANE
 -  `"random"`: uses random initial values
 -  A user-supplied list of S3 class `"JANE.initial_values"` representing initial values for the EM algorithm. See `?specify_initial_values` for details on how to specify initial values
-
-Details of the graphical neural network approach can be found in @JANE.
 
 Below is an example where starting values are supplied to `JANE()` using `specify_initial_values()`.
 
 ```{r, eval = FALSE}
 # Specify starting values
-D <- 3L
-K <- 5L
+D <- 3
+K <- 5
 N <- nrow(sim_data$A)
 n_interior_knots <- 5L
 U <- matrix(stats::rnorm(N*D), nrow = N, ncol = D)
@@ -397,17 +396,17 @@ p <- extraDistr::rdirichlet(n = 1, rep(3,K))[1,]
 Z <-  extraDistr::rdirichlet(n = N, alpha = rep(1, K))
 beta <- stats::rnorm(n = 1 + 2*(1 + n_interior_knots))
 
-my_starting_values <- JANE::specify_initial_values(A = network_adjacency_matrix,
-                                                   D = D,
-                                                   K = K,
-                                                   model = "RSR",
-                                                   n_interior_knots = n_interior_knots,
-                                                   U = U,
-                                                   omegas = omegas, 
-                                                   mus = mus, 
-                                                   p = p, 
-                                                   Z = Z,
-                                                   beta = beta)         
+my_starting_values <- specify_initial_values(A = network_adjacency_matrix,
+                                             D = D,
+                                             K = K,
+                                             model = "RSR",
+                                             n_interior_knots = n_interior_knots,
+                                             U = U,
+                                             omegas = omegas, 
+                                             mus = mus, 
+                                             p = p, 
+                                             Z = Z,
+                                             beta = beta)         
 
 # Run JANE using my_starting_values (no need to specify D and K as function will 
 # determine those values from my_starting_values)
@@ -493,21 +492,21 @@ q \sim \text{Beta}(h, l)
 -  $c = D+1$
 -  $\boldsymbol{e} = \boldsymbol{0}_{dim(\boldsymbol{\beta}_{LR})}$
 -  $\boldsymbol{e}_2 = \boldsymbol{0}_{dim(\boldsymbol{\beta}_{GLM})}$
--  $\boldsymbol{F} = \text{Diag}(1/100, (1/2.5^2)\mathbf{1}_{dim(\boldsymbol{\beta}_{LR})})$
--  $\boldsymbol{F}_2 = \text{Diag}(1/100, (1/2.5^2)\mathbf{1}_{dim(\boldsymbol{\beta}_{GLM})})$
+-  $\boldsymbol{F} = \text{Diag}(1/100, (1/2.5^2)\mathbf{1}_{dim(\boldsymbol{\beta}_{LR})-1})$
+-  $\boldsymbol{F}_2 = \text{Diag}(1/100, (1/2.5^2)\mathbf{1}_{dim(\boldsymbol{\beta}_{GLM})-1})$
 -  $\boldsymbol{G} = \mathbf{I}_D$
 -  $h = l =1$
 -  $m_1 = m_2 = o_1 = o_2 = 2$
 -  $\boldsymbol{\nu} = 3\mathbf{1}_{K}$
 
-where, $D$ is the dimension of the latent space, $K$ is the number of clusters, $$dim(\boldsymbol{\beta}_{LR}) = dim(\boldsymbol{\beta}_{GLM}) = \begin{cases}0 & \text{"NDH''}\\ \zeta+1 &  \text{"RS''} \\ 2\zeta+2 & \text{"RSR''},\end{cases}$$ and $\zeta$ is the number of interior knots used in fitting a natural cubic spline for degree heterogeneity (and connection strength heterogeneity if working with weighted network) models (i.e., `"RS"` and `"RSR"` only).
+where, $D$ is the dimension of the latent space, $K$ is the number of clusters, $$dim(\boldsymbol{\beta}_{LR}) = dim(\boldsymbol{\beta}_{GLM}) = \begin{cases}1 & \text{"NDH''}\\ \zeta+2 &  \text{"RS''} \\ 2\zeta+3 & \text{"RSR''},\end{cases}$$ and $\zeta$ is the number of interior knots used in fitting a natural cubic spline for degree heterogeneity (and connection strength heterogeneity if working with weighted network) models (i.e., `"RS"` and `"RSR"` only).
 
 ## Example of specifying hyperparameters for a single combination of $K$ and $D$
 
 ```{r, eval = FALSE}
 # Specify prior hyperparameters
-D <- 3L
-K <- 5L
+D <- 3
+K <- 5
 n_interior_knots <- 5L
 a <- rep(1, D)
 b <- 3
@@ -529,24 +528,24 @@ my_prior_hyperparameters <- specify_priors(D = D,
                                            e = e,
                                            f = f)
                                            
-# Run JANE on simulated data using supplied prior hyperparameters (no need to 
-# specify D and K as function will determine those values from my_prior_hyperparameters)
-res <- JANE::JANE(A = network_adjacency_matrix,
-                  initialization = "GNN",
-                  model = "RS",
-                  noise_weights = FALSE,
-                  control = list(priors = my_prior_hyperparameters))
+# Run JANE using supplied prior hyperparameters (no need to specify D and K 
+# as function will determine those values from my_prior_hyperparameters)
+JANE(A = network_adjacency_matrix,
+     initialization = "GNN",
+     model = "RS",
+     noise_weights = FALSE,
+     control = list(priors = my_prior_hyperparameters))
 ```
 
 
-## Example of specifying hyperparameters for a multiple combinations of $K$ and $D$
+## Example of specifying hyperparameters for multiple combinations of $K$ and $D$
 
 ### Nested list
 
 ```{r, eval = FALSE}
 # Specify first set of prior hyperparameters
-D <- 3L
-K <- 5L
+D <- 3
+K <- 5
 n_interior_knots <- 5L
 a <- rep(1, D)
 b <- 3
@@ -569,8 +568,8 @@ my_prior_hyperparameters_1 <- specify_priors(D = D,
                                              f = f)
 
 # Specify second set of prior hyperparameters
-D <- 2L
-K <- 3L
+D <- 2
+K <- 3
 n_interior_knots <- 5L
 a <- rep(1, D)
 b <- 3
@@ -596,13 +595,13 @@ my_prior_hyperparameters_2 <- specify_priors(D = D,
 my_prior_hyperparameters <- list(my_prior_hyperparameters_1,
                                  my_prior_hyperparameters_2)
 
-# Run JANE on simulated data using supplied prior hyperparameters (no need to 
-# specify D and K as function will determine those values from my_prior_hyperparameters)
-res <- JANE::JANE(A = network_adjacency_matrix,
-                  initialization = "GNN",
-                  model = "RS",
-                  noise_weights = FALSE,
-                  control = list(priors = my_prior_hyperparameters))
+# Run JANE using supplied prior hyperparameters (no need to specify D and K 
+# as function will determine those values from my_prior_hyperparameters)
+JANE(A = network_adjacency_matrix,
+     initialization = "GNN",
+     model = "RS",
+     noise_weights = FALSE,
+     control = list(priors = my_prior_hyperparameters))
 ```
 
 ### Unevaluated calls
@@ -624,17 +623,17 @@ my_prior_hyperparameters <- specify_priors(model = "RS",
                                            e = e,
                                            f = f)
                                            
-# Run JANE on simulated data using supplied prior hyperparameters
-res <- JANE::JANE(A = sim_data$A,
-                  D = 2:5,
-                  K = 2:10,
-                  initialization = "GNN",
-                  model = "RS",
-                  noise_weights = FALSE,
-                  control = list(priors = my_prior_hyperparameters))
+# Run JANE using supplied prior hyperparameters
+JANE(A = network_adjacency_matrix,
+     D = 2:5,
+     K = 2:10,
+     initialization = "GNN",
+     model = "RS",
+     noise_weights = FALSE,
+     control = list(priors = my_prior_hyperparameters))
 ```
 
-# Parallel implementation of **JANE**
+# Parallel implementation of `JANE()`
 
 You can speed up fitting models for multiple combinations of cluster number `K`, latent space dimension `D`, and number of initializations of the EM algorithm `n_start`, by running `JANE()` in parallel. This leverages the `future` and `future.apply` packages to distribute computation across cores.
 
@@ -645,30 +644,30 @@ Below is an example using 5 parallel workers to run `JANE()` with parallel backe
 future::plan(future::multisession, workers = 5)
 
 # Run JANE in parallel 
-res_parallel <- JANE::JANE(A = network_adjacency_matrix,
-                           D = 2:5,
-                           K = 3:10,
-                           initialization = "GNN",
-                           model = "RSR")
+res_parallel <- JANE(A = network_adjacency_matrix,
+                     D = 2:5,
+                     K = 3:10,
+                     initialization = "GNN",
+                     model = "RSR")
 
-# Reset to sequential processing.
+# Reset to sequential processing
 future::plan(future::sequential)
 ```
 
-# Case-control implementation of **JANE**
+# Case-control implementation of `JANE()`
 
-When working with large *sparse* networks, the case-control approximation implemented in `JANE()` can reduce computational cost. This approach leverages approximation methods developed by [@Raftery2012]. The implementation in `JANE()` samples a fixed number of non-links (i.e., "controls") for each actor instead of considering all possible non-links, thereby improving scalability.
+When working with large *sparse* networks, the case-control approximation implemented in `JANE()` can reduce computational cost. This approach leverages approximation methods developed by @Raftery2012. With the case-control implementation, the likelihood includes all edges (where most of the information lies) but uses a Monte Carlo approximation of terms involving the unconnected dyads of the network (i.e., non-edges). Thus, the cost of evaluating the likelihood becomes linear, rather than quadratic, in $N$.
 
-Below is an example running `JANE()` with the case-control approach, sampling 20 controls per actor.
+Below is an example running `JANE()` with the case-control approach, sampling 20 controls (i.e., non-edges) per actor.
 
 ```{r eval=FALSE}
-res_case_control <- JANE::JANE(A = network_adjacency_matrix,
-                               D = 2L,
-                               K = 3L,
-                               initialization = "GNN",
-                               model = "RSR",
-                               case_control = TRUE,
-                               control = list(n_control = 20))
+JANE(A = network_adjacency_matrix,
+     D = 2,
+     K = 3,
+     initialization = "GNN",
+     model = "RSR",
+     case_control = TRUE,
+     control = list(n_control = 20))
 ```
 
 # Using S3 methods with **JANE** objects
@@ -693,13 +692,13 @@ This displays:
 
 ## `summary()`
 
-Use the`summary()` method to extract and display detailed information about the estimated model.
+Use the `summary()` method to extract and display detailed information about the estimated model.
 
 ```{r, eval = FALSE}
 summary(res)
 ```
 
-You can also compare estiamted clusters assignments to known true assigments using the `true_labels` argument, or inspect starting values using `initial_values = TRUE`.
+You can also compare estimated cluster assignments to known true assigments using the `true_labels` argument, or inspect starting values using `initial_values = TRUE`.
 
 ```{r, eval = FALSE}
 summary(res, true_labels = true_labels_vec)
@@ -713,23 +712,23 @@ Output includes:
 -   Soft cluster memberships and hard cluster assignments
 -   Clustering uncertainty
 -   ARI, NMI, classification error rate (if `true_labels` is supplied)
--   Model selection criteria (BIC, ICL)
--   Summary of noise edges if `noise_weights = TRUE`. This includes the estimated conditional probability that a specific edge is a noise or a non-noise edge, and their corresponding noise-edge cluster assignment based on a hard clustering rule of $\{h | \hat{Z}^{W}_{eh} = max(\hat{Z}^{W}_{e1}, \hat{Z}^{W}_{e2})\}$ for $e = 1\dots,|E|$, where $\hat{Z}^{W}_{e1}$ and $\hat{Z}^{W}_{e2}$ are the estimated conditional probabilities that the $e^{th}$ edge is a non-noise and noise edge, respectively, and $|E|$ represents the total number of edges in the network (for undirected networks, only the upper diagonal edges are retained). Noise-edge cluster are defined as: 1 = non-noise edge and 2 = noise edge
+-   Model selection criteria 
+-   Summary of noise edges if `noise_weights = TRUE`. This includes the estimated conditional probability that a specific edge is a noise or a non-noise edge, and their corresponding noise edge cluster assignment based on a hard clustering rule of $\{h | \hat{Z}^{W}_{eh} = max(\hat{Z}^{W}_{e1}, \hat{Z}^{W}_{e2})\}$ for $e = 1\dots,|E|$, where $\hat{Z}^{W}_{e1}$ and $\hat{Z}^{W}_{e2}$ are the estimated conditional probabilities that the $e^{th}$ edge is a non-noise and noise edge, respectively, and $|E|$ represents the total number of edges in the network (for undirected networks, only the upper diagonal edges are retained). Noise edge cluster labels are defined as: 1 = non-noise edge and 2 = noise edge
 
-## `plot()`:
+## `plot()`
 
-The `plot()` method provides visualizations depending on the 'type' argument.
+The `plot()` method provides visualizations depending on the `type` argument.
 
-### Latent Space Clustering (default `type = "lsnc"`)
+### Latent space clustering (default `type = "lsnc"`)
 
 ```{r, eval = FALSE}
 plot(res)
 ```
 
 -   Plots latent positions colored by cluster
--   Ellipses show the fitted Gaussian components when $D$ = 2. When $D$ > 2, pairwise plots of the dimensions are displayed instead.
+-   Contours show the fitted Gaussian components when $D$ = 2. When $D$ > 2, pairwise plots of the dimensions are displayed instead
 
-### Misclassified Actors (`type = "misclassified"`)
+### Misclassified actors (`type = "misclassified"`)
 
 ```{r, eval = FALSE}
 plot(res, type = "misclassified", true_labels = true_labels_vec)
@@ -737,25 +736,25 @@ plot(res, type = "misclassified", true_labels = true_labels_vec)
 
 -   Highlights misclassified actors in black based on supplied true cluster assignments (i.e., `true_labels_vec` in this example)
 
-### Clustering Uncertainty (`type = "uncertainty"`)
+### Clustering uncertainty (`type = "uncertainty"`)
 
 ```{r, eval = FALSE}
 plot(res, type = "uncertainty")
 ```
 
--   Colors nodes by uncertainty (i.e., 1 - $\hat{Z}^{U}_{ik}$)
+-   Colors nodes by uncertainty (i.e., 1 - $max_k\hat{Z}^{U}_{ik}$)
 
-### EM Trace Plot (`type = "trace_plot"`)
+### EM trace plot (`type = "trace_plot"`)
 
 ```{r, eval = FALSE}
 plot(res, type = "trace_plot")
 ```
 
--   Shows convergence metrics over EM iterations.
+-   Shows convergence metrics over EM iterations
 
 ### Additional options
 
--   `alpha_edge`, `alpha_node`, `zoom`, `swap_axes`, `rotation_angle`, `zoom`, etc.
--   When `noise_weights=TRUE`, `remove_noise_edges = TRUE` removes noise edges based on noise-edge cluster assignment
+-   `alpha_edge`, `alpha_node`, `zoom`, `swap_axes`, `rotation_angle`, `cluster_cols`, etc.
+-   `remove_noise_edges = TRUE` removes noise edges based on noise edge hard cluster assignment (only applicable if `JANE()` was run with `noise_weights = TRUE`)
 
 # References
