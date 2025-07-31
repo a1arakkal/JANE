@@ -109,17 +109,26 @@ test_that("BIC works", {
       downsampling_GNN = TRUE 
     )
     
-    starting_params <- JANE:::initialize_starting_values(A = (sim_data$W>0)*1, 
-                                                         K = 3,
-                                                         D = 2, 
-                                                         model = model,
-                                                         random_start = F,
-                                                         control = control,
-                                                         family = family,
-                                                         noise_weights = noise_weights,
-                                                         guess_noise_weights = 1,
-                                                         prob_matrix_W= prob_matrix_W,
-                                                         q_prob = q_prob)
+    omega_good <- F
+    attempts <- 0
+    while(!omega_good){
+      starting_params <- JANE:::initialize_starting_values(A = (sim_data$W>0)*1, 
+                                                           K = 3,
+                                                           D = 2, 
+                                                           model = model,
+                                                           random_start = F,
+                                                           control = control,
+                                                           family = family,
+                                                           noise_weights = noise_weights,
+                                                           guess_noise_weights = 1,
+                                                           prob_matrix_W= prob_matrix_W,
+                                                           q_prob = q_prob)
+      
+      test <- apply(starting_params$omegas, 3, function(x){all(eigen(x, symmetric = TRUE, only.values = TRUE)$values>0)} )
+      if(all(test) | attempts>20){
+        omega_good <- T
+      }
+    }
     
     A = sim_data$W
     
@@ -486,13 +495,12 @@ test_that("BIC works", {
     
     # all.equal(JANE:::BICL(A = A, object = object)$BIC_model, bic_logit_RSR_R(A, object))
     
-    dmvnorm_chol_quad_log <- function(x, mean, omega, ridge = 1e-10, verbose = FALSE) {
+    dmvnorm_chol_quad_log <- function(x, mean, omega, ridge = 1e-6, verbose = T) {
       d <- length(mean)
       diff <- x - mean
       
       # Check eigenvalues
       eigvals <- eigen(omega, symmetric = TRUE, only.values = TRUE)$values
-      
       if (any(eigvals <= 0)) {
         if (verbose) {
           warning("omega is not positive definite, applying ridge regularization")
