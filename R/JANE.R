@@ -834,6 +834,7 @@ JANE <- function(A,
     names(optimal_starting[["cluster_labels"]]) <- ids
     rownames(optimal_starting$prob_matrix) <- ids
     rownames(optimal_starting$U) <- ids
+    optimal_starting <- structure(optimal_starting[sort(names(optimal_starting))], class = "JANE.initial_values")
   } else {
     optimal_starting <- NULL
   }
@@ -863,7 +864,7 @@ JANE <- function(A,
   }))
 
   return(structure(list(optimal_res = optimal_res[sort(names(optimal_res))],
-                        optimal_starting = structure(optimal_starting[sort(names(optimal_starting))], class = "JANE.initial_values"),
+                        optimal_starting = optimal_starting,
                         input_params =  list(IC_selection = con$IC_selection,
                                              case_control = case_control,
                                              DA_type = DA_type,
