@@ -14,7 +14,12 @@ arma::sp_mat draw_A_NDH_c(arma::mat U, double beta0){
        arma::rowvec temp = U.row(i) - U.row(j);
        arma::rowvec temp2 = temp * temp.t();
        double eta = beta0 - temp2(0);
-       double p = 1.0/(1.0+std::exp(-1.0*eta));
+       double p = 0;
+       if(eta >= 0){
+         p = 1.0/(1.0 + std::exp(-1.0*eta));
+       } else {
+         p = std::exp(eta)/(1.0 + std::exp(eta));
+       }
        if (arma::randu<double>() < p){
          A(i,j) = 1.0;
          A(j,i) = A(i,j);
@@ -37,7 +42,12 @@ arma::sp_mat draw_A_RS_c(arma::mat U, double beta0, arma::colvec s){
        arma::rowvec temp = U.row(i) - U.row(j);
        arma::rowvec temp2 = temp * temp.t();
        double eta = beta0 - temp2(0) + s(i) + s(j);
-       double p = 1.0/(1.0+std::exp(-1.0*eta));
+       double p = 0;
+       if(eta >= 0){
+         p = 1.0/(1.0 + std::exp(-1.0*eta));
+       } else {
+         p = std::exp(eta)/(1.0 + std::exp(eta));
+       }
        if (arma::randu<double>() < p){
          A(i,j) = 1.0;
          A(j,i) = A(i,j);
@@ -60,7 +70,12 @@ arma::sp_mat draw_A_RSR_c(arma::mat U, double beta0, arma::colvec s, arma::colve
        arma::rowvec temp = U.row(i) - U.row(j);
        arma::rowvec temp2 = temp * temp.t();
        double eta = beta0 - temp2(0) + s(i) + r(j);
-       double p = 1.0/(1.0+std::exp(-1.0*eta));
+       double p = 0;
+       if(eta >= 0){
+         p = 1.0/(1.0 + std::exp(-1.0*eta));
+       } else {
+         p = std::exp(eta)/(1.0 + std::exp(eta));
+       }
        if (arma::randu<double>() < p){
          A(i,j) = 1.0;
        } 
