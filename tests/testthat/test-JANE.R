@@ -356,21 +356,19 @@ test_that("JANE comprehensive works", {
             
             # prob_mat -----------------------------------------------------------------
             
-            dmvnorm_chol_quad_log <- function(x, mean, omega) {
+            dmvnorm_chol_quad_log <- function(x, mean, omega, ridge = 1e-10) {
                d <- length(mean)
-               
                diff <- x - mean
                
-               # Quadratic form: diff' * omega * diff
-               rss <- (t(diff) %*% omega %*% diff)[1,1]
+               # Regularize omega to ensure positive definiteness
+               omega_reg <- omega + diag(ridge, d)
                
-               # Cholesky decomposition of omega (precision matrix)
-               L <- chol(omega)
+               rss <- as.numeric(t(diff) %*% omega_reg %*% diff)
                
-               # log determinant of covariance matrix = -2 * sum(log(diag(L)))
+               L <- chol(omega_reg)
+               
                log_det_sigma <- -2 * sum(log(diag(L)))
                
-               # Log density
                log_density <- -0.5 * (d * log(2 * pi) + log_det_sigma + rss)
                
                return(log_density)
