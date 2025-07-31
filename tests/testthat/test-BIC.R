@@ -501,7 +501,12 @@ test_that("BIC works", {
       
       # Check eigenvalues
       eigvals <- eigen(omega, symmetric = TRUE, only.values = TRUE)$values
-      if (any(eigvals <= 0)) {
+      test_L <- tryCatch({
+        chol(omega)
+        FALSE  # chol succeeded, so test_L = FALSE (no failure)
+      }, error = function(e) TRUE)  # chol failed, test_L = TRUE
+      
+      if (any(eigvals <= 0)|test_L) {
         if (verbose) {
           warning("omega is not positive definite, applying ridge regularization")
         }

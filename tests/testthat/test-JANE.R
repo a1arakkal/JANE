@@ -371,8 +371,12 @@ test_that("JANE comprehensive works", {
                
                # Check eigenvalues
                eigvals <- eigen(omega, symmetric = TRUE, only.values = TRUE)$values
+               test_L <- tryCatch({
+                  chol(omega)
+                  FALSE  # chol succeeded, so test_L = FALSE (no failure)
+               }, error = function(e) TRUE)  # chol failed, test_L = TRUE
                
-               if (any(eigvals <= 0)) {
+               if (any(eigvals <= 0)|test_L) {
                   if (verbose) {
                      warning("omega is not positive definite, applying ridge regularization")
                   }
