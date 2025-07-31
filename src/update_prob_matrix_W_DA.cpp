@@ -10,7 +10,7 @@ double trunc_poisson_density(double w, double mean, double log){
 
   if (w > 0.0){
 
-    temp = w*std::log(mean) - mean - std::lgamma(w + 1.0) - std::log(1.0 - std::exp(-1.0*mean));
+    temp = w*std::log(mean) - mean - std::lgamma(w + 1.0) - std::log(-1.0*std::expm1(-1.0*mean));
 
     if(log <= 0.0){
 
@@ -62,8 +62,12 @@ void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, Rcpp:
       
       if (model == "NDH"){
          
-         double eta_exp = std::exp(beta(0) - cross_prod(0));
-         pij = 1.0/(1.0 + (1.0/eta_exp));
+         double eta = beta(0) - cross_prod(0);
+         if(eta >= 0){
+            pij = 1.0/(1.0 + std::exp(-1.0*eta));
+         } else {
+            pij = std::exp(eta)/(1.0 + std::exp(eta));
+         }
         
          if (family != "bernoulli"){
            
@@ -76,9 +80,13 @@ void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, Rcpp:
          arma::rowvec x_ij = arma::ones<arma::rowvec>(1+X.n_cols);
          x_ij(arma::span(1, X.n_cols)) = X.row(i) + X.row(j);
          arma::rowvec x_ij_beta = x_ij*beta; 
-         double eta_exp = std::exp(x_ij_beta(0) - cross_prod(0));
-         pij = 1.0/(1.0 + (1.0/eta_exp));
-
+         double eta = x_ij_beta(0) - cross_prod(0);
+         if(eta >= 0){
+            pij = 1.0/(1.0 + std::exp(-1.0*eta));
+         } else {
+            pij = std::exp(eta)/(1.0 + std::exp(eta));
+         }
+        
          if (family != "bernoulli"){
            
            arma::rowvec x2_ij = arma::ones<arma::rowvec>(1+X2.n_cols);
@@ -88,14 +96,17 @@ void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, Rcpp:
 
          }
 
-
       } else {
        
          arma::rowvec x_ij = arma::ones<arma::rowvec>(1+X.n_cols);
          x_ij(arma::span(1, X.n_cols)) = arma::join_rows(X.row(i).subvec(0, (X.n_cols*0.5) - 1), X.row(j).subvec(X.n_cols*0.5, X.n_cols - 1));
          arma::rowvec x_ij_beta = x_ij*beta; 
-         double eta_exp = std::exp(x_ij_beta(0) - cross_prod(0));
-         pij = 1.0/(1.0 + (1.0/eta_exp));
+         double eta = x_ij_beta(0) - cross_prod(0);
+         if(eta >= 0){
+            pij = 1.0/(1.0 + std::exp(-1.0*eta));
+         } else {
+            pij = std::exp(eta)/(1.0 + std::exp(eta));
+         }
 
          if (family != "bernoulli"){
            
@@ -105,7 +116,6 @@ void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, Rcpp:
            eta_w = x2_ij_beta(0);
 
          }
-
 
       }
      

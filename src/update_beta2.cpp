@@ -22,8 +22,9 @@ void update_beta2(arma::colvec& beta2, arma::mat prob_matrix_W, arma::mat f_2, a
       if (model == "NDH"){
           
         double lambda = std::exp(beta2(0));
-        double g_1 =  lambda / (1.0 - std::exp(-1.0*lambda));
-        double g_2 = ( lambda * (1.0 - (std::exp(-1.0*lambda) * (1.0 + lambda))) )/std::pow(1.0 - std::exp(-1.0*lambda), 2);
+        double denom = -std::expm1(-1.0*lambda);  
+        double g_1 = lambda / denom;
+        double g_2 = (lambda * (1.0 - std::exp(-1.0*lambda) * (1.0 + lambda))) / (denom * denom);
 
         p_1_NDH = p_1_NDH + ( prob_matrix_W(m, 3)*(prob_matrix_W(m, 2) + g_2*beta2(0) - g_1) );
         p_2_NDH = p_2_NDH + ( prob_matrix_W(m, 3)*g_2 );  
@@ -49,8 +50,9 @@ void update_beta2(arma::colvec& beta2, arma::mat prob_matrix_W, arma::mat f_2, a
         }
         
         double lambda = std::exp(x2_ij_beta(0));
-        arma::colvec g_1 = (lambda / (1.0 - std::exp(-1.0*lambda))) * x2_ij.t();
-        arma::mat g_2 = (( lambda * (1.0 - (std::exp(-1.0*lambda) * (1.0 + lambda))) )/std::pow(1.0 - std::exp(-1.0*lambda), 2)) * x2_ij.t()*x2_ij;
+        double denom = -std::expm1(-1.0*lambda);
+        arma::colvec g_1 = (lambda / denom) * x2_ij.t();
+        arma::mat g_2 = ((lambda * (1.0 - std::exp(-1.0*lambda) * (1.0 + lambda))) / (denom * denom)) * x2_ij.t() * x2_ij;
         
         p_1 = p_1 + ( prob_matrix_W(m, 3)*(prob_matrix_W(m, 2)*x2_ij.t() + g_2*beta2 - g_1) );
         p_2 = p_2 + ( prob_matrix_W(m, 3)*g_2 );  
@@ -93,7 +95,7 @@ void update_beta2(arma::colvec& beta2, arma::mat prob_matrix_W, arma::mat f_2, a
 
   if (model != "NDH") {
 
-    beta2 = arma::inv_sympd(f_2 + p_2) *  (f_2*e_2 + p_1);
+    beta2 = arma::solve((f_2 + p_2), (f_2*e_2 + p_1));
 
   } else {
 

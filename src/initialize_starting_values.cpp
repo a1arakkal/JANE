@@ -11,8 +11,9 @@ double log_like_C(arma::colvec par, arma::mat X, arma::colvec y){
   double log_like = 0.0;
 
   for(int i = 0; i < N; i++){
-
-    log_like = log_like + (y(i)*eta(i) - std::log(1.0 + std::exp(eta(i))));
+    
+    double max_val = std::max(0.0, eta(i));
+    log_like = log_like + ( y(i)*eta(i)  - max_val - std::log(std::exp(-1.0*max_val) + std::exp(eta(i) - max_val)) );
 
   }
 
@@ -24,7 +25,18 @@ double log_like_C(arma::colvec par, arma::mat X, arma::colvec y){
 arma::colvec gradient_C(arma::colvec par, arma::mat X, arma::colvec y){
 
   arma::colvec eta = X*par;
-  arma::colvec p = 1.0 / ( 1.0 + arma::exp(-1.0*eta));
+  arma::colvec p(eta.n_elem);
+
+  for(int i = 0; i < eta.n_elem; i++){
+    
+    if(eta(i) >= 0){
+      p(i) = 1.0/(1.0 + std::exp(-1.0*eta(i)));
+    } else {
+      p(i) = std::exp(eta(i))/(1.0 + std::exp(eta(i)));
+    }
+
+  }
+  
   arma::colvec out = X.t()*(y - p); 
   
   return(-out);

@@ -10,7 +10,7 @@ double trunc_poisson_density_BIC(double w, double mean, double log){
 
   if (w > 0.0){
 
-    temp = w*std::log(mean) - mean - std::lgamma(w + 1.0) - std::log(1.0 - std::exp(-1.0*mean));
+    temp = w*std::log(mean) - mean - std::lgamma(w + 1.0) - std::log(-1.0*std::expm1(-1.0*mean));
 
     if(log <= 0.0){
 
@@ -65,7 +65,7 @@ double BIC_logit_NDH(arma::sp_mat A, Rcpp::List object){
           arma::rowvec cross_prod = temp * temp.t();
           double eta = beta(0) - cross_prod(0);
           double max_val = std::max(0.0, eta);
-          p_1 = p_1 + ( A(i,j)*eta - max_val - std::log( std::exp(-max_val) + std::exp(eta - max_val) ) );
+          p_1 = p_1 + ( A(i,j)*eta - max_val - std::log( std::exp(-1.0*max_val) + std::exp(eta - max_val) ) );
           
        }
        
@@ -100,7 +100,7 @@ double BIC_logit_RS(arma::sp_mat A, Rcpp::List object){
          arma::rowvec cross_prod = temp * temp.t();
          double eta = x_ij_beta(0) - cross_prod(0);
          double max_val = std::max(0.0, eta);
-         p_1 = p_1 + ( A(i,j)*eta - max_val - std::log( std::exp(-max_val) + std::exp(eta - max_val) ) );
+         p_1 = p_1 + ( A(i,j)*eta - max_val - std::log( std::exp(-1.0*max_val) + std::exp(eta - max_val) ) );
        
        }
        
@@ -135,7 +135,7 @@ double BIC_logit_RSR(arma::sp_mat A, Rcpp::List object){
          arma::rowvec cross_prod = temp * temp.t();
          double eta = x_ij_beta(0) - cross_prod(0);
          double max_val = std::max(0.0, eta);
-         p_1 = p_1 + ( A(i,j)*eta - max_val - std::log( std::exp(-max_val) + std::exp(eta - max_val) ) );
+         p_1 = p_1 + ( A(i,j)*eta - max_val - std::log( std::exp(-1.0*max_val) + std::exp(eta - max_val) ) );
        
        }
        
@@ -231,7 +231,8 @@ double BIC_hurdle(arma::sp_mat W, Rcpp::List object){
            arma::rowvec cross_prod = temp * temp.t();
            double eta = beta(0) - cross_prod(0);
            double w = W(i,j);
-           p_1 = p_1 + ( -1.0*std::log(1.0 + std::exp(eta)) );
+           double max_val = std::max(0.0, eta);
+           p_1 = p_1 + ( -max_val - std::log(std::exp(-1.0*max_val) + std::exp(eta - max_val)) );
           
            if (w > 0.0){
               
@@ -287,7 +288,8 @@ double BIC_hurdle(arma::sp_mat W, Rcpp::List object){
           arma::rowvec cross_prod = temp * temp.t();
           double eta = x_ij_beta(0) - cross_prod(0);
           double w = W(i,j);
-          p_1 = p_1 + ( -1.0*std::log(1.0 + std::exp(eta)) );
+          double max_val = std::max(0.0, eta);
+          p_1 = p_1 + ( -max_val - std::log(std::exp(-1.0*max_val) + std::exp(eta - max_val)) );
           
            if (w > 0.0){
               
@@ -346,7 +348,8 @@ double BIC_hurdle(arma::sp_mat W, Rcpp::List object){
           arma::rowvec cross_prod = temp * temp.t();
           double eta = x_ij_beta(0) - cross_prod(0);
           double w = W(i,j);
-          p_1 = p_1 + ( -1.0*std::log(1.0 + std::exp(eta)) );
+          double max_val = std::max(0.0, eta);
+          p_1 = p_1 + ( -max_val - std::log(std::exp(-1.0*max_val) + std::exp(eta - max_val)) );
           
            if (w > 0.0){
               
