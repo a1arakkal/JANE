@@ -112,6 +112,7 @@ test_that("BIC works", {
     omega_good <- F
     attempts <- 0
     while(!omega_good){
+      attempts <- attempts + 1
       starting_params <- JANE:::initialize_starting_values(A = (sim_data$W>0)*1, 
                                                            K = 3,
                                                            D = 2, 
@@ -124,7 +125,12 @@ test_that("BIC works", {
                                                            prob_matrix_W= prob_matrix_W,
                                                            q_prob = q_prob)
       
-      test <- apply(starting_params$omegas, 3, function(x){all(eigen(x, symmetric = TRUE, only.values = TRUE)$values>0)} )
+      test <- apply(starting_params$omegas, 3, function(x){tryCatch({
+        chol(x)
+        TRUE  
+      }, error = function(e) FALSE)  
+      })
+      
       if(all(test) | attempts>20){
         omega_good <- T
       }
@@ -509,6 +515,8 @@ test_that("BIC works", {
       if (any(eigvals <= 0)|test_L) {
         if (verbose) {
           warning("omega is not positive definite, applying ridge regularization")
+          print(omega)
+          print(eigvals)
         }
         omega <- omega + diag(ridge, d)
       }

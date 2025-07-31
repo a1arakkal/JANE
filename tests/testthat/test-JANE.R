@@ -342,7 +342,13 @@ test_that("JANE comprehensive works", {
                                                                     prob_matrix_W= prob_matrix_W,
                                                                     q_prob = noise)
                
-               test <- apply(starting_params$omegas, 3, function(x){all(eigen(x, symmetric = TRUE, only.values = TRUE)$values>0)} )
+               test <- apply(starting_params$omegas, 3, function(x){tryCatch({
+                  chol(x)
+                  TRUE  
+               }, error = function(e) FALSE)  
+               })
+               
+               
                if(all(test) | attempts>20){
                   omega_good <- T
                }
@@ -379,6 +385,8 @@ test_that("JANE comprehensive works", {
                if (any(eigvals <= 0)|test_L) {
                   if (verbose) {
                      warning("omega is not positive definite, applying ridge regularization")
+                     print(omega)
+                     print(eigvals)
                   }
                   omega <- omega + diag(ridge, d)
                }
