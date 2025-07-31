@@ -62,6 +62,23 @@ test_that("JANE works", {
                                DA_type = "none",
                                control = list(n_control = 20)) )
    
+   expect_no_error( JANE::JANE(A = sim_data$A,
+                               D = 2L,
+                               K = 3L,
+                               initialization = "GNN", 
+                               model = "RS",
+                               case_control = TRUE,
+                               DA_type = "none",
+                               control = list(n_control = 20)) )
+   
+   expect_no_error( JANE::JANE(A = sim_data$A,
+                               D = 2L,
+                               K = 3L,
+                               initialization = "GNN", 
+                               model = "RSR",
+                               case_control = TRUE,
+                               DA_type = "none",
+                               control = list(n_control = 20)) )
    # Reproducibility
    expect_equal( JANE::JANE(A = sim_data$A,
                             D = 2L,
@@ -149,6 +166,42 @@ test_that("JANE works", {
            guess_noise_weights = 0.2) # expected noise edge proportion
    )
    
+   expect_no_error(
+      JANE(A = sim_data$W,
+           D = 2,
+           K = 5,
+           model = "RS",
+           noise_weights = TRUE,
+           family = "poisson",
+           guess_noise_weights = 1L,
+           case_control = TRUE,
+           control = list(n_control = 20)) 
+   )
+   
+   expect_no_error(
+      JANE(A = sim_data$W,
+           D = 2,
+           K = 5,
+           model = "RS",
+           noise_weights = TRUE,
+           family = "lognormal",
+           guess_noise_weights = -3.5,
+           case_control = TRUE,
+           control = list(n_control = 20)) 
+   )
+   
+   
+   expect_no_error(
+      JANE(A = sim_data$A,
+           D = 2,
+           K = 5,
+           model = "RSR",
+           noise_weights = TRUE,
+           family = "bernoulli",
+           guess_noise_weights = 0.2,
+           case_control = TRUE,
+           control = list(n_control = 20)) 
+   )
    
 })
 
