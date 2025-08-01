@@ -1,4 +1,7 @@
 
+#' @useDynLib JANE, .registration = TRUE
+NULL
+
 JANE_startup_message <- function(){
 
   msg <- c(paste0(path <- r"(

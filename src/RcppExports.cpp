@@ -11,33 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// trunc_poisson_density_BIC
-double trunc_poisson_density_BIC(double w, double mean, double log);
-RcppExport SEXP _JANE_trunc_poisson_density_BIC(SEXP wSEXP, SEXP meanSEXP, SEXP logSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type w(wSEXP);
-    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
-    Rcpp::traits::input_parameter< double >::type log(logSEXP);
-    rcpp_result_gen = Rcpp::wrap(trunc_poisson_density_BIC(w, mean, log));
-    return rcpp_result_gen;
-END_RCPP
-}
-// lognormal_density_BIC
-double lognormal_density_BIC(double w, double precision, double mean, double log);
-RcppExport SEXP _JANE_lognormal_density_BIC(SEXP wSEXP, SEXP precisionSEXP, SEXP meanSEXP, SEXP logSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type w(wSEXP);
-    Rcpp::traits::input_parameter< double >::type precision(precisionSEXP);
-    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
-    Rcpp::traits::input_parameter< double >::type log(logSEXP);
-    rcpp_result_gen = Rcpp::wrap(lognormal_density_BIC(w, precision, mean, log));
-    return rcpp_result_gen;
-END_RCPP
-}
 // BIC_logit_NDH
 double BIC_logit_NDH(arma::sp_mat A, Rcpp::List object);
 RcppExport SEXP _JANE_BIC_logit_NDH(SEXP ASEXP, SEXP objectSEXP) {
@@ -94,6 +67,44 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::sp_mat >::type W(WSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type object(objectSEXP);
     rcpp_result_gen = Rcpp::wrap(BIC_hurdle(W, object));
+    return rcpp_result_gen;
+END_RCPP
+}
+// logit_inv
+double logit_inv(double eta);
+RcppExport SEXP _JANE_logit_inv(SEXP etaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type eta(etaSEXP);
+    rcpp_result_gen = Rcpp::wrap(logit_inv(eta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// trunc_poisson_density
+double trunc_poisson_density(double w, double mean, double log);
+RcppExport SEXP _JANE_trunc_poisson_density(SEXP wSEXP, SEXP meanSEXP, SEXP logSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
+    Rcpp::traits::input_parameter< double >::type log(logSEXP);
+    rcpp_result_gen = Rcpp::wrap(trunc_poisson_density(w, mean, log));
+    return rcpp_result_gen;
+END_RCPP
+}
+// lognormal_density
+double lognormal_density(double w, double precision, double mean, double log);
+RcppExport SEXP _JANE_lognormal_density(SEXP wSEXP, SEXP precisionSEXP, SEXP meanSEXP, SEXP logSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< double >::type precision(precisionSEXP);
+    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
+    Rcpp::traits::input_parameter< double >::type log(logSEXP);
+    rcpp_result_gen = Rcpp::wrap(lognormal_density(w, precision, mean, log));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -444,33 +455,6 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// trunc_poisson_density
-double trunc_poisson_density(double w, double mean, double log);
-RcppExport SEXP _JANE_trunc_poisson_density(SEXP wSEXP, SEXP meanSEXP, SEXP logSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type w(wSEXP);
-    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
-    Rcpp::traits::input_parameter< double >::type log(logSEXP);
-    rcpp_result_gen = Rcpp::wrap(trunc_poisson_density(w, mean, log));
-    return rcpp_result_gen;
-END_RCPP
-}
-// lognormal_density
-double lognormal_density(double w, double precision, double mean, double log);
-RcppExport SEXP _JANE_lognormal_density(SEXP wSEXP, SEXP precisionSEXP, SEXP meanSEXP, SEXP logSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type w(wSEXP);
-    Rcpp::traits::input_parameter< double >::type precision(precisionSEXP);
-    Rcpp::traits::input_parameter< double >::type mean(meanSEXP);
-    Rcpp::traits::input_parameter< double >::type log(logSEXP);
-    rcpp_result_gen = Rcpp::wrap(lognormal_density(w, precision, mean, log));
-    return rcpp_result_gen;
-END_RCPP
-}
 // update_prob_matrix_W_DA
 void update_prob_matrix_W_DA(arma::mat& prob_matrix_W, Rcpp::String model, Rcpp::String family, arma::colvec beta, arma::colvec beta2, double precision_weights, double precision_noise_weights, double guess_noise_weights, arma::mat U, arma::mat X, arma::mat X2, double q, double temp_beta);
 RcppExport SEXP _JANE_update_prob_matrix_W_DA(SEXP prob_matrix_WSEXP, SEXP modelSEXP, SEXP familySEXP, SEXP betaSEXP, SEXP beta2SEXP, SEXP precision_weightsSEXP, SEXP precision_noise_weightsSEXP, SEXP guess_noise_weightsSEXP, SEXP USEXP, SEXP XSEXP, SEXP X2SEXP, SEXP qSEXP, SEXP temp_betaSEXP) {
@@ -542,13 +526,14 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_JANE_trunc_poisson_density_BIC", (DL_FUNC) &_JANE_trunc_poisson_density_BIC, 3},
-    {"_JANE_lognormal_density_BIC", (DL_FUNC) &_JANE_lognormal_density_BIC, 4},
     {"_JANE_BIC_logit_NDH", (DL_FUNC) &_JANE_BIC_logit_NDH, 2},
     {"_JANE_BIC_logit_RS", (DL_FUNC) &_JANE_BIC_logit_RS, 2},
     {"_JANE_BIC_logit_RSR", (DL_FUNC) &_JANE_BIC_logit_RSR, 2},
     {"_JANE_BIC_ICL_MBC", (DL_FUNC) &_JANE_BIC_ICL_MBC, 1},
     {"_JANE_BIC_hurdle", (DL_FUNC) &_JANE_BIC_hurdle, 2},
+    {"_JANE_logit_inv", (DL_FUNC) &_JANE_logit_inv, 1},
+    {"_JANE_trunc_poisson_density", (DL_FUNC) &_JANE_trunc_poisson_density, 3},
+    {"_JANE_lognormal_density", (DL_FUNC) &_JANE_lognormal_density, 4},
     {"_JANE_log_like_C", (DL_FUNC) &_JANE_log_like_C, 3},
     {"_JANE_gradient_C", (DL_FUNC) &_JANE_gradient_C, 3},
     {"_JANE_compute_dist", (DL_FUNC) &_JANE_compute_dist, 6},
@@ -570,8 +555,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_JANE_update_mus_omegas", (DL_FUNC) &_JANE_update_mus_omegas, 8},
     {"_JANE_update_p", (DL_FUNC) &_JANE_update_p, 3},
     {"_JANE_update_prob_matrix_DA", (DL_FUNC) &_JANE_update_prob_matrix_DA, 6},
-    {"_JANE_trunc_poisson_density", (DL_FUNC) &_JANE_trunc_poisson_density, 3},
-    {"_JANE_lognormal_density", (DL_FUNC) &_JANE_lognormal_density, 4},
     {"_JANE_update_prob_matrix_W_DA", (DL_FUNC) &_JANE_update_prob_matrix_W_DA, 13},
     {"_JANE_update_q_prob", (DL_FUNC) &_JANE_update_q_prob, 6},
     {"_JANE_update_precision_weights", (DL_FUNC) &_JANE_update_precision_weights, 9},

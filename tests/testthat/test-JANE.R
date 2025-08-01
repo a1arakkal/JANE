@@ -1476,6 +1476,272 @@ test_that("JANE comprehensive works", {
                
             }
             
+            if(family == "bernoulli" & noise == 0){
+               # compute log-Q --------------------------------------------------------
+               if (model == "NDH"){
+                  log_Q_R <- function(A, U, mus, omegas, prob_matrix, beta0, p, a, b, c, G, nu, e, f){
+                     
+                     N <- nrow(A)
+                     K <- ncol(prob_matrix)
+                     D <- ncol(U)
+                     
+                     p1 <- 0
+                     
+                     for (i in 1:(N-1)){
+                        for (j in (i+1):N){
+                           eta <- beta0 - crossprod(U[i,] - U[j,])[1,1]
+                           p1 <- p1 + (A[i,j]*eta - log(1+exp(eta)))
+                        }
+                     }
+                     
+                     p2 <- 0
+                     
+                     for (i in 1:N){
+                        for (k in 1:K){
+                           p2 <- p2 + (prob_matrix[i,k]*( (log(p[k])) - ( (D/2) * log(2*pi) ) +
+                                                             ( (1/2) * log(det(omegas[,,k])) ) -
+                                                             ( (1/2) * (t(U[i,] - mus[k, ]) %*% omegas[,,k] %*% (U[i,] - mus[k, ]))[1,1])
+                           )
+                           )
+                        }
+                     }
+                     
+                     p3 <- (-f/2)*(beta0 - e)^2
+                     
+                     p4 <- 0
+                     for (k in 1:K){
+                        p4 <- p4 + ( (nu[k] - 1) * log(p[k]) )
+                     }
+                     
+                     p5 <- 0
+                     for (k in 1:K){
+                        p5 <- p5 + ( ( (1/2) * log(det(omegas[,,k])) ) - ( (1/2) *  ((mus[k, ] - a) %*% (b*omegas[,,k]) %*% t(mus[k, ] - a))[1,1] ) )
+                     }
+                     
+                     p6 <- 0
+                     for (k in 1:K){
+                        p6 <- p6 + ( ( ((c-D-1) / 2) * log(det(omegas[,,k])) ) - ( (1/2) * sum(diag(omegas[,,k]%*%G)) ) )
+                     }
+                     
+                     log_Q <- p1 + p2 + p3 + p4 + p5 + p6
+                     
+                     return(log_Q)
+                  }
+                  
+                  all_test[[as.character(noise)]][[model]][[family]][["log_Q"]] <- all.equal(
+                     log_Q_R(A = A,
+                             U = current$U,
+                             mus = current$mus,
+                             omegas = current$omegas,
+                             prob_matrix = current$prob_matrix,
+                             beta0 = current$beta,
+                             p = current$p,
+                             a = current$priors$a,
+                             b =current$priors$b,
+                             c =current$ priors$c,
+                             G = current$priors$G,
+                             nu = current$priors$nu,
+                             e = current$priors$e,
+                             f =current$priors$f),
+                     JANE:::log_Q(A = A,
+                           U = current$U,
+                           mus = current$mus,
+                           omegas = current$omegas,
+                           prob_matrix = current$prob_matrix,
+                           beta = current$beta,
+                           X = NULL,
+                           n_control = NULL,
+                           p = current$p,
+                           a = current$priors$a,
+                           b = current$priors$b,
+                           c = current$priors$c,
+                           G = current$priors$G,
+                           nu = current$priors$nu,
+                           e = current$priors$e,
+                           f = current$priors$f,
+                           model = NULL))
+               } else if (model == "RS"){
+                  log_Q_RS_RE <- function(A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f, X){
+                     
+                     N <- nrow(A)
+                     K <- ncol(prob_matrix)
+                     D <- ncol(U)
+                     
+                     p1 <- 0
+                     
+                     for (i in 1:(N-1)){
+                        for (j in (i+1):N){
+                           diff <- U[i,] - U[j,]
+                           cross_prod <- crossprod(diff)[1,1]
+                           x_ij <- c(1, X[i,] + X[j,])
+                           beta_x <- (t(x_ij) %*% beta)[1,1]
+                           eta <- beta_x-cross_prod
+                           p1 <- p1 + (A[i,j]*eta - log(1+exp(eta)))
+                        }
+                     }
+                     
+                     p2 <- 0
+                     
+                     for (i in 1:N){
+                        for (k in 1:K){
+                           p2 <- p2 + (prob_matrix[i,k]*( (log(p[k])) - ( (D/2) * log(2*pi) ) +
+                                                             ( (1/2) * log(det(omegas[,,k])) ) -
+                                                             ( (1/2) * (t(U[i,] - mus[k, ]) %*% omegas[,,k] %*% (U[i,] - mus[k, ]))[1,1])
+                           )
+                           )
+                        }
+                     }
+                     
+                     temp_p3 <- t((beta - e)) %*% f %*% (beta - e)
+                     p3 <- -0.5*temp_p3[1,1]
+                     
+                     p4 <- 0
+                     for (k in 1:K){
+                        p4 <- p4 + ( (nu[k] - 1) * log(p[k]) )
+                     }
+                     
+                     p5 <- 0
+                     for (k in 1:K){
+                        p5 <- p5 + ( ( (1/2) * log(det(omegas[,,k])) ) - ( (1/2) *  ((mus[k, ] - a) %*% (b*omegas[,,k]) %*% t(mus[k, ] - a))[1,1] ) )
+                     }
+                     
+                     p6 <- 0
+                     for (k in 1:K){
+                        p6 <- p6 + ( ( ((c-D-1) / 2) * log(det(omegas[,,k])) ) - ( (1/2) * sum(diag(omegas[,,k]%*%G)) ) )
+                     }
+                     
+                     log_Q <- p1 + p2 + p3 + p4 + p5 + p6
+                     
+                     return(log_Q)
+                  }
+                  
+                  all_test[[as.character(noise)]][[model]][[family]][["log_Q"]] <- all.equal(
+                     log_Q_RS_RE(A = A,
+                                 U = current$U,
+                                 mus = current$mus,
+                                 omegas = current$omegas,
+                                 prob_matrix = current$prob_matrix,
+                                 beta = current$beta,
+                                 X = current$X,
+                                 p = current$p,
+                                 a = current$priors$a,
+                                 b =current$priors$b,
+                                 c =current$ priors$c,
+                                 G = current$priors$G,
+                                 nu = current$priors$nu,
+                                 e = current$priors$e,
+                                 f =current$priors$f),
+                     JANE:::log_Q_RE(A = A,
+                              U = current$U,
+                              mus = current$mus,
+                              omegas = current$omegas,
+                              prob_matrix = current$prob_matrix,
+                              beta = current$beta,
+                              X = current$X,
+                              n_control = NULL,
+                              p = current$p,
+                              a = current$priors$a,
+                              b = current$priors$b,
+                              c = current$priors$c,
+                              G = current$priors$G,
+                              nu = current$priors$nu,
+                              e = current$priors$e,
+                              f = current$priors$f,
+                              model = current$model))
+               }else{
+                  log_Q_RSR_RE <- function(A, U, mus, omegas, prob_matrix, beta, p, a, b, c, G, nu, e, f, X){
+                     
+                     N <- nrow(A)
+                     K <- ncol(prob_matrix)
+                     D <- ncol(U)
+                     
+                     p1 <- 0
+                     
+                     for (i in 1:N){
+                        for (j in 1:N){
+                           if(j!=i) {
+                              diff <- U[i,] - U[j,]
+                              cross_prod <- crossprod(diff)[1,1]
+                              x_ij <- c(1, X[i, 1:(ncol(X) * 0.5)], X[j, (ncol(X)*0.5 + 1):ncol(X) ])
+                              beta_x <- (t(x_ij) %*% beta)[1,1]
+                              eta <- beta_x-cross_prod
+                              p1 <- p1 + (A[i,j]*eta - log(1+exp(eta)))
+                           }
+                        }
+                     }
+                     
+                     p2 <- 0
+                     
+                     for (i in 1:N){
+                        for (k in 1:K){
+                           p2 <- p2 + (prob_matrix[i,k]*( (log(p[k])) - ( (D/2) * log(2*pi) ) +
+                                                             ( (1/2) * log(det(omegas[,,k])) ) -
+                                                             ( (1/2) * (t(U[i,] - mus[k, ]) %*% omegas[,,k] %*% (U[i,] - mus[k, ]))[1,1])
+                           )
+                           )
+                        }
+                     }
+                     
+                     temp_p3 <- t((beta - e)) %*% f %*% (beta - e)
+                     p3 <- -0.5*temp_p3[1,1]
+                     
+                     p4 <- 0
+                     for (k in 1:K){
+                        p4 <- p4 + ( (nu[k] - 1) * log(p[k]) )
+                     }
+                     
+                     p5 <- 0
+                     for (k in 1:K){
+                        p5 <- p5 + ( ( (1/2) * log(det(omegas[,,k])) ) - ( (1/2) *  ((mus[k, ] - a) %*% (b*omegas[,,k]) %*% t(mus[k, ] - a))[1,1] ) )
+                     }
+                     
+                     p6 <- 0
+                     for (k in 1:K){
+                        p6 <- p6 + ( ( ((c-D-1) / 2) * log(det(omegas[,,k])) ) - ( (1/2) * sum(diag(omegas[,,k]%*%G)) ) )
+                     }
+                     
+                     log_Q <- p1 + p2 + p3 + p4 + p5 + p6
+                     
+                     return(log_Q)
+                  }
+                  
+                  all_test[[as.character(noise)]][[model]][[family]][["log_Q"]] <-all.equal(
+                     log_Q_RSR_RE(A = A,
+                                  U = current$U,
+                                  mus = current$mus,
+                                  omegas = current$omegas,
+                                  prob_matrix = current$prob_matrix,
+                                  beta = current$beta,
+                                  X = current$X,
+                                  p = current$p,
+                                  a = current$priors$a,
+                                  b =current$priors$b,
+                                  c =current$ priors$c,
+                                  G = current$priors$G,
+                                  nu = current$priors$nu,
+                                  e = current$priors$e,
+                                  f =current$priors$f),
+                     JANE:::log_Q_RE(A = A,
+                              U = current$U,
+                              mus = current$mus,
+                              omegas = current$omegas,
+                              prob_matrix = current$prob_matrix,
+                              beta = current$beta,
+                              X = current$X,
+                              n_control = NULL,
+                              p = current$p,
+                              a = current$priors$a,
+                              b = current$priors$b,
+                              c = current$priors$c,
+                              G = current$priors$G,
+                              nu = current$priors$nu,
+                              e = current$priors$e,
+                              f = current$priors$f,
+                              model = current$model))
+                  
+               }
+            }
+            
             if(any(!unlist(all_test))){
                break
             }

@@ -26,7 +26,8 @@ double log_Q(arma::sp_mat A, arma::mat U, arma::mat mus, arma::cube omegas, arma
           arma::rowvec temp = U.row(i) - U.row(j);
           arma::rowvec cross_prod = temp * temp.t();
           double eta = beta(0) - cross_prod(0);
-          p1_2 = p1_2 + ( (0.5)*(-A(i,j)*cross_prod(0) - std::log(1.0 + std::exp(eta)) ) );
+          double max_val = std::max(0.0, eta);
+          p1_2 = p1_2 + ( (0.5)*(-A(i,j)*cross_prod(0) - max_val - std::log(std::exp(-1.0*max_val) + std::exp(eta-max_val)) ) );
           
        }
 
@@ -97,11 +98,12 @@ double log_Q_RE(arma::sp_mat A, arma::mat U, arma::mat mus, arma::cube omegas, a
          arma::rowvec cross_prod = temp * temp.t();
          
          double eta = x_ij_beta(0) - cross_prod(0);
-         
+         double max_val = std::max(0.0, eta);
+
          if (model == "RS"){
-            p1 = p1 + ( (0.5)*( (A(i,j)*eta) - std::log(1.0 + std::exp(eta)) ) );
+            p1 = p1 + ( (0.5)*( (A(i,j)*eta) - max_val - std::log(std::exp(-1.0*max_val) + std::exp(eta-max_val)) ) );
          } else {
-            p1 = p1 + ( (1.0)*( (A(i,j)*eta) - std::log(1.0 + std::exp(eta)) ) );
+            p1 = p1 + ( (1.0)*( (A(i,j)*eta) - max_val - std::log(std::exp(-1.0*max_val) + std::exp(eta-max_val)) ) );
          }
          
        }

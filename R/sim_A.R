@@ -423,22 +423,3 @@ sim_A <- function(N,
   
 }
 
-#' @useDynLib JANE   
-draw_A_NDH_c <- function(U, beta0) {
-  .Call('_JANE_draw_A_NDH_c', PACKAGE = 'JANE', U, beta0)
-}
-
-#' @useDynLib JANE   
-draw_A_RS_c <- function(U, beta0, s) {
-  .Call('_JANE_draw_A_RS_c', PACKAGE = 'JANE', U, beta0, s)
-}
-
-#' @useDynLib JANE   
-draw_A_RSR_c <- function(U, beta0, s, r) {
-  .Call('_JANE_draw_A_RSR_c', PACKAGE = 'JANE', U, beta0, s, r)
-}
-
-#' @useDynLib JANE   
-compute_mean_edge_weight <- function(edge_indices, beta0, RE, model) {
-  invisible(.Call('_JANE_compute_mean_edge_weight', PACKAGE = 'JANE', edge_indices, beta0, RE, model))
-}

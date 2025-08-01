@@ -1,5 +1,6 @@
 
 #include <RcppArmadillo.h>
+#include "helper_funs.h"
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
@@ -28,13 +29,7 @@ arma::colvec gradient_C(arma::colvec par, arma::mat X, arma::colvec y){
   arma::colvec p(eta.n_elem);
 
   for(int i = 0; i < eta.n_elem; i++){
-    
-    if(eta(i) >= 0){
-      p(i) = 1.0/(1.0 + std::exp(-1.0*eta(i)));
-    } else {
-      p(i) = std::exp(eta(i))/(1.0 + std::exp(eta(i)));
-    }
-
+    p(i) = logit_inv(eta(i));
   }
   
   arma::colvec out = X.t()*(y - p); 

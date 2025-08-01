@@ -547,19 +547,3 @@ initialize_starting_values <- function(A,
   return(starting_params)
   
 }
-
-#' @useDynLib JANE   
-log_like_C <- function(par, X, y) {
-  .Call('_JANE_log_like_C', PACKAGE = 'JANE', par, X, y)
-}
-
-#' @useDynLib JANE   
-gradient_C <- function(par, X, y) {
-  .Call('_JANE_gradient_C', PACKAGE = 'JANE', par, X, y)
-}
-
-#' @useDynLib JANE   
-compute_dist <- function(U, distances, model, X, indices, downsampling) {
-  invisible(.Call('_JANE_compute_dist', PACKAGE = 'JANE', U, distances, model, X, indices, downsampling))
-}
-

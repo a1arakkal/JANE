@@ -33,38 +33,3 @@ BICL <- function(A, object){
   
   return(out)
 }
-
-#' @useDynLib JANE  
-BIC_logit_NDH <- function(A, object) {
-.Call('_JANE_BIC_logit_NDH', PACKAGE = 'JANE', A, object)
-}
-
-#' @useDynLib JANE  
-BIC_logit_RS <- function(A, object) {
-  .Call('_JANE_BIC_logit_RS', PACKAGE = 'JANE', A, object)
-}
-
-#' @useDynLib JANE  
-BIC_logit_RSR <- function(A, object) {
-  .Call('_JANE_BIC_logit_RSR', PACKAGE = 'JANE', A, object)
-}
-
-#' @useDynLib JANE  
-BIC_ICL_MBC <- function(object) {
-  .Call('_JANE_BIC_ICL_MBC', PACKAGE = 'JANE', object)
-}
-
-#' @useDynLib JANE  
-BIC_hurdle <- function(W, object) {
-  .Call('_JANE_BIC_hurdle', PACKAGE = 'JANE', W, object)
-}
-
-#' @useDynLib JANE  
-trunc_poisson_density_BIC <- function(w, mean, log) {
-  .Call('_JANE_trunc_poisson_density_BIC', PACKAGE = 'JANE', w, mean, log)
-}
-
-#' @useDynLib JANE  
-lognormal_density_BIC <- function(w, precision, mean, log) {
-  .Call('_JANE_lognormal_density_BIC', PACKAGE = 'JANE', w, precision, mean, log)
-}

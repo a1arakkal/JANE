@@ -1,5 +1,6 @@
 
 #include <RcppArmadillo.h>
+#include "helper_funs.h"
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
@@ -21,12 +22,7 @@ void update_beta(arma::colvec& beta, arma::sp_mat A , arma::mat U, double f, dou
           arma::rowvec temp = U.row(i) - U.row(j);
           arma::rowvec cross_prod = temp * temp.t();
           double eta = beta(0) - cross_prod(0);
-          double p = 0;
-          if(eta >= 0){
-            p = 1.0/(1.0 + std::exp(-1.0*eta));
-          } else {
-            p = std::exp(eta)/(1.0 + std::exp(eta));
-          }
+          double p = logit_inv(eta);
           double p_1_p = p*(1.0 - p);
           p_1 = p_1 + (p_1_p*beta(0) - p);
           p_2 = p_2 + p_1_p;
@@ -80,12 +76,7 @@ void update_beta_CC(arma::colvec& beta, arma::sp_mat A, double n_control, arma::
       arma::rowvec temp = U.row(i) - U.row(j);
       arma::rowvec cross_prod = temp * temp.t();
       double eta = beta(0) - cross_prod(0);
-      double p = 0;
-      if(eta >= 0){
-         p = 1.0/(1.0 + std::exp(-1.0*eta));
-      } else {
-         p = std::exp(eta)/(1.0 + std::exp(eta));
-      }
+      double p = logit_inv(eta);
       double p_1_p = p*(1.0 - p);
       p_1 = p_1 + (p_1_p*beta(0) - p);
       p_2 = p_2 + p_1_p;
@@ -118,12 +109,7 @@ void update_beta_CC(arma::colvec& beta, arma::sp_mat A, double n_control, arma::
       arma::rowvec temp = U.row(i) - U.row(j);
       arma::rowvec cross_prod = temp * temp.t();
       double eta = beta(0) - cross_prod(0);
-      double p = 0;
-      if(eta >= 0){
-        p = 1.0/(1.0 + std::exp(-1.0*eta));
-      } else {
-        p = std::exp(eta)/(1.0 + std::exp(eta));
-      }
+      double p = logit_inv(eta);
       double p_1_p = p*(1.0 - p);
       p_3 = p_3 + ((N_A_0_i)/(n_A_0_i*1.0))*(p_1_p*beta(0) - p);
       p_4 = p_4 + ((N_A_0_i)/(n_A_0_i*1.0))*p_1_p;
@@ -160,12 +146,7 @@ void update_beta_RE(arma::colvec& beta, arma::sp_mat A, arma::mat U, arma::mat f
             arma::rowvec temp = U.row(i) - U.row(j);
             arma::rowvec cross_prod = temp * temp.t();
             double eta = x_ij_beta(0) - cross_prod(0);
-            double p = 0;
-            if(eta >= 0){
-              p = 1.0/(1.0 + std::exp(-1.0*eta));
-            } else {
-              p = std::exp(eta)/(1.0 + std::exp(eta));
-            }
+            double p = logit_inv(eta);
             arma::mat p_1_p = p*(1.0 - p)*(x_ij.t() * x_ij);
             p_1 = p_1 + (p_1_p*beta - (p*x_ij.t()));
             p_2 = p_2 + p_1_p;
@@ -187,12 +168,7 @@ void update_beta_RE(arma::colvec& beta, arma::sp_mat A, arma::mat U, arma::mat f
            arma::rowvec temp = U.row(i) - U.row(j);
            arma::rowvec cross_prod = temp * temp.t();
            double eta = x_ij_beta(0) - cross_prod(0);
-           double p = 0;
-           if(eta >= 0){
-              p = 1.0/(1.0 + std::exp(-1.0*eta));
-           } else {
-              p = std::exp(eta)/(1.0 + std::exp(eta));
-           }
+           double p = logit_inv(eta);
            arma::mat p_1_p = p*(1.0 - p)*(x_ij.t() * x_ij);
            p_1 = p_1 + (p_1_p*beta - (p*x_ij.t()));
            p_2 = p_2 + p_1_p;
@@ -262,12 +238,7 @@ void update_beta_RE_CC(arma::colvec& beta, arma::sp_mat A, double n_control, arm
       arma::rowvec temp = U.row(i) - U.row(j);
       arma::rowvec cross_prod = temp * temp.t();
       double eta = x_ij_beta(0) - cross_prod(0);
-      double p = 0;
-      if(eta >= 0){
-        p = 1.0/(1.0 + std::exp(-1.0*eta));
-      } else {
-        p = std::exp(eta)/(1.0 + std::exp(eta));
-      }
+      double p = logit_inv(eta);
       arma::mat p_1_p = p*(1.0 - p)*(x_ij.t() * x_ij);
       
       p_1 = p_1 + (p_1_p*beta - (p*x_ij.t()));
@@ -313,12 +284,7 @@ void update_beta_RE_CC(arma::colvec& beta, arma::sp_mat A, double n_control, arm
       arma::rowvec temp = U.row(i) - U.row(j);
       arma::rowvec cross_prod = temp * temp.t();
       double eta = x_ij_beta(0) - cross_prod(0);
-      double p = 0;
-      if(eta >= 0){
-        p = 1.0/(1.0 + std::exp(-1.0*eta));
-      } else {
-        p = std::exp(eta)/(1.0 + std::exp(eta));
-      }
+      double p = logit_inv(eta);
       arma::mat p_1_p = p*(1.0 - p)*(x_ij.t() * x_ij);
  
       p_4 = p_4 + ((N_A_0_i)/(n_A_0_i*1.0))*(p_1_p*beta - (p*x_ij.t()));
