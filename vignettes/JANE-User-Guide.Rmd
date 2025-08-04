@@ -698,7 +698,7 @@ Use the `summary()` method to extract and display detailed information about the
 summary(res)
 ```
 
-You can also compare estimated cluster assignments to known true assigments using the `true_labels` argument, or inspect starting values using `initial_values = TRUE`.
+You can also compare estimated cluster assignments to known true assignments using the `true_labels` argument, or inspect starting values using `initial_values = TRUE`.
 
 ```{r, eval = FALSE}
 summary(res, true_labels = true_labels_vec)
