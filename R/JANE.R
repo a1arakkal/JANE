@@ -281,8 +281,12 @@ JANE <- function(A,
   cl$noise_weights <- eval(noise_weights)
   
   # Check for class of A
+  if(inherits(A, "matrix")){
+    A <- Matrix::Matrix(A, sparse = TRUE)
+  }
+  
   if(!inherits(A, "dgCMatrix")){
-    A <- methods::as(A, "dgCMatrix")
+    A <- methods::as(A, "generalMatrix")
   }
   
   # Check for self loops 
