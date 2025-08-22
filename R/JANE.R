@@ -1,6 +1,6 @@
 #' Fit JANE
 #' @description Fit a latent space cluster model, with or without noise edges, using an EM algorithm.
-#' @param A A square matrix or sparse matrix of class 'dgCMatrix' representing the adjacency matrix of the network of interest.
+#' @param A A square matrix or sparse matrix of class 'Matrix' (from the Matrix package) representing the adjacency matrix of the network of interest.
 #' @param D Integer (scalar or vector) specifying the dimension of the latent space (default is 2).
 #' @param K Integer (scalar or vector) specifying the number of clusters to consider (default is 2).
 #' @param family A character string specifying the distribution of the edge weights.
@@ -258,8 +258,8 @@ JANE <- function(A,
   )
   
   # Stop if A not supplied
-  if(missing(A) || !(inherits(A, "matrix") | inherits(A, "dgCMatrix"))){
-    stop("Argument 'A' missing or is not a matrix, please supply an adjacency matrix")
+  if(missing(A) || !(inherits(A, "matrix") | inherits(A, "Matrix"))){
+    stop("Argument 'A' missing or is not a matrix of the correct class, please supply a dense adjacency matrix or sparse adjacency matrix of class 'Matrix' (Matrix package)")
   }
   
   # Stop if A is not square
@@ -281,7 +281,7 @@ JANE <- function(A,
   cl$noise_weights <- eval(noise_weights)
   
   # Check for class of A
-  if(!"dgCMatrix" %in% class(A)){
+  if(!inherits(A, "dgCMatrix")){
     A <- methods::as(A, "dgCMatrix")
   }
   

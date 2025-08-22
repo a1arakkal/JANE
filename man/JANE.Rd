@@ -20,7 +20,7 @@ JANE(
 )
 }
 \arguments{
-\item{A}{A square matrix or sparse matrix of class 'dgCMatrix' representing the adjacency matrix of the network of interest.}
+\item{A}{A square matrix or sparse matrix of class 'Matrix' (from the Matrix package) representing the adjacency matrix of the network of interest.}
 
 \item{D}{Integer (scalar or vector) specifying the dimension of the latent space (default is 2).}
 
