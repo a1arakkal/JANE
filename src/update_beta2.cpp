@@ -95,7 +95,7 @@ void update_beta2(arma::colvec& beta2, arma::mat prob_matrix_W, arma::mat f_2, a
 
   if (model != "NDH") {
 
-    beta2 = arma::solve((f_2 + p_2), (f_2*e_2 + p_1));
+    beta2 = arma::solve((f_2 + p_2), (f_2*e_2 + p_1), arma::solve_opts::no_approx + arma::solve_opts::likely_sympd);
 
   } else {
 
