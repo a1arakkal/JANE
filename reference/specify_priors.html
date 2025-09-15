@@ -104,19 +104,19 @@
 
 
 <dt id="arg-b">b<a class="anchor" aria-label="anchor" href="#arg-b"></a></dt>
-<dd><p>A positive numeric scalar specifying the scaling factor on the precision of the multivariate normal prior on \(\mu_k\) for \(k = 1,\ldots,K\), where \(\mu_k\) represents the mean of the multivariate normal distribution for the latent positions of the \(k^{th}\) cluster.</p></dd>
+<dd><p>A strictly positive numeric scalar specifying the scaling factor on the precision of the multivariate normal prior on \(\mu_k\) for \(k = 1,\ldots,K\), where \(\mu_k\) represents the mean of the multivariate normal distribution for the latent positions of the \(k^{th}\) cluster.</p></dd>
 
 
 <dt id="arg-c">c<a class="anchor" aria-label="anchor" href="#arg-c"></a></dt>
-<dd><p>A numeric scalar \(\ge\) \(D\) specifying the degrees of freedom of the Wishart prior on \(\Omega_k\) for \(k = 1,\ldots,K\), where \(\Omega_k\) represents the precision of the multivariate normal distribution for the latent positions of the \(k^{th}\) cluster.</p></dd>
+<dd><p>A positive numeric scalar \(&gt; D\) specifying the degrees of freedom of the Wishart prior on \(\Omega_k\) for \(k = 1,\ldots,K\), where \(\Omega_k\) represents the precision of the multivariate normal distribution for the latent positions of the \(k^{th}\) cluster.</p></dd>
 
 
 <dt id="arg-g">G<a class="anchor" aria-label="anchor" href="#arg-g"></a></dt>
-<dd><p>A numeric \(D \times D\) matrix specifying the inverse of the scale matrix of the Wishart prior on \(\Omega_k\) for \(k = 1,\ldots,K\), where \(\Omega_k\) represents the precision of the multivariate normal distribution for the latent positions of the \(k^{th}\) cluster.</p></dd>
+<dd><p>A numeric positive definite \(D \times D\) matrix specifying the inverse of the scale matrix of the Wishart prior on \(\Omega_k\) for \(k = 1,\ldots,K\), where \(\Omega_k\) represents the precision of the multivariate normal distribution for the latent positions of the \(k^{th}\) cluster.</p></dd>
 
 
 <dt id="arg-nu">nu<a class="anchor" aria-label="anchor" href="#arg-nu"></a></dt>
-<dd><p>A positive numeric vector of length \(K\) specifying the concentration parameters of the Dirichlet prior on \(p\), where \(p\) represents the mixture weights of the finite multivariate normal mixture distribution for the latent positions.</p></dd>
+<dd><p>A positive numeric vector of length \(K\) with elements \(\ge 1\) specifying the concentration parameters of the Dirichlet prior on \(p\), where \(p\) represents the mixture weights of the finite multivariate normal mixture distribution for the latent positions.</p></dd>
 
 
 <dt id="arg-e">e<a class="anchor" aria-label="anchor" href="#arg-e"></a></dt>
@@ -124,15 +124,15 @@
 
 
 <dt id="arg-f">f<a class="anchor" aria-label="anchor" href="#arg-f"></a></dt>
-<dd><p>A numeric p.s.d square matrix of dimension <code>1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)</code> specifying the precision of the multivariate normal prior on \(\beta_{LR}\), where \(\beta_{LR}\) represents the coefficients of the logistic regression model.</p></dd>
+<dd><p>A numeric positive definite square matrix of dimension <code>1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)</code> specifying the precision of the multivariate normal prior on \(\beta_{LR}\), where \(\beta_{LR}\) represents the coefficients of the logistic regression model.</p></dd>
 
 
 <dt id="arg-h">h<a class="anchor" aria-label="anchor" href="#arg-h"></a></dt>
-<dd><p>A positive numeric scalar specifying the first shape parameter for the Beta prior on \(q\), where \(q\) is the proportion of non-edges in the "true" underlying network converted to noise edges. Only relevant when <code>noise_weights = TRUE</code>.</p></dd>
+<dd><p>A positive numeric scalar \(\ge 1\) specifying the first shape parameter for the Beta prior on \(q\), where \(q\) is the proportion of non-edges in the "true" underlying network converted to noise edges. Only relevant when <code>noise_weights = TRUE</code>.</p></dd>
 
 
 <dt id="arg-l">l<a class="anchor" aria-label="anchor" href="#arg-l"></a></dt>
-<dd><p>A positive numeric scalar specifying the second shape parameter for the Beta prior on \(q\), where \(q\) is the proportion of non-edges in the "true" underlying network converted to noise edges. Only relevant when <code>noise_weights = TRUE</code>.</p></dd>
+<dd><p>A strictly positive numeric scalar specifying the second shape parameter for the Beta prior on \(q\), where \(q\) is the proportion of non-edges in the "true" underlying network converted to noise edges. Only relevant when <code>noise_weights = TRUE</code>.</p></dd>
 
 
 <dt id="arg-e-">e_2<a class="anchor" aria-label="anchor" href="#arg-e-"></a></dt>
@@ -140,23 +140,23 @@
 
 
 <dt id="arg-f-">f_2<a class="anchor" aria-label="anchor" href="#arg-f-"></a></dt>
-<dd><p>A numeric p.s.d square matrix of dimension <code>1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)</code> specifying the precision of the multivariate normal prior on \(\beta_{GLM}\), where \(\beta_{GLM}\) represents the coefficients of the zero-truncated Poisson or log-normal GLM. Only relevant when <code>noise_weights = TRUE &amp; family != 'bernoulli'</code>.</p></dd>
+<dd><p>A numeric positive definite square matrix of dimension <code>1 + (model =='RS')*(n_interior_knots + 1) +  (model =='RSR')*2*(n_interior_knots + 1)</code> specifying the precision of the multivariate normal prior on \(\beta_{GLM}\), where \(\beta_{GLM}\) represents the coefficients of the zero-truncated Poisson or log-normal GLM. Only relevant when <code>noise_weights = TRUE &amp; family != 'bernoulli'</code>.</p></dd>
 
 
 <dt id="arg-m-">m_1<a class="anchor" aria-label="anchor" href="#arg-m-"></a></dt>
-<dd><p>A positive numeric scalar specifying the shape parameter for the Gamma prior on \(\tau^2_{weights}\), where \(\tau^2_{weights}\) is the precision (on the log scale) of the log-normal weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when <code>noise_weights = TRUE &amp; family = 'lognormal'</code>.</p></dd>
+<dd><p>A positive numeric scalar \(&gt; 1\) specifying the shape parameter for the Gamma prior on \(\tau^2_{weights}\), where \(\tau^2_{weights}\) is the precision (on the log scale) of the log-normal weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when <code>noise_weights = TRUE &amp; family = 'lognormal'</code>.</p></dd>
 
 
 <dt id="arg-o-">o_1<a class="anchor" aria-label="anchor" href="#arg-o-"></a></dt>
-<dd><p>A positive numeric scalar specifying the rate parameter for the Gamma prior on \(\tau^2_{weights}\), where \(\tau^2_{weights}\) is the precision (on the log scale) of the log-normal weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when <code>noise_weights = TRUE &amp; family = 'lognormal'</code>.</p></dd>
+<dd><p>A positive numeric scalar \(&gt; 0\) specifying the rate parameter for the Gamma prior on \(\tau^2_{weights}\), where \(\tau^2_{weights}\) is the precision (on the log scale) of the log-normal weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when <code>noise_weights = TRUE &amp; family = 'lognormal'</code>.</p></dd>
 
 
 <dt id="arg-m-">m_2<a class="anchor" aria-label="anchor" href="#arg-m-"></a></dt>
-<dd><p>A positive numeric scalar specifying the shape parameter for the Gamma prior on \(\tau^2_{noise \ weights}\), where \(\tau^2_{noise \ weights}\) is the precision (on the log scale) of the log-normal noise weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when <code>noise_weights = TRUE &amp; family = 'lognormal'</code>.</p></dd>
+<dd><p>A positive numeric scalar \(\ge 2\) specifying the shape parameter for the Gamma prior on \(\tau^2_{noise \ weights}\), where \(\tau^2_{noise \ weights}\) is the precision (on the log scale) of the log-normal noise weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when <code>noise_weights = TRUE &amp; family = 'lognormal'</code>.</p></dd>
 
 
 <dt id="arg-o-">o_2<a class="anchor" aria-label="anchor" href="#arg-o-"></a></dt>
-<dd><p>A positive numeric scalar specifying the rate parameter for the Gamma prior on \(\tau^2_{noise \ weights}\), where \(\tau^2_{noise \ weights}\) is the precision (on the log scale) of the log-normal noise weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when <code>noise_weights = TRUE &amp; family = 'lognormal'</code>.</p></dd>
+<dd><p>A positive numeric scalar \(&gt; 0\) specifying the rate parameter for the Gamma prior on \(\tau^2_{noise \ weights}\), where \(\tau^2_{noise \ weights}\) is the precision (on the log scale) of the log-normal noise weight distribution. Note, this value is scaled by 0.5, see 'Details'. Only relevant when <code>noise_weights = TRUE &amp; family = 'lognormal'</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
