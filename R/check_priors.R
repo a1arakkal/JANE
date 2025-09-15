@@ -81,21 +81,6 @@ check_priors <- function(priors,
       }
     }
     
-    dim_priors <- lapply(priors, function(x){if("array" %in% class(x)){dim(x)} else{length(x)}})
-    check_dim <- sapply(names(dim_priors), function(x){all(correct_dim[[x]] == dim_priors[[x]])})
-    
-    if(!all(check_dim)){
-      stop(paste0("Dimension of hyperparameters incorrect for: ", 
-                  paste0(names(check_dim)[!check_dim], collapse = ", "), ". \n  ",
-                  "Dimension needs to be => ", 
-                  paste0(unname(sapply(names(check_dim)[!check_dim], function(x){ifelse(length(correct_dim[[x]]) >1,
-                                                                                        paste0(x, ": array of dim (",paste0(correct_dim[[x]], collapse = ", "), ")"),
-                                                                                        paste0(x, ": vector of length ", correct_dim[[x]]))})), 
-                         collapse = ", "), 
-                  ".")
-      )
-    } 
-    
   } else if (model == "RS"){
     
     # input check
@@ -148,22 +133,6 @@ check_priors <- function(priors,
                             o_2 = 1)
       }
     }
-    
-    dim_priors <- lapply(priors, function(x){if("array" %in% class(x)){dim(x)} else{length(x)}})
-    check_dim <- sapply(names(dim_priors), function(x){all(correct_dim[[x]] == dim_priors[[x]])})
-    
-    if(!all(check_dim)){
-      stop(paste0("Dimension of hyperparameters incorrect for: ", 
-                  paste0(names(check_dim)[!check_dim], collapse = ", "), ". \n  ",
-                  "Dimension needs to be => ", 
-                  paste0(unname(sapply(names(check_dim)[!check_dim], function(x){ifelse(length(correct_dim[[x]]) >1,
-                                                                                        paste0(x, ": array of dim (",paste0(correct_dim[[x]], collapse = ", "), ")"),
-                                                                                        paste0(x, ": vector of length ", correct_dim[[x]]))})), 
-                         collapse = ", "), 
-                  ".")
-      )
-    }
-    
     
   } else {
     
@@ -218,23 +187,23 @@ check_priors <- function(priors,
                             o_2 = 1)
       }
     }
-    
-    dim_priors <- lapply(priors, function(x){if("array" %in% class(x)){dim(x)} else{length(x)}})
-    check_dim <- sapply(names(dim_priors), function(x){all(correct_dim[[x]] == dim_priors[[x]])})
-    
-    if(!all(check_dim)){
-      stop(paste0("Dimension of hyperparameters incorrect for: ", 
-                  paste0(names(check_dim)[!check_dim], collapse = ", "), ". \n   ",
-                  "Dimension needs to be => ", 
-                  paste0(unname(sapply(names(check_dim)[!check_dim], function(x){ifelse(length(correct_dim[[x]]) >1,
-                                                                                        paste0(x, ": array of dim (",paste0(correct_dim[[x]], collapse = ", "), ")"),
-                                                                                        paste0(x, ": vector of length ", correct_dim[[x]]))})), 
-                         collapse = ", "), 
-                  ".")
-      )
-    } 
-    
   }
+  
+  dim_priors <- lapply(priors, function(x){if("array" %in% class(x)){dim(x)} else{length(x)}})
+  check_dim <- sapply(names(dim_priors), function(x){all(correct_dim[[x]] == dim_priors[[x]]) & 
+      (length(correct_dim[[x]]) == length(dim_priors[[x]]))})
+  
+  if(!all(check_dim)){
+    stop(paste0("Dimension of hyperparameters incorrect for: ", 
+                paste0(names(check_dim)[!check_dim], collapse = ", "), ". \n   ",
+                "Dimension needs to be => ", 
+                paste0(unname(sapply(names(check_dim)[!check_dim], function(x){ifelse(length(correct_dim[[x]]) >1,
+                                                                                      paste0(x, ": array of dim (",paste0(correct_dim[[x]], collapse = ", "), ")"),
+                                                                                      paste0(x, ": vector of length ", correct_dim[[x]]))})), 
+                       collapse = ", "), 
+                ".")
+    )
+  } 
   
   values_check <- c("b" = "> 0",
                     "c" = "> D",
