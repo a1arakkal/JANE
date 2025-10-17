@@ -169,6 +169,21 @@ sim_A <- function(N,
     stop("Please supply a numeric >0 for precision_noise_weights")
   }
   
+  if (dim(omegas)[3] != nrow(mus)) {
+    stop("The number of rows in 'mus' must match the number of D x D matrices in 'omegas'")
+  }
+  
+  if (any(dim(omegas)[1:2] != ncol(mus))) {
+    stop("The number of columns in 'mus' (i.e., D, the latent space dimension) must match the dimensions of the D x D matrices in 'omegas'")
+  }
+  
+  if (length(p) != nrow(mus)) {
+    warning(
+      "The length of 'p' does not match the number of rows in 'mus' and the number of D x D matrices in 'omegas'. ",
+      "Only using mus[1:length(p), ] and omegas[, , 1:length(p)] to simulate the network."
+    )
+  }
+  
   # draw Z
   Z <-  t(stats::rmultinom(n = N, size = 1, prob = p))
   
