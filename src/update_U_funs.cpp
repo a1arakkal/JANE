@@ -46,7 +46,7 @@ void update_U(arma::mat& U, arma::sp_mat A, arma::mat mus, arma::cube omegas, ar
      
    }
 
-   arma::colvec new_ui = arma::solve((p1_1 + p1_2), (p2_1 + p2_2 + p2_3), arma::solve_opts::no_approx + arma::solve_opts::likely_sympd);
+   arma::colvec new_ui = solve_only_sympd((p1_1 + p1_2), (p2_1 + p2_2 + p2_3));
 
    U.row(i) = new_ui.t();
      
@@ -143,7 +143,7 @@ void update_U_CC(arma::mat& U, double n_control, arma::sp_mat A, arma::mat mus, 
      
    }
 
-   arma::colvec new_ui = arma::solve((p1_1 + p1_2), (p2_1 + p2_2 + p2_3 + p2_4), arma::solve_opts::no_approx + arma::solve_opts::likely_sympd);
+   arma::colvec new_ui = solve_only_sympd((p1_1 + p1_2), (p2_1 + p2_2 + p2_3 + p2_4));
    
    U.row(i) = new_ui.t();
      
@@ -222,7 +222,7 @@ void update_U_RE(arma::mat& U, arma::sp_mat A, arma::mat mus, arma::cube omegas,
      
    }
 
-   arma::colvec new_ui = arma::solve((p1_1 + p1_2), ( p2_1 + p2_2  + p2_3 ), arma::solve_opts::no_approx + arma::solve_opts::likely_sympd);
+   arma::colvec new_ui = solve_only_sympd((p1_1 + p1_2), ( p2_1 + p2_2  + p2_3 ));
    
    U.row(i) = new_ui.t();
      
@@ -422,7 +422,7 @@ void update_U_RE_CC(arma::mat& U, double n_control, arma::sp_mat A, arma::mat mu
     
    }
 
-   arma::colvec new_ui = arma::solve((p1_1 + p1_2), (p2_1 + p2_2 + p2_3 + p2_4), arma::solve_opts::no_approx + arma::solve_opts::likely_sympd);
+   arma::colvec new_ui = solve_only_sympd((p1_1 + p1_2), (p2_1 + p2_2 + p2_3 + p2_4));
    
    U.row(i) = new_ui.t();
      

@@ -108,6 +108,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// solve_only_sympd
+arma::colvec solve_only_sympd(arma::mat A, arma::colvec b);
+RcppExport SEXP _JANE_solve_only_sympd(SEXP ASEXP, SEXP bSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type A(ASEXP);
+    Rcpp::traits::input_parameter< arma::colvec >::type b(bSEXP);
+    rcpp_result_gen = Rcpp::wrap(solve_only_sympd(A, b));
+    return rcpp_result_gen;
+END_RCPP
+}
 // log_like_C
 double log_like_C(arma::colvec par, arma::mat X, arma::colvec y);
 RcppExport SEXP _JANE_log_like_C(SEXP parSEXP, SEXP XSEXP, SEXP ySEXP) {
@@ -534,6 +546,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_JANE_logit_inv", (DL_FUNC) &_JANE_logit_inv, 1},
     {"_JANE_trunc_poisson_density", (DL_FUNC) &_JANE_trunc_poisson_density, 3},
     {"_JANE_lognormal_density", (DL_FUNC) &_JANE_lognormal_density, 4},
+    {"_JANE_solve_only_sympd", (DL_FUNC) &_JANE_solve_only_sympd, 2},
     {"_JANE_log_like_C", (DL_FUNC) &_JANE_log_like_C, 3},
     {"_JANE_gradient_C", (DL_FUNC) &_JANE_gradient_C, 3},
     {"_JANE_compute_dist", (DL_FUNC) &_JANE_compute_dist, 6},

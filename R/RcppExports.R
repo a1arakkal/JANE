@@ -33,6 +33,10 @@ lognormal_density <- function(w, precision, mean, log) {
     .Call(`_JANE_lognormal_density`, w, precision, mean, log)
 }
 
+solve_only_sympd <- function(A, b) {
+    .Call(`_JANE_solve_only_sympd`, A, b)
+}
+
 log_like_C <- function(par, X, y) {
     .Call(`_JANE_log_like_C`, par, X, y)
 }

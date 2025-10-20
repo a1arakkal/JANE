@@ -57,3 +57,18 @@ double lognormal_density(double w, double precision, double mean, double log){
   return temp;
 
 }
+
+// solve_only_sympd
+// [[Rcpp::export]]
+arma::colvec solve_only_sympd(arma::mat A, arma::colvec b){
+
+    if (!A.is_sympd()) {
+      Rcpp::stop("Matrix is not symmetric positive definite.");
+    }
+
+    arma::colvec x = arma::solve(A, b, arma::solve_opts::no_approx + arma::solve_opts::likely_sympd);
+
+    return x;
+
+  }
+

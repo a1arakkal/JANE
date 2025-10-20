@@ -182,7 +182,7 @@ void update_beta_RE(arma::colvec& beta, arma::sp_mat A, arma::mat U, arma::mat f
    
   }
        
-  beta = arma::solve((f + (p_2)),  (f*e + (p_3) + (p_1)), arma::solve_opts::no_approx + arma::solve_opts::likely_sympd);
+  beta = solve_only_sympd((f + (p_2)),  (f*e + (p_3) + (p_1)));
       
 }
 
@@ -296,11 +296,11 @@ void update_beta_RE_CC(arma::colvec& beta, arma::sp_mat A, double n_control, arm
   
    if (model == "RS"){
    
-     beta = arma::solve((f + (0.5*p_2) + (0.5*p_5)), (f*e + (0.5*p_3) + (0.5*p_1) + (0.5*p_4)), arma::solve_opts::no_approx + arma::solve_opts::likely_sympd);
+     beta = solve_only_sympd((f + (0.5*p_2) + (0.5*p_5)), (f*e + (0.5*p_3) + (0.5*p_1) + (0.5*p_4)));
       
    } else {
 
-     beta = arma::solve((f + (p_2) + (p_5)), (f*e + (p_3) + (p_1) + (p_4)), arma::solve_opts::no_approx + arma::solve_opts::likely_sympd);
+     beta = solve_only_sympd((f + (p_2) + (p_5)), (f*e + (p_3) + (p_1) + (p_4)));
       
    }
    

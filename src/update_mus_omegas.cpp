@@ -24,7 +24,14 @@ void update_mus_omegas(arma::mat prob_matrix, arma::mat U, double b, arma::rowve
     
     mus.row(k) = ( (p1_mu + b*a) / (sums_prob_mat(k) + b) );
     
-    arma::mat p2_omega = arma::inv_sympd( G + p2_1_omega + (b*a.t()*a) - ( (sums_prob_mat(k) + b)*mus.row(k).t()*mus.row(k) ) );
+    arma::mat temp = G + p2_1_omega + (b*a.t()*a) - ( (sums_prob_mat(k) + b)*mus.row(k).t()*mus.row(k) );
+
+    if (!temp.is_sympd()) {
+      Rcpp::stop("Matrix is not symmetric positive definite.");
+    }
+
+    arma::mat p2_omega = arma::inv_sympd(temp);
+
     omegas.slice(k) =  (sums_prob_mat(k) + c - D) * p2_omega;
     
   }
