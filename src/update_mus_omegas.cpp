@@ -26,7 +26,7 @@ void update_mus_omegas(arma::mat prob_matrix, arma::mat U, double b, arma::rowve
     
     arma::mat temp = G + p2_1_omega + (b*a.t()*a) - ( (sums_prob_mat(k) + b)*mus.row(k).t()*mus.row(k) );
 
-    if (!temp.is_sympd(100 * datum::eps)) {
+    if (!temp.is_sympd(100.0 * arma::datum::eps)) {
       Rcpp::stop("Matrix is not symmetric positive definite.");
     }
 
