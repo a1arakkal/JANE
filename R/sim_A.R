@@ -177,10 +177,15 @@ sim_A <- function(N,
     stop("The number of columns in 'mus' (i.e., D, the latent space dimension) must match the dimensions of the D x D matrices in 'omegas'")
   }
   
+  if (abs(sum(p) - 1.0) > 1e-8) {
+    stop(
+      "The p vector of mixture weights does not sum to 1.0"
+    )
+  }
+  
   if (length(p) != nrow(mus)) {
-    warning(
-      "The length of 'p' does not match the number of rows in 'mus' and the number of D x D matrices in 'omegas'. ",
-      "Only using mus[1:length(p), ] and omegas[, , 1:length(p)] to simulate the network."
+    stop(
+      "The length of 'p' does not match the number of rows in 'mus' and the number of D x D matrices in 'omegas'"
     )
   }
   
