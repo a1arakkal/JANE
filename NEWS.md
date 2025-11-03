@@ -34,3 +34,17 @@
 * Make new S3 class for priors and initial values
 * Improve documentation - add information about connection strength heterogeneity, fix priors in 'details' of specify_priors, and fix typos
 * Add vignette "JANE User Guide"
+
+## 2.0.1
+* Add website with vignette to "URL" section of DESCRIPTION
+* Fix bug in JANE when class is added to NULL optimal_starting
+* Add more comprehensive tests
+* Replace some helper functions with more numerically stable variants
+* Use .registration = T for useDynLib
+* @useDynLib only included once in zzz.R. Removed all other instances in other R scripts
+* Create header file for helper functions
+* Create helper functions for inverse logit, density for ZTP and log-normal, and solve_only_sympd (checks for sympd before running arma::solve)
+* Update scripts to work with helper functions
+* Fix deprecated methods::as(A, "dgCMatrix") in JANE.R
+* Update specify_priors and check_priors to check user input, also remove redundant code
+* Add dimension checks for user supplied mus, omegas, and p in sim_A
