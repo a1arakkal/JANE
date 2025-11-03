@@ -179,7 +179,7 @@ sim_A <- function(N,
   
   if (abs(sum(p) - 1.0) > 1e-8) {
     stop(
-      "The p vector of mixture weights does not sum to 1.0"
+      "The 'p' vector of mixture weights does not sum to 1.0"
     )
   }
   
