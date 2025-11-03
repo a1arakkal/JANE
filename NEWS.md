@@ -35,7 +35,7 @@
 * Improve documentation - add information about connection strength heterogeneity, fix priors in 'details' of specify_priors, and fix typos
 * Add vignette "JANE User Guide"
 
-## 2.0.1
+## 2.1.0
 * Add website with vignette to "URL" section of DESCRIPTION
 * Fix bug in JANE when class is added to NULL optimal_starting
 * Add more comprehensive tests
