@@ -1,0 +1,257 @@
+# Plot JANE fits
+
+S3 plot method for object of class "`JANE`".
+
+## Usage
+
+``` r
+# S3 method for class 'JANE'
+plot(
+  x,
+  type = "lsnc",
+  true_labels,
+  initial_values = FALSE,
+  zoom = 100,
+  density_type = "contour",
+  rotation_angle = 0,
+  alpha_edge = 0.1,
+  alpha_node = 1,
+  swap_axes = FALSE,
+  main,
+  xlab,
+  ylab,
+  cluster_cols,
+  remove_noise_edges = FALSE,
+  ...
+)
+```
+
+## Arguments
+
+- x:
+
+  An object of S3 [`class`](https://rdrr.io/r/base/class.html) "`JANE`",
+  a result of a call to
+  [`JANE`](https://a1arakkal.github.io/JANE/reference/JANE.md).
+
+- type:
+
+  A character string to select the type of plot:
+
+  - 'lsnc': plot the network using the estimated latent positions and
+    color-code actors by cluster (default)
+
+  - 'misclassified': (can only be used if `true_labels` is `!NULL`)
+    similar to 'lsnc', but will color misclassified actors in black
+
+  - 'uncertainty': similar to 'lsnc', but here the color gradient
+    applied represents the actor-specific classification uncertainty
+
+  - 'trace_plot': presents various trace plots across the iterations of
+    the EM algorithm
+
+- true_labels:
+
+  (optional) A numeric, character, or factor vector of known true
+  cluster labels. Must have the same length as number of actors in the
+  fitted network. Need to account for potential isolates removed.
+
+- initial_values:
+
+  A logical; if `TRUE` then plots fit using the starting parameters used
+  in the EM algorithm (default is `FALSE`, i.e., the results after the
+  EM algorithm is run are plotted).
+
+- zoom:
+
+  A numeric value \> 0 that controls the % magnification of the plot
+  (default is 100%).
+
+- density_type:
+
+  Choose from one of the following three options: 'contour' (default),
+  'hdr', 'image', and 'persp' indicating the density plot type.
+
+- rotation_angle:
+
+  A numeric value that rotates the estimated latent positions and
+  contours of the multivariate normal distributions clockwise (or
+  counterclockwise if `swap_axes = TRUE`) through the specified angle
+  about the origin (default is 0 degrees). Only relevant when `D` (i.e.,
+  dimension of the latent space) `>= 2` and `type != 'trace_plot'`.
+
+- alpha_edge:
+
+  A numeric value in `[0,1]` that controls the transparency of the
+  network edges (default is 0.1).
+
+- alpha_node:
+
+  A numeric value in `[0,1]` that controls the transparency of the
+  actors in the network (default is 1).
+
+- swap_axes:
+
+  A logical; if `TRUE` will swap the x and y axes (default is `FALSE`).
+
+- main:
+
+  An optional overall title for the plot.
+
+- xlab:
+
+  An optional title for the x axis.
+
+- ylab:
+
+  An optional title for the y axis.
+
+- cluster_cols:
+
+  An optional vector of colors for the clusters. Must have a length of
+  at least \\K\\.
+
+- remove_noise_edges:
+
+  (only applicable if `JANE` was run with `noise_weights = TRUE`) A
+  logical; if `TRUE` will remove noise edges based on hard clustering
+  rule of \\\\h \| \hat{Z}^{W}\_{eh} = max(\hat{Z}^{W}\_{e1},
+  \hat{Z}^{W}\_{e2})\\\\ for \\e = 1,\ldots,\|E\|\\, where
+  \\\hat{Z}^{W}\_{e1}\\ and \\\hat{Z}^{W}\_{e2}\\ are the estimated
+  conditional probabilities that the \\e^{th}\\ edge is a non-noise and
+  noise edge, respectively (default is `FALSE`).
+
+- ...:
+
+  Unused.
+
+## Value
+
+A plot of the network or trace plot of the EM run.
+
+## Details
+
+The classification of actors into specific clusters is based on a hard
+clustering rule of \\\\h \| \hat{Z}^{U}\_{ih} = max_k
+\hat{Z}^{U}\_{ik}\\\\. Additionally, the actor-specific classification
+uncertainty is derived as 1 - \\max_k \hat{Z}^{U}\_{ik}\\.
+
+The trace plot contains up to five unique plots tracking various metrics
+across the iterations of the EM algorithm, depending on the
+[`JANE`](https://a1arakkal.github.io/JANE/reference/JANE.md) control
+parameter `termination_rule`:
+
+- `termination_rule = 'prob_mat'`: Five plots will be presented.
+  Specifically, in the top panel, the plot on the left presents the
+  change in the absolute difference in \\{\hat{Z}^U}\\ (i.e., the \\N
+  \times K\\ cluster membership probability matrix) between subsequent
+  iterations and, if `noise_weights = TRUE`, the change in the absolute
+  difference in \\{\hat{Z}^W}\\ (i.e., the \\\|E\| \times 2\\ edge
+  weight cluster membership probability matrix) between subsequent
+  iterations. The exact quantile of the absolute difference plotted are
+  presented in parentheses and determined by the
+  [`JANE`](https://a1arakkal.github.io/JANE/reference/JANE.md) control
+  parameter `quantile_diff`. For example, the default control parameter
+  `quantile_diff` = 1, so the values being plotted are the max absolute
+  difference in \\{\hat{Z}^U}\\ (and potentially \\{\hat{Z}^W}\\)
+  between subsequent iterations. The plot on the right of the top panel
+  presents the absolute difference in the cumulative average of the
+  absolute change in \\{\hat{Z}^U}\\ (and potentially \\{\hat{Z}^W}\\)
+  and \\\hat{U}\\ (i.e., the \\N \times D\\ matrix of latent positions)
+  across subsequent iterations (absolute change in \\{\hat{Z}^U}\\,
+  \\{\hat{Z}^W}\\, and \\\hat{U}\\ are computed in an identical manner
+  as described previously). This metric is only tracked beginning at an
+  iteration determined by the `n_its_start_CA` control parameter in
+  [`JANE`](https://a1arakkal.github.io/JANE/reference/JANE.md). Note,
+  this plot may be empty if the EM algorithm converges before the
+  `n_its_start_CA`-th iteration. Finally, the bottom panel presents ARI,
+  NMI, and CER values comparing the classifications between subsequent
+  iterations, respectively. Specifically, at a given iteration we
+  determine the classification of actors in clusters based on a hard
+  clustering rule of \\\\h \| \hat{Z}^{U}\_{ih} = max_k
+  \hat{Z}^{U}\_{ik}\\\\ and given these labels from two subsequent
+  iterations, we compute and plot the ARI, NMI and CER.
+
+- `termination_rule = 'Q'`: Plots generated are similar to those
+  described in the previous bullet point. However, instead of tracking
+  the change in \\{\hat{Z}^U}\\ (and potentially \\{\hat{Z}^W}\\) over
+  iterations, here the absolute difference in the objective function of
+  the E-step evaluated using parameters from subsequent iterations is
+  tracked. Furthermore, the cumulative average of the absolute change in
+  \\\hat{U}\\ is no longer tracked.
+
+- `termination_rule %in% c('ARI', 'NMI', 'CER')`: Four plots will be
+  presented. Specifically, the top left panel presents a plot of the
+  absolute difference in the cumulative average of the absolute change
+  in the specific `termination_rule` employed and \\\hat{U}\\ across
+  iterations. As previously mentioned, if the EM algorithm converges
+  before the `n_its_start_CA`-th iteration then this will be an empty
+  plot. Furthermore, the other three plots present ARI, NMI, and CER
+  values comparing the classifications between subsequent iterations,
+  respectively.
+
+## Note
+
+If an error interrupts the plotting process, the graphics device may be
+left in a state where par("new") = TRUE. This can cause subsequent plots
+to be overlaid. To reset the graphics state, call plot.new() or close
+and reopen the device with dev.off(); dev.new().
+
+## See also
+
+[`surfacePlot`](https://mclust-org.github.io/mclust/reference/surfacePlot.html),
+[`adjustedRandIndex`](https://mclust-org.github.io/mclust/reference/adjustedRandIndex.html),
+[`classError`](https://mclust-org.github.io/mclust/reference/classError.html),
+[`NMI`](https://rdrr.io/pkg/aricode/man/NMI.html)
+
+## Examples
+
+``` r
+# \donttest{
+# Simulate network
+mus <- matrix(c(-1,-1,1,-1,1,1), 
+              nrow = 3,
+              ncol = 2, 
+              byrow = TRUE)
+omegas <- array(c(diag(rep(7,2)),
+                  diag(rep(7,2)), 
+                  diag(rep(7,2))), 
+                  dim = c(2,2,3))
+p <- rep(1/3, 3)
+beta0 <- 1.0
+sim_data <- JANE::sim_A(N = 100L, 
+                        model = "NDH",
+                        mus = mus, 
+                        omegas = omegas, 
+                        p = p, 
+                        params_LR = list(beta0 = beta0), 
+                        remove_isolates = TRUE)
+                        
+# Run JANE on simulated data
+res <- JANE::JANE(A = sim_data$A,
+                  D = 2L,
+                  K = 3L,
+                  initialization = "GNN", 
+                  model = "NDH",
+                  case_control = FALSE,
+                  DA_type = "none")
+
+# plot trace plot
+plot(res, type = "trace_plot")
+                   
+# plot network
+plot(res)
+
+# plot network - misclassified
+plot(res, type = "misclassified", true_labels = apply(sim_data$Z_U, 1, which.max))
+
+# plot network - uncertainty and swap axes
+plot(res, type = "uncertainty", swap_axes = TRUE)
+
+# plot network - but only show contours of MVNs
+plot(res, swap_axes = TRUE, alpha_edge = 0, alpha_node = 0)
+
+# plot using starting values of EM algorithm
+plot(res, initial_values = TRUE)
+# }
+```
